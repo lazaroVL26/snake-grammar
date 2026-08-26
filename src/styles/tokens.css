@@ -1,1 +1,40 @@
-/* preenchido na fase 5 */
+:root {
+  /* Paleta — caderno de idiomas encontrando fliperama. */
+  --bg: #0e1a2b;
+  --surface: #16263f;
+  --grid: #1d3355;
+  --snake: #f2c14e;
+  --snake-head: #ffd97d;
+  --fruit: #ee6c5d;
+  --ok: #5fd3a0;
+  --err: #ee6c5d;
+  --text: #eae7e1;
+  --muted: #9aaec8;
+
+  --font-display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
+  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
+  --font-mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+
+  --radius-sm: 8px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+
+  --shell-width: 640px;
+  --motion-fast: 160ms;
+  --motion-base: 200ms;
+  --easing: cubic-bezier(0.2, 0.7, 0.3, 1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --motion-fast: 0ms;
+    --motion-base: 0ms;
+  }
+}
