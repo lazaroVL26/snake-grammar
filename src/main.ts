@@ -2,106 +2,214 @@ import './styles/tokens.css';
 import './styles/app.css';
 
 import { CONFIG } from './config';
+import { createRng } from './game/board';
 import { Engine } from './game/engine';
 import { Renderer } from './game/renderer';
-import { createRng } from './game/board';
 import { queueDirection } from './game/snake';
 import {
   applyAnswer,
   createInitialState,
   pause,
   resolveFeedback,
-  restart,
   startCountdown,
   tick,
   transition,
 } from './game/state';
 import { bindKeyboard } from './input/keyboard';
 import { bindSwipe, createDpad } from './input/touch';
-import { el, query } from './ui/dom';
-import type { AttemptLog, Direction, GameState } from './types';
+import { QuestionBankError, loadQuestions } from './quiz/questions';
+import { QuestionSelector, presentQuestion } from './quiz/selector';
+import { loadStats, recordGame } from './storage/persistence';
+import { buildShell, showBankError } from './ui/shell';
+import { Hud } from './ui/hud';
+import { Overlays } from './ui/overlays';
+import { QuestionModal, type AnswerResult } from './ui/questionModal';
+import { buildReport, reportToText } from './ui/report';
+import type { AnswerMode, AttemptLog, Direction, GameState, Question } from './types';
 
 const root = document.getElementById('app');
 if (!root) throw new Error('Elemento #app nao encontrado no index.html.');
 
-root.append(
-  el('main', { class: 'shell' }, [
-    el('h1', { class: 'shell__title', text: 'Snake Grammar' }),
-    el('div', { id: 'hud', class: 'hud' }),
-    el('div', { class: 'board' }, [
-      el('canvas', {
-        id: 'board',
-        class: 'board__canvas',
-        width: CONFIG.GRID_COLS * CONFIG.CELL_SIZE,
-        height: CONFIG.GRID_ROWS * CONFIG.CELL_SIZE,
-        'aria-label':
-          'Tabuleiro do jogo Snake. Use as setas do teclado para mover a cobra.',
-        role: 'img',
-      }),
-      el('div', { id: 'overlay', class: 'overlay' }),
-    ]),
-    el('div', { id: 'controls', class: 'controls' }),
-    el('div', { id: 'modal-root' }),
-  ]),
-);
+let bank: Question[];
+try {
+  bank = loadQuestions();
+} catch (error) {
+  const problems = error instanceof QuestionBankError ? error.problems : [String(error)];
+  console.error(error);
+  showBankError(root, problems);
+  throw error;
+}
 
-const canvas = query<HTMLCanvasElement>('#board');
-const controls = query<HTMLElement>('#controls');
-const renderer = new Renderer(canvas);
+const shell = buildShell(root);
 const rng = createRng(Date.now() >>> 0);
+const renderer = new Renderer(shell.canvas);
+const hud = new Hud(shell.hud);
 
 let state: GameState = createInitialState(rng, performance.now());
+let selector = new QuestionSelector(bank, rng);
+let best = loadStats().bestScore;
+let mode: AnswerMode = 'choice';
+let currentQuestion: Question | null = null;
+let countdownEndsAt = 0;
 
-function setState(next: GameState): void {
-  state = next;
-}
+const byId = new Map(bank.map((question) => [question.id, question]));
+
+const overlays = new Overlays(shell.overlay, {
+  onStart: (chosen) => {
+    mode = chosen;
+    beginGame();
+  },
+  onResume: () => enterCountdown(),
+  onRestart: () => resetGame(),
+  onCopyReport: () => copyReport(),
+});
+
+const modal = new QuestionModal(shell.modalRoot, {
+  onAnswered: (result) => onAnswered(result),
+  onDismissed: () => onFeedbackDone(),
+});
 
 function turn(direction: Direction): void {
   if (state.phase !== 'running' && state.phase !== 'countdown') return;
-  setState({ ...state, snake: queueDirection(state.snake, direction) });
+  state = { ...state, snake: queueDirection(state.snake, direction) };
 }
 
-controls.append(createDpad(turn));
-bindSwipe(canvas, turn);
+function enterCountdown(): void {
+  const next = state.phase === 'idle' ? startCountdown(state, performance.now()) : transition(state, 'countdown');
+  if (next.phase !== 'countdown') return;
+  state = next;
+  countdownEndsAt = performance.now() + CONFIG.RESUME_COUNTDOWN_MS * 3;
+  engine.resetClock();
+}
 
-// Placeholder da fase 3: a pergunta real entra na fase 5.
-function autoAnswer(now: number): void {
+function beginGame(): void {
+  overlays.hide();
+  enterCountdown();
+}
+
+function resetGame(): void {
+  state = createInitialState(rng, performance.now());
+  selector = new QuestionSelector(bank, rng);
+  currentQuestion = null;
+  best = loadStats().bestScore;
+  hud.update(state, best);
+  overlays.showIdle(best);
+}
+
+function askQuestion(): void {
+  const question = selector.next();
+  currentQuestion = question;
+  modal.open(presentQuestion(question, rng), mode);
+}
+
+function onAnswered(result: AnswerResult): void {
+  const question = currentQuestion;
+  if (!question) return;
   const log: AttemptLog = {
-    questionId: 'placeholder',
-    focus: 'simple-past',
-    correct: true,
-    chosen: 'ok',
-    elapsedMs: 0,
+    questionId: question.id,
+    focus: question.focus,
+    correct: result.correct,
+    chosen: result.chosen,
+    elapsedMs: result.elapsedMs,
   };
-  setState(resolveFeedback(applyAnswer(state, log), rng, now));
-  setState(transition(state, 'running'));
+  if (!result.correct) selector.requeue(question);
+  state = applyAnswer(state, log);
+  hud.update(state, best);
 }
 
-bindKeyboard({
-  onDirection: turn,
-  onTogglePause: () => {
-    if (state.phase === 'running') setState(pause(state));
-    else if (state.phase === 'paused') setState(transition(state, 'running'));
-  },
-  onConfirm: () => {
-    if (state.phase === 'idle') setState(transition(startCountdown(state, performance.now()), 'running'));
-    else if (state.phase === 'gameover') {
-      setState(restart(state, rng, performance.now()));
-      setState(transition(startCountdown(state, performance.now()), 'running'));
-    }
-  },
-});
+function onFeedbackDone(): void {
+  state = resolveFeedback(state, rng, performance.now());
+  currentQuestion = null;
+  hud.update(state, best);
+  if (state.phase === 'gameover') finishGame();
+  else {
+    countdownEndsAt = performance.now() + CONFIG.RESUME_COUNTDOWN_MS * 3;
+    engine.resetClock();
+  }
+}
+
+function finishGame(): void {
+  const stats = recordGame(state);
+  best = stats.bestScore;
+  hud.update(state, best);
+  overlays.showGameOver(buildReport(state, best, byId, performance.now()));
+}
+
+async function copyReport(): Promise<boolean> {
+  const text = reportToText(buildReport(state, best, byId, performance.now()));
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+function togglePause(): void {
+  if (state.phase === 'running') {
+    state = pause(state);
+    overlays.showPaused();
+  } else if (state.phase === 'paused') {
+    overlays.hide();
+    enterCountdown();
+  }
+}
+
+function pauseIfRunning(): void {
+  if (state.phase !== 'running') return;
+  state = pause(state);
+  overlays.showPaused();
+}
 
 const engine = new Engine({
   tickMs: () => state.tickMs,
   onTick: (now) => {
-    setState(tick(state, now));
-    if (state.phase === 'question') autoAnswer(now);
+    if (state.phase !== 'running') return;
+    state = tick(state, now);
+    if (state.phase === 'question') askQuestion();
+    else if (state.phase === 'gameover') finishGame();
+    hud.update(state, best);
   },
-  onRender: (now) => renderer.draw(state, now),
+  onRender: (now) => {
+    if (state.phase === 'countdown') updateCountdown(now);
+    renderer.draw(state, now);
+  },
   schedule: (callback) => window.requestAnimationFrame(callback),
   cancel: (handle) => window.cancelAnimationFrame(handle),
 });
 
+function updateCountdown(now: number): void {
+  const remaining = countdownEndsAt - now;
+  if (remaining <= 0) {
+    state = transition(state, 'running');
+    overlays.hide();
+    engine.resetClock();
+    return;
+  }
+  overlays.showCountdown(Math.ceil(remaining / CONFIG.RESUME_COUNTDOWN_MS));
+}
+
+bindKeyboard({
+  onDirection: turn,
+  onTogglePause: togglePause,
+  onConfirm: () => {
+    if (state.phase === 'idle') beginGame();
+    else if (state.phase === 'gameover') {
+      resetGame();
+      beginGame();
+    }
+  },
+});
+
+shell.controls.append(createDpad(turn));
+bindSwipe(shell.canvas, turn);
+
+window.addEventListener('blur', pauseIfRunning);
+document.addEventListener('visibilitychange', () => {
+  if (document.hidden) pauseIfRunning();
+});
 window.addEventListener('resize', () => renderer.resize());
+
+hud.update(state, best);
+overlays.showIdle(best);
 engine.start();
