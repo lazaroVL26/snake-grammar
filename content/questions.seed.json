@@ -1,0 +1,488 @@
+[
+  {
+    "id": "sp-001",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "We ___ a great film last night.",
+    "verbHint": "watch",
+    "options": ["watched", "had watched", "have watched", "was watching"],
+    "answerIndex": 0,
+    "accepted": ["watched"],
+    "explanation": "\"Last night\" marca um momento terminado no passado, sem ligação com outra ação anterior: Simple Past."
+  },
+  {
+    "id": "sp-002",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "She ___ to São Paulo in 2019.",
+    "verbHint": "move",
+    "options": ["moved", "had moved", "has moved", "moves"],
+    "answerIndex": 0,
+    "accepted": ["moved"],
+    "explanation": "Data específica no passado (in 2019) pede Simple Past."
+  },
+  {
+    "id": "sp-003",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "They ___ the test two weeks ago.",
+    "verbHint": "take",
+    "options": ["took", "had taken", "have taken", "take"],
+    "answerIndex": 0,
+    "accepted": ["took"],
+    "explanation": "\"Ago\" sempre acompanha Simple Past. O passado de take é took."
+  },
+  {
+    "id": "sp-004",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "I ___ my keys on the bus yesterday.",
+    "verbHint": "lose",
+    "options": ["lost", "had lost", "have lost", "lose"],
+    "answerIndex": 0,
+    "accepted": ["lost"],
+    "explanation": "Fato isolado com \"yesterday\": Simple Past. Passado irregular de lose é lost."
+  },
+  {
+    "id": "sp-005",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "He ___ born in Restinga Sêca.",
+    "verbHint": "be",
+    "options": ["was", "were", "had been", "is"],
+    "answerIndex": 0,
+    "accepted": ["was"],
+    "explanation": "\"Be born\" em inglês é sempre Simple Past: he was born. Com he/she/it usa-se was."
+  },
+  {
+    "id": "sp-006",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "___ you finish the report last Friday?",
+    "verbHint": "do (auxiliar)",
+    "options": ["Did", "Had", "Have", "Do"],
+    "answerIndex": 0,
+    "accepted": ["did"],
+    "explanation": "Pergunta no Simple Past usa o auxiliar did + verbo no infinitivo (finish, não finished)."
+  },
+  {
+    "id": "sp-007",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "We ___ go to the party last weekend.",
+    "verbHint": "not go",
+    "options": ["didn't", "hadn't", "haven't", "don't"],
+    "answerIndex": 0,
+    "accepted": ["didn't", "did not"],
+    "explanation": "Negativa no Simple Past: didn't + verbo no infinitivo."
+  },
+  {
+    "id": "sp-008",
+    "level": 1,
+    "focus": "simple-past",
+    "sentence": "The teacher ___ us three questions in yesterday's class.",
+    "verbHint": "ask",
+    "options": ["asked", "had asked", "has asked", "asks"],
+    "answerIndex": 0,
+    "accepted": ["asked"],
+    "explanation": "Momento definido e encerrado (yesterday's class): Simple Past."
+  },
+  {
+    "id": "sp-009",
+    "level": 2,
+    "focus": "simple-past",
+    "sentence": "How long ___ the meeting last?",
+    "verbHint": "do (auxiliar)",
+    "options": ["did", "had", "has", "does"],
+    "answerIndex": 0,
+    "accepted": ["did"],
+    "explanation": "Pergunta sobre um evento passado e concluído: did + last (infinitivo)."
+  },
+  {
+    "id": "sp-010",
+    "level": 2,
+    "focus": "simple-past",
+    "sentence": "In 2020 we ___ all our classes online.",
+    "verbHint": "have",
+    "options": ["had", "had had", "have had", "have"],
+    "answerIndex": 0,
+    "accepted": ["had"],
+    "explanation": "Aqui \"had\" é o Simple Past de have, não um Past Perfect. O Past Perfect de have seria had had."
+  },
+  {
+    "id": "sp-011",
+    "level": 2,
+    "focus": "simple-past",
+    "sentence": "She ___ the email at 9 a.m. and replied immediately.",
+    "verbHint": "see",
+    "options": ["saw", "had seen", "has seen", "sees"],
+    "answerIndex": 0,
+    "accepted": ["saw"],
+    "explanation": "Duas ações em ordem natural, com horário definido: as duas ficam no Simple Past."
+  },
+  {
+    "id": "sp-012",
+    "level": 2,
+    "focus": "simple-past",
+    "sentence": "Last night he ___ until 3 a.m.",
+    "verbHint": "study",
+    "options": ["studied", "had studied", "has studied", "studies"],
+    "answerIndex": 0,
+    "accepted": ["studied"],
+    "explanation": "\"Last night\" fecha o evento no passado: Simple Past."
+  },
+  {
+    "id": "sp-013",
+    "level": 2,
+    "focus": "simple-past",
+    "sentence": "They ___ each other in 2015 and got married in 2018.",
+    "verbHint": "meet",
+    "options": ["met", "had met", "have met", "were meeting"],
+    "answerIndex": 0,
+    "accepted": ["met"],
+    "explanation": "Os fatos são contados na ordem em que aconteceram, cada um com sua data: Simple Past."
+  },
+  {
+    "id": "sp-014",
+    "level": 2,
+    "focus": "simple-past",
+    "sentence": "Yesterday we ___ our homework in the library.",
+    "verbHint": "do",
+    "options": ["did", "had done", "have done", "were doing"],
+    "answerIndex": 0,
+    "accepted": ["did"],
+    "explanation": "Ação concluída ontem, sem referência a outra ação anterior: Simple Past."
+  },
+  {
+    "id": "pp-001",
+    "level": 1,
+    "focus": "past-perfect",
+    "sentence": "By the time we arrived, the concert ___.",
+    "verbHint": "finish",
+    "options": ["had finished", "finishes", "has finished", "was finishing"],
+    "answerIndex": 0,
+    "accepted": ["had finished", "'d finished"],
+    "explanation": "\"By the time\" + passado exige Past Perfect: o show acabou ANTES de a gente chegar."
+  },
+  {
+    "id": "pp-002",
+    "level": 1,
+    "focus": "past-perfect",
+    "sentence": "When the teacher came in, the students ___ the room.",
+    "verbHint": "already leave",
+    "options": [
+      "had already left",
+      "have already left",
+      "already leave",
+      "are already leaving"
+    ],
+    "answerIndex": 0,
+    "accepted": ["had already left", "'d already left"],
+    "explanation": "\"Already\" com dois momentos passados marca o que veio primeiro: had + particípio."
+  },
+  {
+    "id": "pp-003",
+    "level": 1,
+    "focus": "past-perfect",
+    "sentence": "I couldn't pay because I ___ my wallet at home.",
+    "verbHint": "forget",
+    "options": ["had forgotten", "have forgotten", "forgets", "was forgetting"],
+    "answerIndex": 0,
+    "accepted": ["had forgotten", "'d forgotten"],
+    "explanation": "O esquecimento é a causa anterior ao problema já passado: Past Perfect. Particípio de forget é forgotten."
+  },
+  {
+    "id": "pp-004",
+    "level": 1,
+    "focus": "past-perfect",
+    "sentence": "The room was empty. Everybody ___ home.",
+    "verbHint": "go",
+    "options": ["had gone", "has gone", "was going", "goes"],
+    "answerIndex": 0,
+    "accepted": ["had gone", "'d gone"],
+    "explanation": "Explica o que já tinha acontecido antes daquele momento passado: had + particípio (gone)."
+  },
+  {
+    "id": "pp-005",
+    "level": 2,
+    "focus": "past-perfect",
+    "sentence": "By 2018 she ___ in four different countries.",
+    "verbHint": "live",
+    "options": ["had lived", "has lived", "lives", "was living"],
+    "answerIndex": 0,
+    "accepted": ["had lived", "'d lived"],
+    "explanation": "\"By + ano no passado\" indica o total acumulado até aquele ponto: Past Perfect."
+  },
+  {
+    "id": "pp-006",
+    "level": 2,
+    "focus": "past-perfect",
+    "sentence": "She didn't recognize him because they ___ for ten years.",
+    "verbHint": "not meet",
+    "options": ["hadn't met", "haven't met", "weren't meeting", "don't meet"],
+    "answerIndex": 0,
+    "accepted": ["hadn't met", "had not met"],
+    "explanation": "O período de dez anos é anterior ao momento em que ela não o reconheceu: Past Perfect negativo."
+  },
+  {
+    "id": "pp-007",
+    "level": 2,
+    "focus": "past-perfect",
+    "sentence": "Before he moved to Japan, he ___ sushi.",
+    "verbHint": "never eat",
+    "options": [
+      "had never eaten",
+      "has never eaten",
+      "never eats",
+      "was never eating"
+    ],
+    "answerIndex": 0,
+    "accepted": ["had never eaten", "'d never eaten"],
+    "explanation": "\"Never ... before\" com referência passada pede Past Perfect. Particípio de eat é eaten."
+  },
+  {
+    "id": "pp-008",
+    "level": 2,
+    "focus": "past-perfect",
+    "sentence": "When I got to the office, someone ___ my computer.",
+    "verbHint": "already turn on",
+    "options": [
+      "had already turned on",
+      "has already turned on",
+      "already turns on",
+      "was already turning on"
+    ],
+    "answerIndex": 0,
+    "accepted": ["had already turned on", "'d already turned on"],
+    "explanation": "Alguém ligou o computador antes de eu chegar. Ação anterior a outra ação passada: Past Perfect."
+  },
+  {
+    "id": "pp-009",
+    "level": 3,
+    "focus": "past-perfect",
+    "sentence": "By the time the police arrived, the thief ___.",
+    "verbHint": "escape",
+    "options": ["had escaped", "has escaped", "escapes", "was escaping"],
+    "answerIndex": 0,
+    "accepted": ["had escaped", "'d escaped"],
+    "explanation": "\"By the time\" + Simple Past na outra oração: a fuga vem antes, no Past Perfect."
+  },
+  {
+    "id": "pp-010",
+    "level": 3,
+    "focus": "past-perfect",
+    "sentence": "He told me he ___ the book twice.",
+    "verbHint": "read",
+    "options": ["had read", "has read", "reads", "was reading"],
+    "answerIndex": 0,
+    "accepted": ["had read", "'d read"],
+    "explanation": "No discurso indireto, o present perfect (\"I have read it twice\") vira Past Perfect."
+  },
+  {
+    "id": "pp-011",
+    "level": 3,
+    "focus": "past-perfect",
+    "sentence": "She said she ___ never been to Argentina.",
+    "verbHint": "have (auxiliar)",
+    "options": ["had", "has", "was", "did"],
+    "answerIndex": 0,
+    "accepted": ["had", "'d"],
+    "explanation": "Discurso indireto com verbo introdutório no passado (said): o auxiliar vira had."
+  },
+  {
+    "id": "pp-012",
+    "level": 3,
+    "focus": "past-perfect",
+    "sentence": "The house was quiet because the children ___ to bed.",
+    "verbHint": "already go",
+    "options": [
+      "had already gone",
+      "have already gone",
+      "already go",
+      "were already going"
+    ],
+    "answerIndex": 0,
+    "accepted": ["had already gone", "'d already gone"],
+    "explanation": "O silêncio é consequência de algo que já tinha acontecido antes: Past Perfect."
+  },
+  {
+    "id": "pp-013",
+    "level": 3,
+    "focus": "past-perfect",
+    "sentence": "I realized I ___ the wrong bus.",
+    "verbHint": "take",
+    "options": ["had taken", "have taken", "take", "was taking"],
+    "answerIndex": 0,
+    "accepted": ["had taken", "'d taken"],
+    "explanation": "Primeiro peguei o ônibus errado, depois percebi. A ação anterior fica no Past Perfect."
+  },
+  {
+    "id": "pp-014",
+    "level": 3,
+    "focus": "past-perfect",
+    "sentence": "By the end of the trip, we ___ over 2,000 kilometres.",
+    "verbHint": "drive",
+    "options": ["had driven", "have driven", "drives", "were driving"],
+    "answerIndex": 0,
+    "accepted": ["had driven", "'d driven"],
+    "explanation": "\"By the end of\" no passado indica resultado acumulado até aquele ponto: Past Perfect (driven)."
+  },
+  {
+    "id": "pp-015",
+    "level": 3,
+    "focus": "past-perfect",
+    "sentence": "The teacher was angry because we ___ our homework.",
+    "verbHint": "not do",
+    "options": ["hadn't done", "haven't done", "weren't doing", "don't do"],
+    "answerIndex": 0,
+    "accepted": ["hadn't done", "had not done"],
+    "explanation": "A falta da tarefa é anterior à raiva do professor: hadn't + particípio (done)."
+  },
+  {
+    "id": "ct-001",
+    "level": 2,
+    "focus": "contrast",
+    "sentence": "When we arrived, the game ___ — we missed the first goal.",
+    "verbHint": "already start",
+    "options": [
+      "had already started",
+      "already starts",
+      "has already started",
+      "is already starting"
+    ],
+    "answerIndex": 0,
+    "accepted": ["had already started", "'d already started"],
+    "explanation": "O jogo começou ANTES da nossa chegada. Ação mais antiga das duas: Past Perfect."
+  },
+  {
+    "id": "ct-002",
+    "level": 2,
+    "focus": "contrast",
+    "sentence": "We arrived at 8:00 and the game ___ ten minutes later.",
+    "verbHint": "start",
+    "options": ["started", "had started", "has started", "starts"],
+    "answerIndex": 0,
+    "accepted": ["started"],
+    "explanation": "Aqui o jogo começou DEPOIS da chegada. Ordem natural dos fatos: Simple Past nos dois."
+  },
+  {
+    "id": "ct-003",
+    "level": 2,
+    "focus": "contrast",
+    "sentence": "The train ___ when we got to the platform, so we took a taxi.",
+    "verbHint": "already leave",
+    "options": [
+      "had already left",
+      "already left",
+      "has already left",
+      "was already leaving"
+    ],
+    "answerIndex": 0,
+    "accepted": ["had already left", "'d already left"],
+    "explanation": "O trem saiu antes de chegarmos — por isso o táxi. Ação anterior: Past Perfect."
+  },
+  {
+    "id": "ct-004",
+    "level": 2,
+    "focus": "contrast",
+    "sentence": "We got to the platform at 8:00 and the train ___ at 8:05.",
+    "verbHint": "leave",
+    "options": ["left", "had left", "has left", "leaves"],
+    "answerIndex": 0,
+    "accepted": ["left"],
+    "explanation": "Os horários mostram a sequência real: nada aconteceu antes do outro evento. Simple Past."
+  },
+  {
+    "id": "ct-005",
+    "level": 2,
+    "focus": "contrast",
+    "sentence": "He was tired because he ___ all night.",
+    "verbHint": "study",
+    "options": ["had studied", "has studied", "studies", "study"],
+    "answerIndex": 0,
+    "accepted": ["had studied", "'d studied"],
+    "explanation": "O cansaço é resultado de algo anterior àquele momento passado: Past Perfect."
+  },
+  {
+    "id": "ct-006",
+    "level": 3,
+    "focus": "contrast",
+    "sentence": "When I opened the fridge, I saw that someone ___ the cake.",
+    "verbHint": "eat",
+    "options": ["had eaten", "has eaten", "eats", "was eaten"],
+    "answerIndex": 0,
+    "accepted": ["had eaten", "'d eaten"],
+    "explanation": "Alguém comeu o bolo antes de eu abrir a geladeira: Past Perfect (had eaten)."
+  },
+  {
+    "id": "ct-007",
+    "level": 3,
+    "focus": "contrast",
+    "sentence": "I ___ a piece of that cake yesterday and it was delicious.",
+    "verbHint": "eat",
+    "options": ["ate", "had eaten", "have eaten", "was eating"],
+    "answerIndex": 0,
+    "accepted": ["ate"],
+    "explanation": "\"Yesterday\" e nenhuma ação anterior envolvida: Simple Past (ate)."
+  },
+  {
+    "id": "ct-008",
+    "level": 3,
+    "focus": "contrast",
+    "sentence": "By the time she was 20, she ___ three languages.",
+    "verbHint": "learn",
+    "options": ["had learned", "has learned", "learns", "was learning"],
+    "answerIndex": 0,
+    "accepted": ["had learned", "'d learned", "had learnt"],
+    "explanation": "\"By the time\" marca o limite: tudo isso aconteceu antes dos 20 anos dela. Past Perfect."
+  },
+  {
+    "id": "ct-009",
+    "level": 3,
+    "focus": "contrast",
+    "sentence": "She ___ Spanish when she was 20.",
+    "verbHint": "learn",
+    "options": ["learned", "had learned", "has learned", "learns"],
+    "answerIndex": 0,
+    "accepted": ["learned", "learnt"],
+    "explanation": "O aprendizado aconteceu DURANTE aquele período, não antes dele: Simple Past."
+  },
+  {
+    "id": "ct-010",
+    "level": 3,
+    "focus": "contrast",
+    "sentence": "They got married in 2018, three years after they ___.",
+    "verbHint": "meet",
+    "options": ["had met", "have met", "meet", "were meeting"],
+    "answerIndex": 0,
+    "accepted": ["had met", "'d met"],
+    "explanation": "O encontro é anterior ao casamento, que já está no passado: Past Perfect."
+  },
+  {
+    "id": "ct-011",
+    "level": 3,
+    "focus": "contrast",
+    "sentence": "The film ___ when I turned on the TV, so I saw only the ending.",
+    "verbHint": "already begin",
+    "options": [
+      "had already begun",
+      "has already begun",
+      "already begins",
+      "had already began"
+    ],
+    "answerIndex": 0,
+    "accepted": ["had already begun", "'d already begun"],
+    "explanation": "O filme começou antes de eu ligar a TV. Cuidado com o particípio: begin – began – begun."
+  },
+  {
+    "id": "ct-012",
+    "level": 3,
+    "focus": "contrast",
+    "sentence": "I ___ on the TV at 9 p.m. and watched the news.",
+    "verbHint": "turn",
+    "options": ["turned", "had turned", "have turned", "was turning"],
+    "answerIndex": 0,
+    "accepted": ["turned"],
+    "explanation": "Horário definido e ações na ordem em que ocorreram: Simple Past."
+  }
+]
