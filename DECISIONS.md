@@ -136,3 +136,15 @@ Além dos casos exigidos, existem testes em jsdom para o modal da pergunta
 partida completa (`tests/integration.test.ts`). O ambiente jsdom é declarado por arquivo,
 com `// @vitest-environment jsdom`, para os testes de lógica pura continuarem rodando em
 Node.
+
+## 21. A penalidade por erro passou de 1 para 2 segmentos
+
+Pedido do professor depois de jogar a primeira versão. A regra original da §5.4 era −1;
+agora são **2 segmentos**, na constante `WRONG_PENALTY_SEGMENTS` de `config.ts` — não há
+número mágico espalhado, e voltar para 1 é uma linha. `CLAUDE.md` §5.4 foi atualizado
+junto, para a especificação não contradizer o código.
+
+Efeito colateral que vale registrar: com `INITIAL_LENGTH: 3`, **o primeiro erro continua
+encerrando a partida** — antes por 3 → 2, agora por 3 → 1. A penalidade maior só muda o
+jogo depois do segundo acerto. Se a intenção for dar mais fôlego ao aluno antes da morte
+súbita, o ajuste é subir `INITIAL_LENGTH`, não mexer na penalidade.

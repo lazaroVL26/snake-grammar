@@ -26,6 +26,15 @@ function asking(overrides: Partial<GameState> = {}): GameState {
   return running({ phase: 'question', ...overrides });
 }
 
+/** Cobra reta com o comprimento pedido, para testar a penalidade sem morrer. */
+function longSnake(size: number): GameState['snake'] {
+  return {
+    segments: Array.from({ length: size }, (_, i) => ({ x: 10 - i, y: 10 })),
+    direction: 'right',
+    pending: [],
+  };
+}
+
 const correctLog: AttemptLog = {
   questionId: 'q1',
   focus: 'simple-past',
@@ -73,14 +82,22 @@ describe('state — pontuacao', () => {
     );
   });
 
-  it('erro: pontuacao inalterada, -1 comprimento, streak zera', () => {
-    const before = applyAnswer(asking(), correctLog);
+  it('erro: pontuacao inalterada, comprimento cai pela penalidade, streak zera', () => {
+    const before = applyAnswer(asking({ snake: longSnake(8) }), correctLog);
     const scoreBefore = before.stats.score;
     const after = applyAnswer({ ...before, phase: 'question' }, wrongLog);
     expect(after.stats.score).toBe(scoreBefore);
-    expect(length(after.snake)).toBe(length(before.snake) - 1);
+    expect(length(after.snake)).toBe(
+      length(before.snake) - CONFIG.WRONG_PENALTY_SEGMENTS,
+    );
     expect(after.stats.streak).toBe(0);
     expect(after.stats.wrongCount).toBe(1);
+  });
+
+  it('a penalidade tira 2 segmentos e nunca zera a cobra', () => {
+    expect(CONFIG.WRONG_PENALTY_SEGMENTS).toBe(2);
+    expect(length(applyAnswer(asking({ snake: longSnake(6) }), wrongLog).snake)).toBe(4);
+    expect(length(applyAnswer(asking({ snake: longSnake(1) }), wrongLog).snake)).toBe(1);
   });
 
   it('erro nao altera a velocidade', () => {
@@ -94,6 +111,21 @@ describe('state — pontuacao', () => {
     expect(after.stats.score).toBe(0);
     expect(after.attempts[0]?.chosen).toBeNull();
     expect(after.attempts[0]?.correct).toBe(false);
+  });
+
+  it('erro com comprimento 4 ainda mata: 4 - 2 fica abaixo do minimo', () => {
+    const state = asking({ snake: longSnake(4) });
+    const resolved = resolveFeedback(applyAnswer(state, wrongLog), rng, 10);
+    expect(length(resolved.snake)).toBe(2);
+    expect(resolved.phase).toBe('gameover');
+    expect(resolved.gameOverReason).toBe('too-short');
+  });
+
+  it('erro com comprimento 5 sobrevive com 3 segmentos', () => {
+    const state = asking({ snake: longSnake(5) });
+    const resolved = resolveFeedback(applyAnswer(state, wrongLog), createRng(3), 10);
+    expect(length(resolved.snake)).toBe(3);
+    expect(resolved.phase).toBe('countdown');
   });
 
   it('erro com comprimento 3 leva a gameover com motivo too-short', () => {

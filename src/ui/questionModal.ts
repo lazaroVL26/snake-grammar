@@ -304,11 +304,12 @@ export class QuestionModal {
         button.classList.add('option--err');
     });
 
+    const penalty = CONFIG.WRONG_PENALTY_SEGMENTS;
     const headline = correct
       ? 'Certo.'
       : chosen === null
-        ? 'Tempo esgotado. A cobra perdeu 1 segmento.'
-        : 'Errado. A cobra perdeu 1 segmento.';
+        ? `Tempo esgotado. A cobra perdeu ${penalty} segmentos.`
+        : `Errado. A cobra perdeu ${penalty} segmentos.`;
 
     const children: Array<Node | string> = [
       el('strong', { class: 'feedback__headline', text: headline }),

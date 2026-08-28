@@ -9,7 +9,7 @@ import {
   head,
   length,
   sameCell,
-  shrink,
+  shrinkBy,
   step,
 } from './snake';
 
@@ -104,7 +104,7 @@ export function applyAnswer(state: GameState, log: AttemptLog): GameState {
     return {
       ...state,
       phase: 'feedback',
-      snake: shrink(state.snake),
+      snake: shrinkBy(state.snake, CONFIG.WRONG_PENALTY_SEGMENTS),
       attempts,
       stats: {
         ...state.stats,

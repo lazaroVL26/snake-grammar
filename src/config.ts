@@ -27,6 +27,8 @@ export const CONFIG = {
   RESUME_COUNTDOWN_MS: 600,
   /** Pontos por resposta correta. */
   POINTS_PER_CORRECT: 10,
+  /** Segmentos perdidos a cada erro (ou estouro de tempo). */
+  WRONG_PENALTY_SEGMENTS: 2,
   /** A cada N acertos consecutivos vem o bonus de sequencia. */
   STREAK_BONUS_EVERY: 3,
   /** Pontos extras do bonus de sequencia. */

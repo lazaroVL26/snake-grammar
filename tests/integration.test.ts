@@ -61,33 +61,37 @@ describe('partida completa', () => {
     expect(state.phase).toBe('countdown');
     state = transition(state, 'running');
 
-    // 2) erra duas vezes: volta a 3 e cai para 2 segmentos.
-    for (let i = 0; i < 2; i += 1) {
-      state = eatFruit(state);
-      expect(state.phase).toBe('question');
-      const question = selector.next();
-      selector.requeue(question);
-      state = answer(state, question, false);
-      state = resolveFeedback(state, rng, 200 + i);
-      if (i === 0) {
-        expect(length(state.snake)).toBe(3);
-        expect(state.phase).toBe('countdown');
-        state = transition(state, 'running');
-      }
-    }
+    // 2) erra uma vez: a penalidade de 2 leva de 4 para 2 segmentos e mata.
+    state = eatFruit(state);
+    expect(state.phase).toBe('question');
+    const q2 = selector.next();
+    selector.requeue(q2);
+    state = answer(state, q2, false);
+    expect(length(state.snake)).toBe(4 - CONFIG.WRONG_PENALTY_SEGMENTS);
+    state = resolveFeedback(state, rng, 200);
 
     expect(length(state.snake)).toBe(2);
     expect(state.phase).toBe('gameover');
     expect(state.gameOverReason).toBe('too-short');
     expect(state.stats.score).toBe(CONFIG.POINTS_PER_CORRECT);
     expect(state.stats.correctCount).toBe(1);
-    expect(state.stats.wrongCount).toBe(2);
+    expect(state.stats.wrongCount).toBe(1);
   });
 
   it('o relatorio final traz as frases erradas com a explicacao', () => {
     const rng = createRng(7);
     const selector = new QuestionSelector(bank, rng);
-    let state: GameState = { ...createInitialState(rng, 0), phase: 'running' };
+    // Cobra longa: com a penalidade de 2 segmentos ela precisa sobreviver a
+    // dois erros para o relatorio ter duas frases para revisar.
+    let state: GameState = {
+      ...createInitialState(rng, 0),
+      phase: 'running',
+      snake: {
+        segments: Array.from({ length: 8 }, (_, i) => ({ x: 10 - i, y: 10 })),
+        direction: 'right',
+        pending: [],
+      },
+    };
 
     const wrong: Question[] = [];
     for (let i = 0; i < 3; i += 1) {

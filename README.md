@@ -4,7 +4,7 @@ Jogo web educativo para aula de inglês: o clássico Snake, mas **cada fruta com
 uma frase com lacuna sobre Simple Past × Past Perfect**.
 
 - Resposta certa → +10 pontos e a cobra **cresce** 1 segmento.
-- Resposta errada (ou tempo esgotado) → a cobra **encolhe** 1 segmento.
+- Resposta errada (ou tempo esgotado) → a cobra **encolhe 2 segmentos**.
 - Menos de 3 segmentos → fim de jogo.
 
 No fim da partida o aluno recebe um relatório com precisão, desempenho por tempo verbal

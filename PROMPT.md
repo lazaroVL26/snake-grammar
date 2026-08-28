@@ -28,6 +28,7 @@ siga sozinho até o fim. Faça um commit por fase, com mensagem no formato
 `feat(fase-2): loop do jogo e movimento da cobra`.
 
 ### Fase 1 — Fundação
+
 Scaffold do Vite com TypeScript vanilla, `tsconfig` em modo strict (com
 `noUncheckedIndexedAccess`), ESLint, Prettier, Vitest, scripts do `package.json`,
 estrutura de pastas da §4 do CLAUDE.md, `src/config.ts` com todas as constantes,
@@ -36,12 +37,14 @@ estrutura de pastas da §4 do CLAUDE.md, `src/config.ts` com todas as constantes
 haver teste ainda).
 
 ### Fase 2 — Núcleo do jogo (lógica pura, sem UI)
+
 `game/snake.ts`, `game/board.ts`, `game/collision.ts`, `game/state.ts`, `game/engine.ts`.
 Nenhum desses arquivos pode importar DOM, canvas ou algo de `src/ui`. PRNG injetável para
 tudo que for aleatório. Escreva os testes desta fase junto com o código.
 ✅ Verificação: todos os testes de `snake`, `board`, `collision` e `state` da §11 passam.
 
 ### Fase 3 — Renderização e input
+
 `game/renderer.ts` (única parte que toca no contexto 2D, com `devicePixelRatio`),
 `input/keyboard.ts` (setas + WASD, buffer de direção, Espaço/Esc para pausar),
 `input/touch.ts` (swipe e D-pad em telas pequenas), `main.ts` amarrando tudo.
@@ -49,6 +52,7 @@ tudo que for aleatório. Escreva os testes desta fase junto com o código.
 com teclado.
 
 ### Fase 4 — Quiz
+
 `quiz/questions.ts` (import + validação do JSON, falha alto e clara se o banco estiver
 inconsistente), `quiz/selector.ts` (embaralhamento seedado, sem repetição, repescagem de
 erros em 3–6 posições, progressão de nível), `quiz/answer.ts` (normalização e comparação).
@@ -56,6 +60,7 @@ erros em 3–6 posições, progressão de nível), `quiz/answer.ts` (normalizaç
 que roda sobre o arquivo real `questions.seed.json`.
 
 ### Fase 5 — Interface
+
 `ui/hud.ts`, `ui/questionModal.ts` (focus trap, teclas 1–4, Enter, Esc não fecha,
 cronômetro de 20s com barra, `aria-live`), `ui/overlays.ts` (tela inicial com escolha
 entre múltipla escolha e digitação, pausa, contagem regressiva de retomada, game over com
@@ -66,6 +71,7 @@ o verbo se encaixando na lacuna).
 encolher, morrer por encolhimento, ver relatório, jogar de novo.
 
 ### Fase 6 — Persistência, polimento e entrega
+
 `storage/persistence.ts` (recorde e estatísticas), pausa automática ao perder foco da aba,
 responsividade até 360px, `prefers-reduced-motion`, foco visível, contraste AA.
 Escreva o `README.md` (como rodar, como jogar, **como o professor adiciona questões

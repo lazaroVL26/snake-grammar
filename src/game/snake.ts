@@ -100,6 +100,13 @@ export function shrink(snake: Snake): Snake {
   return { ...snake, segments: snake.segments.slice(0, -1) };
 }
 
+/** Encolhe varios segmentos de uma vez, nunca abaixo de 1. */
+export function shrinkBy(snake: Snake, amount: number): Snake {
+  const keep = Math.max(1, snake.segments.length - Math.max(0, amount));
+  if (keep === snake.segments.length) return snake;
+  return { ...snake, segments: snake.segments.slice(0, keep) };
+}
+
 export function length(snake: Snake): number {
   return snake.segments.length;
 }

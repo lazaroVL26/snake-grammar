@@ -325,11 +325,9 @@ describe('app — partida completa', () => {
   });
 
   it('grava o recorde e reinicia com Jogar de novo', () => {
+    // Um acerto leva a cobra a 4 segmentos; o erro seguinte tira 2 e mata.
     driveUntilQuestion();
     answerQuestion(true);
-    skipCountdown();
-    driveUntilQuestion();
-    answerQuestion(false);
     skipCountdown();
     driveUntilQuestion();
     answerQuestion(false);
