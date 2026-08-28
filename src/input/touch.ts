@@ -56,7 +56,11 @@ const GLYPH: Record<Direction, string> = {
 
 /** D-pad na tela, visivel apenas em telas pequenas (regra em app.css). */
 export function createDpad(onDirection: (direction: Direction) => void): HTMLElement {
-  const pad = el('div', { class: 'dpad', role: 'group', 'aria-label': 'Controles de direcao' });
+  const pad = el('div', {
+    class: 'dpad',
+    role: 'group',
+    'aria-label': 'Controles de direcao',
+  });
   for (const button of PAD) {
     const node = el(
       'button',

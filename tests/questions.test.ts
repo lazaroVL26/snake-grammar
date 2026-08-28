@@ -1,6 +1,11 @@
 import { describe, expect, it } from 'vitest';
 import seed from '../content/questions.seed.json';
-import { GAP, QuestionBankError, loadQuestions, validateQuestions } from '../src/quiz/questions';
+import {
+  GAP,
+  QuestionBankError,
+  loadQuestions,
+  validateQuestions,
+} from '../src/quiz/questions';
 import { normalize } from '../src/quiz/answer';
 import type { Question } from '../src/types';
 
@@ -98,6 +103,8 @@ describe('questions — validacao falha alto e claro', () => {
   });
 
   it('loadQuestions lanca QuestionBankError com a lista de problemas', () => {
-    expect(() => loadQuestions([{ ...valid, answerIndex: 9 }])).toThrow(QuestionBankError);
+    expect(() => loadQuestions([{ ...valid, answerIndex: 9 }])).toThrow(
+      QuestionBankError,
+    );
   });
 });

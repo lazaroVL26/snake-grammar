@@ -1,11 +1,6 @@
 import type { AnswerMode } from '../types';
 import { el } from './dom';
-import {
-  FOCUS_LABEL,
-  REASON_LABEL,
-  formatDuration,
-  type Report,
-} from './report';
+import { FOCUS_LABEL, REASON_LABEL, formatDuration, type Report } from './report';
 
 export interface OverlayCallbacks {
   onStart: (mode: AnswerMode) => void;
@@ -128,7 +123,11 @@ export class Overlays {
     });
     again.addEventListener('click', () => this.callbacks.onRestart());
 
-    const copy = el('button', { type: 'button', class: 'button', text: 'Copiar relatorio' });
+    const copy = el('button', {
+      type: 'button',
+      class: 'button',
+      text: 'Copiar relatorio',
+    });
     copy.addEventListener('click', () => {
       void this.callbacks.onCopyReport().then((done) => {
         copy.textContent = done ? 'Relatorio copiado' : 'Nao foi possivel copiar';

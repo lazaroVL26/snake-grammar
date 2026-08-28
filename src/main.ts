@@ -75,7 +75,10 @@ function turn(direction: Direction): void {
 }
 
 function enterCountdown(): void {
-  const next = state.phase === 'idle' ? startCountdown(state, performance.now()) : transition(state, 'countdown');
+  const next =
+    state.phase === 'idle'
+      ? startCountdown(state, performance.now())
+      : transition(state, 'countdown');
   if (next.phase !== 'countdown') return;
   state = next;
   countdownEndsAt = performance.now() + CONFIG.RESUME_COUNTDOWN_MS * 3;

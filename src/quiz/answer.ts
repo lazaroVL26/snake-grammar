@@ -21,7 +21,7 @@ export function normalize(value: string): string {
 export function contractionVariants(value: string): string[] {
   const base = normalize(value);
   const variants = new Set<string>([base]);
-  if (base.startsWith("had ")) variants.add(`'d ${base.slice(4)}`);
+  if (base.startsWith('had ')) variants.add(`'d ${base.slice(4)}`);
   if (base.startsWith("'d ")) variants.add(`had ${base.slice(3)}`);
   if (base.startsWith('did not ')) variants.add(`didn't ${base.slice(8)}`);
   if (base.startsWith("didn't ")) variants.add(`did not ${base.slice(7)}`);

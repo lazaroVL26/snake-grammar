@@ -63,8 +63,16 @@ export class QuestionModal {
     this.sentence = el('p', { class: 'sentence', lang: 'en' });
     this.hint = el('p', { class: 'hint' });
     this.answers = el('div', { class: 'answers' });
-    this.feedback = el('div', { class: 'feedback', 'aria-live': 'assertive', role: 'status' });
-    this.submit = el('button', { type: 'button', class: 'button button--primary', text: 'Responder' });
+    this.feedback = el('div', {
+      class: 'feedback',
+      'aria-live': 'assertive',
+      role: 'status',
+    });
+    this.submit = el('button', {
+      type: 'button',
+      class: 'button button--primary',
+      text: 'Responder',
+    });
     this.submit.addEventListener('click', () => this.confirm());
 
     this.dialog = el(
@@ -77,7 +85,11 @@ export class QuestionModal {
       },
       [
         el('div', { class: 'modal__head' }, [
-          el('h2', { id: 'modal-title', class: 'modal__title', text: 'Complete a frase' }),
+          el('h2', {
+            id: 'modal-title',
+            class: 'modal__title',
+            text: 'Complete a frase',
+          }),
           this.focusLabel,
         ]),
         el('div', { class: 'timer' }, [this.timerBar, this.timerText]),
@@ -288,7 +300,8 @@ export class QuestionModal {
     this.buttons.forEach((button) => {
       const text = button.textContent ?? '';
       if (text.endsWith(answer)) button.classList.add('option--ok');
-      else if (chosen !== null && text.endsWith(chosen)) button.classList.add('option--err');
+      else if (chosen !== null && text.endsWith(chosen))
+        button.classList.add('option--err');
     });
 
     const headline = correct

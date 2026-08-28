@@ -180,7 +180,11 @@ describe('state — tick', () => {
 
   it('bate na parede e termina o jogo', () => {
     const state = running({
-      snake: { segments: [{ x: CONFIG.GRID_COLS - 1, y: 5 }], direction: 'right', pending: [] },
+      snake: {
+        segments: [{ x: CONFIG.GRID_COLS - 1, y: 5 }],
+        direction: 'right',
+        pending: [],
+      },
     });
     const after = tick(state, 99);
     expect(after.phase).toBe('gameover');

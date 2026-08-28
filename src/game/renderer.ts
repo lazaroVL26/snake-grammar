@@ -114,7 +114,10 @@ export class Renderer {
     const offset = cell * 0.19;
     const along = cell * 0.2;
     const dir = state.snake.direction;
-    const forward = { x: dir === 'right' ? 1 : dir === 'left' ? -1 : 0, y: dir === 'down' ? 1 : dir === 'up' ? -1 : 0 };
+    const forward = {
+      x: dir === 'right' ? 1 : dir === 'left' ? -1 : 0,
+      y: dir === 'down' ? 1 : dir === 'up' ? -1 : 0,
+    };
     const side = { x: forward.y, y: forward.x };
 
     ctx.fillStyle = '#0E1A2B';
@@ -135,7 +138,7 @@ export class Renderer {
     const { ctx } = this;
     const cell = CONFIG.CELL_SIZE;
     const pulse = 1 + Math.sin(timeMs / 260) * 0.06;
-    const radius = (cell * 0.33) * pulse;
+    const radius = cell * 0.33 * pulse;
     const cx = fruit.x * cell + cell / 2;
     const cy = fruit.y * cell + cell / 2;
 

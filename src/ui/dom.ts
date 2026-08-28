@@ -19,20 +19,6 @@ export function el<K extends keyof HTMLElementTagNameMap>(
   return node;
 }
 
-export function query<T extends Element>(selector: string, scope: ParentNode = document): T {
-  const found = scope.querySelector<T>(selector);
-  if (!found) throw new Error(`Elemento nao encontrado: ${selector}`);
-  return found;
-}
-
-export function clear(node: Element): void {
-  node.replaceChildren();
-}
-
-export function setText(node: Element, value: string): void {
-  node.textContent = value;
-}
-
 const FOCUSABLE =
   'a[href], button:not([disabled]), input:not([disabled]), select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -40,8 +26,4 @@ export function focusableIn(scope: ParentNode): HTMLElement[] {
   return Array.from(scope.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
     (node) => node.offsetParent !== null || node === document.activeElement,
   );
-}
-
-export function prefersReducedMotion(): boolean {
-  return window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 }

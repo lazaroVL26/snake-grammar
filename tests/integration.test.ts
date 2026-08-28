@@ -31,7 +31,7 @@ function answer(state: GameState, question: Question, correct: boolean): GameSta
     questionId: question.id,
     focus: question.focus,
     correct,
-    chosen: correct ? question.options[question.answerIndex] ?? '' : null,
+    chosen: correct ? (question.options[question.answerIndex] ?? '') : null,
     elapsedMs: 1200,
   };
   return applyAnswer(state, log);

@@ -7,13 +7,7 @@ export type Focus = 'simple-past' | 'past-perfect' | 'contrast';
 export type AnswerMode = 'choice' | 'typed';
 
 export type GamePhase =
-  | 'idle'
-  | 'countdown'
-  | 'running'
-  | 'paused'
-  | 'question'
-  | 'feedback'
-  | 'gameover';
+  'idle' | 'countdown' | 'running' | 'paused' | 'question' | 'feedback' | 'gameover';
 
 export type GameOverReason = 'wall' | 'self' | 'too-short';
 

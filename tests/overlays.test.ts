@@ -139,7 +139,9 @@ describe('overlays — relatorio final', () => {
   });
 
   it('tem os botoes de jogar de novo e copiar relatorio', async () => {
-    const buttons = Array.from(root.querySelectorAll<HTMLButtonElement>('.panel__actions button'));
+    const buttons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.panel__actions button'),
+    );
     expect(buttons.map((b) => b.textContent)).toEqual([
       'Jogar de novo',
       'Copiar relatorio',

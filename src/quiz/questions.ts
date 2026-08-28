@@ -39,7 +39,9 @@ export function validateQuestions(data: unknown): string[] {
       problems.push(`${label}: "level" precisa ser 1, 2 ou 3.`);
     }
     if (typeof q.focus !== 'string' || !FOCUSES.includes(q.focus as Focus)) {
-      problems.push(`${label}: "focus" precisa ser simple-past, past-perfect ou contrast.`);
+      problems.push(
+        `${label}: "focus" precisa ser simple-past, past-perfect ou contrast.`,
+      );
     }
     if (typeof q.sentence !== 'string' || !q.sentence.includes(GAP)) {
       problems.push(`${label}: a frase precisa conter a lacuna "${GAP}".`);
@@ -65,7 +67,11 @@ export function validateQuestions(data: unknown): string[] {
     }
 
     const answerIndex = q.answerIndex;
-    if (typeof answerIndex !== 'number' || answerIndex < 0 || answerIndex >= options.length) {
+    if (
+      typeof answerIndex !== 'number' ||
+      answerIndex < 0 ||
+      answerIndex >= options.length
+    ) {
       problems.push(`${label}: "answerIndex" fora do intervalo 0..3.`);
       return;
     }
@@ -77,7 +83,9 @@ export function validateQuestions(data: unknown): string[] {
     const correct = normalize(String(options[answerIndex]));
     const forms = new Set(q.accepted.map((value) => normalize(String(value))));
     if (!forms.has(correct)) {
-      problems.push(`${label}: "accepted" nao contem a alternativa correta ("${correct}").`);
+      problems.push(
+        `${label}: "accepted" nao contem a alternativa correta ("${correct}").`,
+      );
     }
   });
 

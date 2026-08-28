@@ -30,12 +30,16 @@ export function bindKeyboard(handlers: KeyboardHandlers): () => void {
       handlers.onDirection(direction);
       return;
     }
-    if (event.code === 'Space' || event.code === 'Escape') {
+
+    // Botao em foco ativa a si mesmo com Espaco/Enter: nao duplicar a acao aqui.
+    const onButton = target instanceof HTMLElement && target.closest('button') !== null;
+
+    if (event.code === 'Escape' || (event.code === 'Space' && !onButton)) {
       event.preventDefault();
       handlers.onTogglePause();
       return;
     }
-    if (event.code === 'Enter' || event.code === 'NumpadEnter') {
+    if ((event.code === 'Enter' || event.code === 'NumpadEnter') && !onButton) {
       handlers.onConfirm();
     }
   };

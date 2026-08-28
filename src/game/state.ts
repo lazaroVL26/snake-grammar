@@ -2,7 +2,16 @@ import { CONFIG } from '../config';
 import type { AttemptLog, GameOverReason, GamePhase, GameState, Rng } from '../types';
 import { spawnFruit } from './board';
 import { hitsSelf, hitsWall } from './collision';
-import { clearQueue, createSnake, grow, head, length, sameCell, shrink, step } from './snake';
+import {
+  clearQueue,
+  createSnake,
+  grow,
+  head,
+  length,
+  sameCell,
+  shrink,
+  step,
+} from './snake';
 
 const TRANSITIONS: Record<GamePhase, readonly GamePhase[]> = {
   idle: ['countdown'],
@@ -106,8 +115,7 @@ export function applyAnswer(state: GameState, log: AttemptLog): GameState {
   }
 
   const streak = state.stats.streak + 1;
-  const bonus =
-    streak % CONFIG.STREAK_BONUS_EVERY === 0 ? CONFIG.STREAK_BONUS_POINTS : 0;
+  const bonus = streak % CONFIG.STREAK_BONUS_EVERY === 0 ? CONFIG.STREAK_BONUS_POINTS : 0;
 
   return {
     ...state,
