@@ -241,25 +241,26 @@ export type Direction = 'up' | 'down' | 'left' | 'right';
 export type Focus = 'simple-past' | 'past-perfect' | 'contrast';
 export type AnswerMode = 'choice' | 'typed';
 export type GamePhase =
-  'idle' | 'countdown' | 'running' | 'paused' | 'question' | 'feedback' | 'gameover';
+  | 'idle' | 'countdown' | 'running' | 'paused'
+  | 'question' | 'feedback' | 'gameover';
 
 export interface Question {
   id: string;
   level: 1 | 2 | 3;
   focus: Focus;
-  sentence: string; // contém exatamente uma lacuna marcada com "___"
-  verbHint: string; // verbo no infinitivo mostrado entre parênteses
-  options: string[]; // 4 alternativas
-  answerIndex: number; // índice da correta em options
-  accepted: string[]; // formas aceitas no modo digitado, já normalizadas
-  explanation: string; // em português do Brasil
+  sentence: string;        // contém exatamente uma lacuna marcada com "___"
+  verbHint: string;        // verbo no infinitivo mostrado entre parênteses
+  options: string[];       // 4 alternativas
+  answerIndex: number;     // índice da correta em options
+  accepted: string[];      // formas aceitas no modo digitado, já normalizadas
+  explanation: string;     // em português do Brasil
 }
 
 export interface AttemptLog {
   questionId: string;
   focus: Focus;
   correct: boolean;
-  chosen: string | null; // null = estourou o tempo
+  chosen: string | null;   // null = estourou o tempo
   elapsedMs: number;
 }
 ```
@@ -319,16 +320,16 @@ marca-texto.
 Tokens (defina em `styles/tokens.css`, use **só** estes):
 
 ```css
---bg: #0e1a2b; /* fundo da página */
---surface: #16263f; /* cartões, modal, HUD */
---grid: #1d3355; /* linhas da grade no canvas */
---snake: #f2c14e; /* corpo da cobra (marca-texto) */
---snake-head: #ffd97d;
---fruit: #ee6c5d; /* fruta */
---ok: #5fd3a0; /* acerto */
---err: #ee6c5d; /* erro */
---text: #eae7e1;
---muted: #9aaec8;
+--bg:        #0E1A2B;   /* fundo da página */
+--surface:   #16263F;   /* cartões, modal, HUD */
+--grid:      #1D3355;   /* linhas da grade no canvas */
+--snake:     #F2C14E;   /* corpo da cobra (marca-texto) */
+--snake-head:#FFD97D;
+--fruit:     #EE6C5D;   /* fruta */
+--ok:        #5FD3A0;   /* acerto */
+--err:       #EE6C5D;   /* erro */
+--text:      #EAE7E1;
+--muted:     #9AAEC8;
 ```
 
 Tipografia (3 papéis, carregadas do Google Fonts no `index.html` com `display=swap`):
@@ -405,7 +406,6 @@ o feedback vira troca de estado instantânea.
 Cobertura mínima real, não teste decorativo. Estes casos precisam existir:
 
 **snake.ts**
-
 - move um passo em cada direção;
 - crescer adiciona segmento sem perder a cauda no mesmo tick;
 - encolher remove exatamente 1 segmento;
@@ -413,17 +413,14 @@ Cobertura mínima real, não teste decorativo. Estes casos precisam existir:
 - buffer de direção aplica no máximo 1 virada por tick.
 
 **collision.ts**
-
 - colisão com cada uma das 4 paredes;
 - autocolisão real;
 - não acusa colisão quando a cabeça ocupa a célula que a cauda acabou de liberar.
 
 **board.ts**
-
 - fruta nunca nasce em cima da cobra (teste com PRNG seedado e tabuleiro quase cheio).
 
 **state.ts**
-
 - acerto: +10 pontos, +1 comprimento, streak incrementa;
 - bônus a cada 3 acertos consecutivos;
 - erro: pontuação inalterada, −1 comprimento, streak zera;
@@ -432,18 +429,15 @@ Cobertura mínima real, não teste decorativo. Estes casos precisam existir:
 - estouro de tempo é tratado exatamente como erro, com `chosen: null`.
 
 **selector.ts**
-
 - não repete questão enquanto houver questões não usadas;
 - questão errada reaparece dentro da janela de 3–6;
 - progressão de nível respeita as faixas de fruta.
 
 **answer.ts**
-
 - normalização: maiúsculas, espaço duplo, apóstrofo curvo, contração `'d`;
 - resposta errada por verbo diferente não é aceita.
 
 **questions.seed.json**
-
 - teste de integridade que roda sobre o arquivo real: ids únicos, 4 opções,
   `answerIndex` válido, `___` presente, `accepted` contém a correta normalizada.
 

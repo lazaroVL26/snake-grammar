@@ -32,13 +32,23 @@ function stubCanvas(): void {
     strokeStyle: '',
     lineWidth: 0,
   };
-  HTMLCanvasElement.prototype.getContext = (): unknown => context;
+  HTMLCanvasElement.prototype.getContext = (() =>
+    context) as unknown as typeof HTMLCanvasElement.prototype.getContext;
 }
 
-function headPosition(): Vec | null {
+interface Snapshot {
+  head: Vec;
+  /** Ordem do renderer: cauda primeiro, cabeca por ultimo. */
+  segments: Vec[];
+}
+
+/** Avanca um quadro e le a cobra inteira pelo que foi desenhado no canvas. */
+function readSnake(): Snapshot | null {
   drawn.length = 0;
   vi.advanceTimersByTime(16);
-  return drawn[drawn.length - 1] ?? null;
+  const segments = [...drawn];
+  const head = segments[segments.length - 1];
+  return head ? { head, segments } : null;
 }
 
 function frames(count: number): void {
@@ -99,16 +109,15 @@ function driveUntilQuestion(): void {
   let index = 0;
 
   for (let frame = 0; frame < 12_000; frame += 1) {
-    if (modalOpen() || gameOver()) {
-      if (modalOpen() && frame === 0) {
-        throw new Error(
-          `modal ja estava aberto: "${document.querySelector('.sentence')?.textContent}"`,
-        );
-      }
-      return;
+    if (modalOpen()) return;
+    if (gameOver()) {
+      throw new Error(
+        `a cobra morreu durante a varredura: ${document.querySelector('.panel__lead')?.textContent} (quadro ${frame})`,
+      );
     }
-    const head = headPosition();
-    if (!head) continue;
+    const snake = readSnake();
+    if (!snake) continue;
+    const head = snake.head;
 
     let target = path[index];
     if (!target) {
@@ -120,7 +129,7 @@ function driveUntilQuestion(): void {
       target = path[index] as Vec;
     }
 
-    const desired = chooseDirection(head, target, facing);
+    const desired = chooseDirection(snake, target, facing);
     if (desired && desired !== facing) {
       key(ARROW[desired]);
       facing = desired;
@@ -129,35 +138,60 @@ function driveUntilQuestion(): void {
   throw new Error('a cobra nao chegou na fruta');
 }
 
-function inBounds(position: Vec, direction: Direction): boolean {
-  const next = {
+function stepTo(position: Vec, direction: Direction): Vec {
+  return {
     x: position.x + (direction === 'right' ? 1 : direction === 'left' ? -1 : 0),
     y: position.y + (direction === 'down' ? 1 : direction === 'up' ? -1 : 0),
   };
-  return (
-    next.x >= 0 && next.y >= 0 && next.x < CONFIG.GRID_COLS && next.y < CONFIG.GRID_ROWS
-  );
 }
 
-function chooseDirection(head: Vec, target: Vec, facing: Direction): Direction | null {
+/**
+ * Direcao segura: nao inverte 180 graus, nao sai do tabuleiro e nao entra no
+ * proprio corpo. A cauda nao conta — ela deixa a celula no mesmo passo.
+ */
+function chooseDirection(
+  snake: Snapshot,
+  target: Vec,
+  facing: Direction,
+): Direction | null {
+  const body = snake.segments.slice(1);
+
+  const safe = (direction: Direction | null): direction is Direction => {
+    if (direction === null || direction === OPPOSITE[facing]) return false;
+    const next = stepTo(snake.head, direction);
+    if (
+      next.x < 0 ||
+      next.y < 0 ||
+      next.x >= CONFIG.GRID_COLS ||
+      next.y >= CONFIG.GRID_ROWS
+    ) {
+      return false;
+    }
+    return !body.some((segment) => segment.x === next.x && segment.y === next.y);
+  };
+
   const horizontal: Direction | null =
-    target.x > head.x ? 'right' : target.x < head.x ? 'left' : null;
+    target.x > snake.head.x ? 'right' : target.x < snake.head.x ? 'left' : null;
   const vertical: Direction | null =
-    target.y > head.y ? 'down' : target.y < head.y ? 'up' : null;
+    target.y > snake.head.y ? 'down' : target.y < snake.head.y ? 'up' : null;
 
-  const legal = (direction: Direction | null): direction is Direction =>
-    direction !== null && direction !== OPPOSITE[facing] && inBounds(head, direction);
+  if (safe(horizontal)) return horizontal;
+  if (safe(vertical)) return vertical;
+  // Encurralado no eixo do alvo: sai da linha por um passo, para onde der.
+  const alternatives: Direction[] = ['up', 'down', 'left', 'right'];
+  return alternatives.find(safe) ?? null;
+}
 
-  if (legal(horizontal)) return horizontal;
-  if (legal(vertical)) return vertical;
-  // Sem poder inverter: sai da linha por um passo, sem encostar na parede.
-  const perpendicular: Direction[] =
-    facing === 'left' || facing === 'right' ? ['up', 'down'] : ['left', 'right'];
-  return perpendicular.find((direction) => inBounds(head, direction)) ?? null;
+function optionText(button: HTMLButtonElement): string {
+  // O textContent do botao comeca com o numero do atalho; a alternativa e o
+  // ultimo no filho. Comparar o texto inteiro confundiria "started" com
+  // "had started".
+  return button.lastChild?.textContent ?? '';
 }
 
 /** Le o gabarito da questao aberta e responde certo ou errado. */
 function answerQuestion(correct: boolean): void {
+  expect(modalOpen(), 'o modal da pergunta precisa estar aberto').toBe(true);
   const sentence = document.querySelector('.sentence')?.textContent ?? '';
   const question = loadQuestions().find((item) => item.sentence === sentence);
   if (!question) throw new Error(`questao nao encontrada: "${sentence}"`);
@@ -166,9 +200,7 @@ function answerQuestion(correct: boolean): void {
   const options = Array.from(document.querySelectorAll<HTMLButtonElement>('.option'));
   expect(options.length).toBe(4);
   const target = options.find((option) =>
-    correct
-      ? (option.textContent ?? '').endsWith(answer)
-      : !(option.textContent ?? '').endsWith(answer),
+    correct ? optionText(option) === answer : optionText(option) !== answer,
   );
   if (!target) throw new Error('alternativa nao encontrada');
 
@@ -178,9 +210,20 @@ function answerQuestion(correct: boolean): void {
   frames(2);
 }
 
+/**
+ * Avanca so ate a contagem regressiva acabar. Passar disso deixaria a cobra
+ * andar sem comando — e ela pode estar encostada na parede.
+ */
 function skipCountdown(): void {
-  vi.advanceTimersByTime(CONFIG.RESUME_COUNTDOWN_MS * 3 + 50);
-  frames(2);
+  let seen = false;
+  for (let frame = 0; frame < 400; frame += 1) {
+    const showing = document.querySelector('.countdown') !== null;
+    if (showing) seen = true;
+    else if (seen) return;
+    else if (frame > 60) return;
+    vi.advanceTimersByTime(16);
+  }
+  throw new Error('a contagem regressiva nao terminou');
 }
 
 function hudCell(index: number): string {
