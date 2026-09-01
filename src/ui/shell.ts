@@ -1,5 +1,6 @@
 import { CONFIG } from '../config';
 import { el } from './dom';
+import { createFullscreenButton } from './fullscreen';
 
 export interface Shell {
   canvas: HTMLCanvasElement;
@@ -39,12 +40,13 @@ export function buildShell(root: HTMLElement): Shell {
           class: 'shell__sub mb-0',
           text: 'Passado, presente e futuro',
         }),
+        createFullscreenButton(),
       ]),
       hud,
       el('div', { class: 'board' }, [canvas, overlay]),
       el('p', {
         class: 'hints text-center mb-0',
-        text: 'Setas ou WASD movem • Espaco ou Esc pausam • 1 a 4 marcam a alternativa • Enter confirma',
+        text: 'Setas ou WASD movem • Espaco ou Esc pausam • F abre tela cheia • 1 a 4 marcam a alternativa • Enter confirma',
       }),
       controls,
       ranking,

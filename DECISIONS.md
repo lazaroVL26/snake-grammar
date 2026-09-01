@@ -356,3 +356,32 @@ Agora são dois contadores: `refreshToken` para as consultas e `submitToken` par
 envios. O envio ainda invalida consultas em voo (elas trariam a lista sem a partida que
 acabou), mas nunca o contrário. Há teste avançando 30 segundos de relógio com a resposta
 pendente.
+
+## 41. Tela cheia maximiza a página, não o tabuleiro
+
+O alvo natural pareceria ser o `.board`, mas o modal da pergunta mora em `.modal-root`,
+fora do canvas. Com `requestFullscreen` no tabuleiro, só a subárvore dele seria pintada e
+**a pergunta sumiria da tela** — o jogo ficaria travado. O alvo é
+`document.documentElement`.
+
+O estado vem do evento `fullscreenchange`, não de uma variável nossa: quem sai pelo Esc ou
+pelo F11 também vê o rótulo do botão voltar para "Tela cheia". O botão se esconde sozinho
+quando `document.fullscreenEnabled` é falso, e a promessa recusada (iframe sem permissão)
+é engolida — o jogo segue na tela normal.
+
+## 42. A linha do tabuleiro é flexível, não uma folga fixa em rem
+
+A primeira tentativa foi `height: calc(100dvh - 13rem)`. Medindo no navegador, o espaço
+real acima e abaixo era 540px, e muda conforme o D-pad aparece ou não. Em vez de calibrar
+um número mágico, a tela cheia dá altura de viewport ao `.shell` e
+`grid-template-rows: auto auto minmax(0, 1fr)` — cabeçalho, HUD e depois o tabuleiro
+ocupando o que sobrar. Ajusta-se sozinho.
+
+Duas correções que só apareceram medindo: o `100dvh` precisava descontar o respiro do
+`body`, senão sobrava scroll exatamente dessa folga; e abaixo de 960px, com o ranking no
+fluxo, a altura fixa espremia o tabuleiro para **44px**. As regras de dimensionamento
+ficaram dentro de `@media (min-width: 960px)`; em tela estreita a tela cheia apenas
+esconde a moldura do navegador.
+
+Resultado num monitor de 1920x1080, sem D-pad: tabuleiro de 640px para **916px**, sem
+barra de rolagem.

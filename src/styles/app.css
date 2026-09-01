@@ -741,3 +741,55 @@
   --bs-alert-bg: color-mix(in srgb, var(--snake) 12%, transparent);
   --bs-alert-border-color: color-mix(in srgb, var(--snake) 30%, transparent);
 }
+
+/* ---------- tela cheia ---------- */
+
+.fullscreen-toggle {
+  margin-left: auto;
+}
+
+/*
+ * Em tela cheia o ganho tem que ser o tabuleiro maior, nao so a moldura do
+ * navegador sumindo. A altura manda: com aspect-ratio 1/1, a largura segue.
+ */
+:root:fullscreen {
+  --shell-width: min(96vw, 1100px);
+}
+
+:root:fullscreen body {
+  padding-block: var(--space-3);
+}
+
+/*
+ * A linha do tabuleiro fica flexivel em vez de eu chutar uma folga fixa: o
+ * espaco acima e abaixo muda conforme o D-pad aparece ou nao.
+ * Linha 1 e o cabecalho, 2 e o HUD, 3 e o tabuleiro; o resto vem depois.
+ */
+/*
+ * So onde o ranking fica ao lado. Em tela estreita ele entra no fluxo, e
+ * espremer tudo numa altura fixa reduziria o tabuleiro a alguns pixels — la a
+ * tela cheia apenas tira a moldura do navegador e a pagina continua rolando.
+ */
+@media (min-width: 960px) {
+  :root:fullscreen .shell {
+    /* Desconta o respiro do body, senao sobra scroll de exatamente essa folga. */
+    height: calc(100dvh - 2 * var(--space-3));
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  :root:fullscreen .board {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    margin-inline: auto;
+  }
+}
+
+/* Em tela cheia o titulo rouba espaco vertical que o tabuleiro aproveita. */
+:root:fullscreen .shell__title {
+  font-size: 1.5rem;
+}
+
+:root:fullscreen .hints {
+  display: none;
+}

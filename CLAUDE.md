@@ -448,6 +448,10 @@ o feedback vira troca de estado instantânea.
   (`position: sticky`); abaixo disso ela desce para o fim da página, depois do D-pad.
 - HUD acima do canvas: pontos • comprimento • acertos/erros • recorde.
 - Abaixo do canvas: uma linha discreta com os controles.
+- Botão de **tela cheia** no cabeçalho (tecla `F`). Maximiza a página inteira, nunca só o
+  tabuleiro: o modal da pergunta vive fora do canvas e sumiria. A partir de 960px o
+  tabuleiro cresce para ocupar a altura livre; abaixo disso a tela cheia só tira a moldura
+  do navegador.
 - Responsivo até 360px de largura: o canvas encolhe proporcionalmente e o D-pad de toque
   aparece abaixo dele.
 

@@ -150,15 +150,22 @@ navegador do aluno.
 
 ## Como jogar
 
-| Ação                    | Teclado                | Toque                       |
-| ----------------------- | ---------------------- | --------------------------- |
-| Mover                   | Setas ou WASD          | Swipe no tabuleiro ou D-pad |
-| Começar / jogar de novo | Enter                  | Botão na tela               |
-| Pausar / continuar      | Espaço ou Esc          | Botão na tela               |
-| Marcar alternativa      | Teclas 1 a 4, ou setas | Toque na alternativa        |
-| Confirmar resposta      | Enter                  | Botão "Responder"           |
+| Ação                    | Teclado                | Toque                           |
+| ----------------------- | ---------------------- | ------------------------------- |
+| Mover                   | Setas ou WASD          | Swipe no tabuleiro ou D-pad     |
+| Começar / jogar de novo | Enter                  | Botão na tela                   |
+| Pausar / continuar      | Espaço ou Esc          | Botão na tela                   |
+| Marcar alternativa      | Teclas 1 a 4, ou setas | Toque na alternativa            |
+| Confirmar resposta      | Enter                  | Botão "Responder"               |
+| Tela cheia              | F                      | Botão "Tela cheia" no cabeçalho |
 
 Na tela inicial, `Enter` dentro do campo de apelido já começa a partida.
+
+**Tela cheia** ajuda no projetor e nos PCs dos alunos: em telas de 960px para cima o
+tabuleiro cresce para ocupar a altura disponível — num monitor de 1920×1080 ele vai de
+640px para cerca de 900px. Em telas estreitas o botão apenas esconde a moldura do
+navegador, porque espremer tudo numa altura fixa deixaria o tabuleiro minúsculo. O botão
+some sozinho se o navegador não permitir tela cheia.
 
 O jogo é 100% jogável só com teclado. Ele pausa sozinho quando a janela perde o foco ou
 o aluno troca de aba.

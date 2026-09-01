@@ -344,6 +344,17 @@ beforeEach(async () => {
   document.body.append(app);
   drawn.length = 0;
   stubCanvas();
+  // O jsdom nao tem a Fullscreen API; sem isso o botao nasceria escondido.
+  Object.defineProperty(document, 'fullscreenEnabled', {
+    value: true,
+    configurable: true,
+  });
+  Object.defineProperty(document, 'fullscreenElement', {
+    value: null,
+    configurable: true,
+  });
+  document.documentElement.requestFullscreen = () => Promise.resolve();
+  document.exitFullscreen = () => Promise.resolve();
   window.matchMedia = ((query: string) => ({
     matches: false,
     media: query,
@@ -448,6 +459,39 @@ describe('app — partida completa', () => {
     Object.defineProperty(document, 'hidden', { value: true, configurable: true });
     document.dispatchEvent(new Event('visibilitychange'));
     expect(text()).toContain('Jogo pausado');
+  });
+});
+
+describe('app — botao de tela cheia', () => {
+  it('o botao aparece no cabecalho quando o navegador suporta', () => {
+    const button = document.querySelector<HTMLButtonElement>('.fullscreen-toggle');
+    expect(button).not.toBeNull();
+    expect(button?.closest('.shell__head')).not.toBeNull();
+    expect(button?.textContent).toBe('Tela cheia');
+  });
+
+  it('a tecla F pede tela cheia para a pagina inteira', () => {
+    const pedido = vi.fn(() => Promise.resolve());
+    document.documentElement.requestFullscreen = pedido;
+    key('KeyF');
+    // Sem contagem exata: cada teste reimporta main.ts e os ouvintes de
+    // teclado se acumulam no window do jsdom. No jogo real, main roda uma vez.
+    expect(pedido).toHaveBeenCalled();
+  });
+
+  it('F dentro do campo de apelido escreve, nao maximiza', () => {
+    const pedido = vi.fn(() => Promise.resolve());
+    document.documentElement.requestFullscreen = pedido;
+    const field = document.querySelector<HTMLInputElement>('.nick__field');
+    field?.focus();
+    field?.dispatchEvent(
+      new KeyboardEvent('keydown', { code: 'KeyF', key: 'f', bubbles: true }),
+    );
+    expect(pedido).not.toHaveBeenCalled();
+  });
+
+  it('a linha de dicas ensina a tecla', () => {
+    expect(document.querySelector('.hints')?.textContent).toContain('F abre tela cheia');
   });
 });
 

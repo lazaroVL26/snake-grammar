@@ -30,6 +30,7 @@ import { Hud } from './ui/hud';
 import { Overlays } from './ui/overlays';
 import { RankingPanel, positionLabel } from './ui/scoreboard';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
+import { toggleFullscreen } from './ui/fullscreen';
 import { buildReport, reportToText } from './ui/report';
 import type {
   ScoreEntry,
@@ -303,6 +304,7 @@ function updateCountdown(now: number): void {
 bindKeyboard({
   onDirection: turn,
   onTogglePause: togglePause,
+  onToggleFullscreen: () => void toggleFullscreen(),
   onConfirm: () => {
     if (state.phase === 'idle') overlays.requestStart();
     else if (state.phase === 'gameover') {
