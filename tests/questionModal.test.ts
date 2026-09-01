@@ -164,6 +164,67 @@ describe('questionModal — multipla escolha', () => {
   });
 });
 
+describe('questionModal — so uma alternativa fica verde', () => {
+  // Caso real do banco (sp-001, ct-002...): a certa e uma forma simples e os
+  // distratores sao "had X"/"have X", que terminam com a mesma palavra.
+  const armadilha: Question = {
+    id: 'ct-002',
+    level: 2,
+    focus: 'contrast',
+    sentence: 'We arrived at 8:00 and the game ___ ten minutes later.',
+    verbHint: 'start',
+    options: ['started', 'had started', 'has started', 'starts'],
+    answerIndex: 0,
+    accepted: ['started'],
+    explanation: 'Sequencia de fatos no passado: Simple Past.',
+  };
+  const apresentada: PresentedQuestion = {
+    question: armadilha,
+    options: ['had started', 'started', 'has started', 'starts'],
+    answerIndex: 1,
+  };
+
+  const verdes = (): string[] =>
+    Array.from(document.querySelectorAll<HTMLButtonElement>('.option--ok')).map(
+      (b) => b.dataset.option ?? '',
+    );
+
+  it('acertando, so a alternativa certa fica verde', () => {
+    modal.open(apresentada, 'choice');
+    press('2', 'Digit2');
+    press('Enter');
+    expect(answered[0]?.correct).toBe(true);
+    expect(verdes()).toEqual(['started']);
+  });
+
+  it('errando, a certa fica verde e so a marcada fica vermelha', () => {
+    modal.open(apresentada, 'choice');
+    press('1', 'Digit1');
+    press('Enter');
+    expect(answered[0]?.correct).toBe(false);
+    expect(verdes()).toEqual(['started']);
+    const vermelhas = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.option--err'),
+    ).map((b) => b.dataset.option);
+    expect(vermelhas).toEqual(['had started']);
+  });
+
+  it('cada alternativa guarda o proprio texto, sem o numero do atalho', () => {
+    modal.open(apresentada, 'choice');
+    const textos = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.option'),
+    ).map((b) => b.dataset.option);
+    expect(textos).toEqual(['had started', 'started', 'has started', 'starts']);
+  });
+
+  it('no estouro de tempo, nada fica vermelho e so a certa fica verde', () => {
+    modal.open(apresentada, 'choice');
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS + 100);
+    expect(verdes()).toEqual(['started']);
+    expect(document.querySelectorAll('.option--err').length).toBe(0);
+  });
+});
+
 describe('questionModal — modo digitado', () => {
   it('foca o campo e aceita a contracao', () => {
     modal.open(presented, 'typed');

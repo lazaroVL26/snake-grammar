@@ -1,5 +1,10 @@
 import { CONFIG } from '../config';
-import { correctAnswer, isChoiceCorrect, isTypedAnswerCorrect } from '../quiz/answer';
+import {
+  correctAnswer,
+  isChoiceCorrect,
+  isTypedAnswerCorrect,
+  normalize,
+} from '../quiz/answer';
 import type { PresentedQuestion } from '../quiz/selector';
 import type { AnswerMode } from '../types';
 import { el, focusableIn } from './dom';
@@ -181,6 +186,9 @@ export class QuestionModal {
           class:
             'option list-group-item list-group-item-action d-flex align-items-center gap-3',
           'aria-pressed': 'false',
+          // O texto do botao comeca com o numero do atalho; guardar a
+          // alternativa crua e o que permite compara-la sem ambiguidade.
+          'data-option': option,
         },
         [el('span', { class: 'option__key', text: String(index + 1) }), option],
       );
@@ -305,11 +313,16 @@ export class QuestionModal {
     this.gap.textContent = answer;
     this.gap.classList.add('gap--filled', correct ? 'gap--ok' : 'gap--corrected');
 
+    // Comparacao exata, nunca por sufixo: com a certa "started" e o distrator
+    // "had started", o sufixo pintaria os dois de verde.
+    const certa = normalize(answer);
+    const marcada = chosen === null ? null : normalize(chosen);
     this.buttons.forEach((button) => {
-      const text = button.textContent ?? '';
-      if (text.endsWith(answer)) button.classList.add('option--ok');
-      else if (chosen !== null && text.endsWith(chosen))
+      const texto = normalize(button.dataset.option ?? '');
+      if (texto === certa) button.classList.add('option--ok');
+      else if (marcada !== null && texto === marcada) {
         button.classList.add('option--err');
+      }
     });
 
     const penalty = CONFIG.WRONG_PENALTY_SEGMENTS;

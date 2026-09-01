@@ -474,3 +474,25 @@ inteira vive em `data/scores.json`, no PC servidor.
 Junto saiu o código que ficou órfão: `reportToText` em `ui/report.ts` e `scoreboardToText`
 em `storage/scoreboard.ts`, com os testes que os cobriam. Se um dia a cópia fizer falta,
 está no histórico.
+
+## 49. Mais de uma alternativa ficava verde no feedback
+
+Relatado pelo professor como "frases com mais de uma resposta correta". Não era o banco: as
+questões estão certas e a correção da resposta sempre esteve certa também. O defeito era só
+na hora de pintar o feedback.
+
+`showFeedback` comparava com `button.textContent.endsWith(answer)`, e o `textContent` do
+botão começa com o número do atalho. Com a resposta certa `started` e o distrator
+`had started`, `"2had started".endsWith("started")` é verdadeiro — os dois ficavam verdes.
+**11 das 101 questões** caíam nisso, sempre o mesmo padrão: certa numa forma simples,
+distratores em `had X` / `have X`.
+
+Pior que feio: ensinava o contrário do exercício, já que o aluno via duas formas marcadas
+como corretas justamente onde a questão quer que ele distinga uma da outra.
+
+Cada alternativa passou a guardar o próprio texto em `data-option`, e a comparação é exata
+sobre ele (normalizada). É o mesmo erro que eu já tinha cometido no arnês de teste na
+decisão sobre o piloto automático — dessa vez estava no produto.
+
+A pontuação nunca foi afetada: `confirm()` usa `presented.options[selected]` e
+`isChoiceCorrect` compara texto exato normalizado. Quem errou foi contado como erro.
