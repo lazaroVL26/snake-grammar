@@ -1,5 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it } from 'vitest';
+import { CONFIG } from '../src/config';
 import { RankingPanel, positionLabel } from '../src/ui/scoreboard';
 import type { ScoreEntry } from '../src/types';
 
@@ -64,6 +65,16 @@ describe('RankingPanel — coluna ao lado do tabuleiro', () => {
     expect(highlighted?.textContent).toContain('Ana');
     expect(highlighted?.getAttribute('aria-current')).toBe('true');
     expect(root.querySelectorAll('.ranking__row--mine').length).toBe(1);
+  });
+
+  it('mostra no maximo o top 10, mesmo com a turma inteira na lista', () => {
+    const turma = Array.from({ length: 25 }, (_, i) =>
+      entry(`Aluno ${i}`, (25 - i) * 10, 70),
+    );
+    panel.update(turma, '2026-09-01');
+    expect(root.querySelectorAll('.ranking__row').length).toBe(CONFIG.SCOREBOARD_VISIBLE);
+    expect(root.textContent).toContain('Aluno 0');
+    expect(root.textContent).not.toContain('Aluno 20');
   });
 
   it('redesenhar substitui a lista em vez de acumular', () => {

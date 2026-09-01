@@ -277,7 +277,8 @@
 .ranking__accuracy {
   color: var(--muted);
   font-variant-numeric: tabular-nums;
-  min-width: 3.2rem;
+  font-size: 0.72rem;
+  min-width: 2.4rem;
   text-align: right;
 }
 
@@ -421,18 +422,6 @@
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-
-.timer__bar {
-  height: 6px;
-  flex: 1;
-  background: var(--snake);
-  border-radius: 999px;
-  transition: background var(--motion-fast) var(--easing);
-}
-
-.timer__bar[data-low='true'] {
-  background: var(--err);
 }
 
 .timer__text {
@@ -688,13 +677,25 @@
   --bs-progress-border-radius: 999px;
 }
 
+/*
+ * A largura e reescrita a cada quadro pelo cronometro, entao nao pode haver
+ * transicao nela: o .progress-bar do Bootstrap traz `transition: width .6s`,
+ * que faria a barra correr atrasada. Só a cor faz a passagem suave.
+ */
 .timer__bar {
+  /*
+   * A cor vai direto na propriedade, nao so na variavel do Bootstrap: quando
+   * so a custom property muda, a transicao nao reinterpola e a barra fica
+   * presa no amarelo mesmo com o tempo acabando.
+   */
   --bs-progress-bar-bg: var(--snake);
-  transition: none;
+  background-color: var(--snake);
+  transition: background-color var(--motion-fast) var(--easing);
 }
 
 .timer__bar[data-low='true'] {
   --bs-progress-bar-bg: var(--err);
+  background-color: var(--err);
 }
 
 /* Alternativas e ranking usam list-group, mas com o nosso espacamento. */
@@ -916,10 +917,14 @@
 
 /* ---------- ranking ---------- */
 
+/*
+ * A coluna do apelido e a que pode crescer; as outras ficam no minimo. Com
+ * gap e precisao largos demais sobravam 14px para o nome, que aparecia cortado.
+ */
 .ranking__row.list-group-item {
   display: grid;
-  grid-template-columns: 1.6rem minmax(0, 1fr) auto 3.2rem;
-  gap: var(--space-2);
+  grid-template-columns: 1.4rem minmax(0, 1fr) auto auto;
+  gap: var(--space-1);
   align-items: baseline;
   padding: var(--space-1) var(--space-2);
   border-radius: var(--radius-sm);

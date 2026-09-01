@@ -43,8 +43,8 @@ export const CONFIG = {
   SCORE_STORAGE_KEY: 'snake-grammar:scores:v1',
   /** Quantas partidas do dia ficam guardadas. */
   SCOREBOARD_SIZE: 20,
-  /** Quantas linhas do ranking aparecem na tela. */
-  SCOREBOARD_VISIBLE: 5,
+  /** Quantas linhas do ranking aparecem na tela: o top 10 do dia. */
+  SCOREBOARD_VISIBLE: 10,
   /** Limite do apelido, para nao quebrar o layout do ranking. */
   NICK_MAX_LENGTH: 16,
 } as const;

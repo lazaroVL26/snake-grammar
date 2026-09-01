@@ -204,7 +204,8 @@ lembrado entre partidas.
 
 Toda partida terminada entra no ranking do dia, com apelido, pontuação, precisão e
 conteúdo. O ranking fica numa **coluna própria ao lado do tabuleiro** (`aside.rank-side`),
-visível a partida inteira, com a partida recém-jogada destacada. A tela de fim de jogo não
+visível a partida inteira, mostrando o **top `SCOREBOARD_VISIBLE`** com a partida
+recém-jogada destacada. "Copiar ranking" continua levando a lista inteira. A tela de fim de jogo não
 repete a lista: mostra só a colocação.
 
 **O ranking zera a cada dia.** Cada entrada guarda o dia local em que foi jogada, e a
@@ -283,7 +284,7 @@ export const CONFIG = {
   STORAGE_KEY: 'snake-grammar:v1',
   SCORE_STORAGE_KEY: 'snake-grammar:scores:v1',
   SCOREBOARD_SIZE: 20,
-  SCOREBOARD_VISIBLE: 5,
+  SCOREBOARD_VISIBLE: 10,
   NICK_MAX_LENGTH: 16,
 } as const;
 ```
@@ -444,7 +445,7 @@ o feedback vira troca de estado instantânea.
 ### 9.2 Layout
 
 - Coluna do jogo centralizada, largura máxima ~640px. A partir de 960px de viewport,
-  uma coluna lateral de 232px com o ranking do dia aparece à direita, grudada no topo
+  uma coluna lateral de 264px com o ranking do dia aparece à direita, grudada no topo
   (`position: sticky`); abaixo disso ela desce para o fim da página, depois do D-pad.
 - HUD acima do canvas: pontos • comprimento • acertos/erros • recorde.
 - Abaixo do canvas: uma linha discreta com os controles.

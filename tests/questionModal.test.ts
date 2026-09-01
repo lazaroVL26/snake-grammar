@@ -187,6 +187,56 @@ describe('questionModal — modo digitado', () => {
 });
 
 describe('questionModal — cronometro', () => {
+  const largura = (): number =>
+    Number.parseFloat(
+      document.querySelector<HTMLElement>('.timer__bar')?.style.width ?? '0',
+    );
+
+  it('a barra comeca cheia e encolhe conforme o tempo passa', () => {
+    modal.open(presented, 'choice');
+    expect(largura()).toBeCloseTo(100, 0);
+
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS / 4);
+    const umQuarto = largura();
+    expect(umQuarto).toBeLessThan(100);
+    expect(umQuarto).toBeGreaterThan(60);
+
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS / 4);
+    const metade = largura();
+    expect(metade).toBeLessThan(umQuarto);
+    expect(metade).toBeCloseTo(50, 0);
+  });
+
+  it('a barra corre a cada quadro, nao aos saltos', () => {
+    modal.open(presented, 'choice');
+    const leituras: number[] = [];
+    for (let i = 0; i < 6; i += 1) {
+      vi.advanceTimersByTime(16);
+      leituras.push(largura());
+    }
+    // Cada quadro precisa encolher um pouco: e isso que faz a barra "correr".
+    for (let i = 1; i < leituras.length; i += 1) {
+      expect(leituras[i], `quadro ${i}`).toBeLessThan(leituras[i - 1] as number);
+    }
+  });
+
+  it('a barra chega a zero e vira vermelha no fim', () => {
+    modal.open(presented, 'choice');
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS * 0.8);
+    const bar = document.querySelector<HTMLElement>('.timer__bar');
+    expect(bar?.dataset.low).toBe('true');
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS * 0.2 + 50);
+    expect(largura()).toBe(0);
+  });
+
+  it('o texto do cronometro acompanha os segundos', () => {
+    modal.open(presented, 'choice');
+    expect(document.querySelector('.timer__text')?.textContent).toBe('20s');
+    vi.advanceTimersByTime(5_000);
+    // Restam ~15,008s: o arredondamento e para cima, entao 16s esta certo.
+    expect(document.querySelector('.timer__text')?.textContent).toMatch(/^1[56]s$/);
+  });
+
   it('estourar o tempo conta como erro com chosen null', () => {
     modal.open(presented, 'choice');
     vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS + 100);

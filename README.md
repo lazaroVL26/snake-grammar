@@ -79,7 +79,8 @@ seguintes.
 
 Toda partida terminada entra no **ranking de hoje**: apelido, pontuação, precisão e
 conteúdo jogado. Ele fica numa **coluna ao lado do tabuleiro**, visível o tempo todo —
-inclusive durante a partida — com a sua linha destacada. Em telas com menos de 960px a
+inclusive durante a partida — mostrando o **top 10** do dia, com a sua linha destacada.
+O botão "Copiar ranking" leva a lista inteira, não só os dez primeiros. Em telas com menos de 960px a
 coluna desce para o fim da página, abaixo dos controles de toque. A tela de fim de jogo
 mostra a sua colocação ("2º lugar de 5 partidas hoje").
 

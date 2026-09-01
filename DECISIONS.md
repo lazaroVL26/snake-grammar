@@ -415,3 +415,30 @@ independentes, e nenhum deles exige distinguir tons próximos.
 A tipografia ganhou papel maior: Bricolage Grotesque nos rótulos das escolhas, nos números
 do ranking e nas pontuações; marca-texto sob o título, no amarelo da cobra, fechando com a
 direção de arte de "caderno de idiomas encontrando fliperama" da §9.1.
+
+## 45. A barra do cronômetro estava travada em 100%
+
+O professor pediu que a barra "corresse" conforme o tempo. Ela já era reescrita a cada
+quadro, mas nunca se mexia: sobrou no `app.css` a regra antiga `.timer__bar { flex: 1 }`,
+e dentro do `.progress` do Bootstrap (que é `display: flex`) o `flex` estica o item para a
+trilha inteira, ignorando a largura. Regra antiga removida.
+
+Dois detalhes vieram junto. O `.progress-bar` do Bootstrap traz `transition: width .6s`,
+que faria a barra correr atrasada em relação ao cronômetro — a transição ficou só na cor.
+E a virada para vermelho no fim mudava apenas a variável `--bs-progress-bar-bg`: quando só
+a custom property muda, a transição não reinterpola e a cor ficava presa no amarelo. A cor
+passou a ser declarada direto em `background-color`, além da variável.
+
+Há teste que falha se a barra parar de encolher a cada quadro.
+
+## 46. Ranking passou a mostrar o top 10, e a coluna precisou crescer
+
+`SCOREBOARD_VISIBLE` foi de 5 para 10. O corte estava sendo aplicado nos painéis que
+deixaram de listar o ranking (decisão 29), então a coluna lateral vinha mostrando a lista
+inteira — o `RankingPanel` passou a cortar, que é onde a política de "top N" pertence.
+"Copiar ranking" continua levando tudo.
+
+Com dados reais apareceu um defeito de layout: a coluna de precisão tinha `min-width` de
+3,2rem e o `gap` era largo, sobrando **14px para o apelido**, que aparecia cortado. A
+coluna foi de 232px para 264px e as demais faixas encolheram; medido em 1280px, 960px e
+360px, nenhum apelido trunca.

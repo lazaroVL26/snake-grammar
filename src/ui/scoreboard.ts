@@ -1,3 +1,4 @@
+import { CONFIG } from '../config';
 import type { ScoreEntry } from '../types';
 import { el } from './dom';
 
@@ -62,10 +63,12 @@ export class RankingPanel {
     options: { highlight?: ScoreEntry | undefined; shared?: boolean } = {},
   ): void {
     const shared = options.shared !== false;
+    // So o topo cabe na coluna; "Copiar ranking" continua levando a lista toda.
+    const visible = board.slice(0, CONFIG.SCOREBOARD_VISIBLE);
     this.root.replaceChildren(
       el('h2', { class: 'rank-side__title mb-0', text: 'Ranking de hoje' }),
       el('p', { class: 'rank-side__date mb-0', text: today }),
-      scoreboardList(board, options.highlight),
+      scoreboardList(visible, options.highlight),
       shared
         ? el('p', {
             class: 'rank-side__note mb-0',
