@@ -16,7 +16,9 @@ export interface Shell {
 export function buildShell(root: HTMLElement): Shell {
   const hud = el('div', { class: 'hud' });
   const overlay = el('div', { class: 'overlay', hidden: true });
-  const controls = el('div', { class: 'controls d-flex justify-content-center' });
+  // Sem .d-flex do Bootstrap: ele traz !important e venceria o display:none
+  // que esconde o D-pad em telas com mouse.
+  const controls = el('div', { class: 'controls' });
   const modalRoot = el('div', { class: 'modal-root' });
   const ranking = el('aside', {
     class: 'rank-side card p-3',
@@ -34,21 +36,30 @@ export function buildShell(root: HTMLElement): Shell {
 
   root.replaceChildren(
     el('main', { class: 'shell container-lg px-0' }, [
-      el('header', { class: 'shell__head d-flex align-items-baseline flex-wrap gap-3' }, [
-        el('h1', { class: 'shell__title mb-0', text: 'Snake Grammar' }),
+      // A coluna do jogo e um elemento proprio: sem isso o ranking teria que
+      // atravessar linhas do grid, e `grid-row: 1 / -1` nao vale sem linhas
+      // explicitas — o ranking acabava esticando o cabecalho.
+      el('div', { class: 'shell__main' }, [
+        el(
+          'header',
+          { class: 'shell__head d-flex align-items-baseline flex-wrap gap-3' },
+          [
+            el('h1', { class: 'shell__title mb-0', text: 'Snake Grammar' }),
+            el('p', {
+              class: 'shell__sub mb-0',
+              text: 'Passado, presente e futuro',
+            }),
+            createFullscreenButton(),
+          ],
+        ),
+        hud,
+        el('div', { class: 'board' }, [canvas, overlay]),
         el('p', {
-          class: 'shell__sub mb-0',
-          text: 'Passado, presente e futuro',
+          class: 'hints text-center mb-0',
+          text: 'Setas ou WASD movem • Espaco ou Esc pausam • F abre tela cheia • 1 a 4 marcam a alternativa • Enter confirma',
         }),
-        createFullscreenButton(),
+        controls,
       ]),
-      hud,
-      el('div', { class: 'board' }, [canvas, overlay]),
-      el('p', {
-        class: 'hints text-center mb-0',
-        text: 'Setas ou WASD movem • Espaco ou Esc pausam • F abre tela cheia • 1 a 4 marcam a alternativa • Enter confirma',
-      }),
-      controls,
       ranking,
       modalRoot,
     ]),

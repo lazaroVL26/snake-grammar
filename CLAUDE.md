@@ -458,9 +458,18 @@ o feedback vira troca de estado instantânea.
 
 ### 9.2 Layout
 
-- Coluna do jogo centralizada, largura máxima ~640px. A partir de 960px de viewport,
-  uma coluna lateral de 264px com o ranking do dia aparece à direita, grudada no topo
-  (`position: sticky`); abaixo disso ela desce para o fim da página, depois do D-pad.
+- A coluna do jogo (`div.shell__main`) é um elemento próprio, irmão do ranking. **Isso é
+  estrutural, não estética:** com os dois no mesmo grid o ranking teria que atravessar
+  linhas, e `grid-row: 1 / -1` não vale sem `grid-template-rows` explícito — o ranking
+  acabava ocupando só a primeira linha e esticando o cabeçalho, empurrando o HUD para
+  baixo dele.
+- **O tabuleiro acompanha a resolução.** Piso de 480px, teto em `--board-max` (1040px), e
+  o limite real é a altura livre: `100dvh` menos o que fica acima e abaixo. Assim ele
+  cresce num monitor grande sem nunca criar rolagem. Em tela baixa (≤820px de altura) a
+  linha de dicas some para virar espaço de jogo.
+- A partir de 960px de viewport, uma coluna lateral de 264px com o ranking do dia aparece
+  à direita, grudada no topo (`position: sticky`); abaixo disso ela desce para o fim da
+  página, depois do D-pad.
 - HUD acima do canvas: pontos • comprimento • acertos/erros • recorde.
 - Abaixo do canvas: uma linha discreta com os controles.
 - Botão de **tela cheia** no cabeçalho (tecla `F`). Maximiza a página inteira, nunca só o

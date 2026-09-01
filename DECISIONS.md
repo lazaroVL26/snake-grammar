@@ -556,3 +556,38 @@ e se o jogo ainda não está maximizado.
 
 Dois cuidados: o texto diz como sair (Esc ou F), para ninguém se sentir preso; e o convite
 não rouba o foco — o campo de apelido continua recebendo, para quem joga só de teclado.
+
+## 53. `grid-row: 1 / -1` não vale sem linhas explícitas
+
+O professor viu o HUD abaixo do ranking, em vez de ao lado. A causa: o ranking usava
+`grid-row: 1 / -1` para atravessar a coluna da direita, mas **`-1` aponta para a última
+linha do grid explícito**, e o `.shell` só declarava colunas. Sem `grid-template-rows`, o
+`-1` caía na linha 1 e o ranking ocupava só a primeira linha — que passava a ter a altura
+dele (medi 226px de cabeçalho, contra 36px do normal) e empurrava o HUD para baixo.
+
+Ficou escondido enquanto o ranking estava vazio e curto; apareceu quando a lista encheu.
+
+A correção foi estrutural, não um remendo de CSS: a coluna do jogo virou um elemento
+próprio, `div.shell__main`, e o `.shell` passou a ser um grid de duas colunas simples —
+coluna do jogo e ranking, cada um numa célula. Nenhum item atravessa linha nenhuma.
+
+## 54. O tabuleiro passou a acompanhar a resolução
+
+Pedido: elemento principal maior e autoajustado por resolução. O tabuleiro estava travado
+em 640px, desperdiçando tela em monitor grande.
+
+Agora o limite é a **altura livre** — `100dvh` menos o que fica acima e abaixo — com piso
+de 480px e teto de 1040px. O tabuleiro é quadrado, então limitar pela altura é o que
+impede que uma tela larga e baixa gere rolagem. A largura do `.shell` acompanha junto.
+
+Medido: 1920×1080 vai de 640 para **840**; 1440×900 para 660; 1366×768 para 592. Nenhuma
+das três rola. Em 360px nada mudou.
+
+Em notebook baixo (≤820px de altura) a linha de dicas some, o que devolve ~64px ao
+tabuleiro — foi o que levou o 1366×768 de 528 para 592.
+
+## 55. `.d-flex` do Bootstrap deixava o D-pad ligado no desktop
+
+Achado ao medir a altura do layout: o D-pad aparecia em tela com mouse. O elemento levava
+`d-flex` do Bootstrap, que traz `display: flex !important` e vencia o `display: none` que
+o esconde fora de telas de toque. Classe removida; quem centraliza é o nosso CSS.

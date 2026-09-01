@@ -42,20 +42,22 @@
   font-size: 0.7rem;
 }
 
+/* A coluna do jogo: cabecalho, placar, tabuleiro, dicas e D-pad. */
+.shell__main {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
 @media (min-width: 960px) {
   .shell {
-    width: min(100%, calc(var(--shell-width) + var(--rank-width) + var(--space-4)));
+    /* Acompanha a resolucao em vez de travar em 640px + ranking. */
+    width: min(100%, calc(var(--board-max) + var(--rank-width) + var(--space-4)));
     grid-template-columns: minmax(0, 1fr) var(--rank-width);
-  }
-
-  /* Tudo na coluna da esquerda; o ranking ocupa a direita inteira. */
-  .shell > * {
-    grid-column: 1;
+    align-items: start;
   }
 
   .shell > .rank-side {
-    grid-column: 2;
-    grid-row: 1 / -1;
     position: sticky;
     top: var(--space-5);
   }
@@ -123,10 +125,45 @@
 
 /* ---------- tabuleiro ---------- */
 
+/*
+ * O tabuleiro e quadrado, entao a altura da tela e que limita o quanto ele
+ * pode crescer: sem esse teto, uma tela larga e baixa criaria rolagem.
+ * `--board-chrome` e o que fica acima e abaixo dele (cabecalho, placar,
+ * dicas, D-pad) — quando o D-pad aparece, o desconto e maior.
+ */
 .board {
   position: relative;
   aspect-ratio: 1 / 1;
   width: 100%;
+  --board-chrome: 15rem;
+  /*
+   * Piso de 480px: abaixo disso vale mais deixar a pagina rolar do que
+   * espremer o tabuleiro a ponto de atrapalhar o jogo.
+   */
+  max-width: min(100%, max(480px, calc(100dvh - var(--board-chrome))), var(--board-max));
+  margin-inline: auto;
+}
+
+/* Notebook baixo (1366x768 e afins): a linha de dicas vira espaco de jogo. */
+@media (min-width: 960px) and (max-height: 820px) {
+  body {
+    padding-block: var(--space-3);
+  }
+
+  .hints {
+    display: none;
+  }
+
+  .board {
+    --board-chrome: 11rem;
+  }
+}
+
+@media (max-width: 640px), (pointer: coarse) {
+  .board {
+    /* D-pad na tela: sobra menos altura para o tabuleiro. */
+    --board-chrome: 26rem;
+  }
 }
 
 .board__canvas {
@@ -659,9 +696,17 @@
   max-width: min(100%, var(--shell-width));
 }
 
+@media (min-width: 641px) and (max-width: 959.98px) {
+  /* Entre o celular e a coluna dupla, o tabuleiro tambem ganha o espaco. */
+  .shell {
+    max-width: min(100%, var(--board-max));
+    width: min(100%, var(--board-max));
+  }
+}
+
 @media (min-width: 960px) {
   .shell {
-    max-width: min(100%, calc(var(--shell-width) + var(--rank-width) + var(--space-4)));
+    max-width: min(100%, calc(var(--board-max) + var(--rank-width) + var(--space-4)));
   }
 }
 
@@ -800,9 +845,13 @@
  * tela cheia apenas tira a moldura do navegador e a pagina continua rolando.
  */
 @media (min-width: 960px) {
-  :root:fullscreen .shell {
+  :root:fullscreen .shell,
+  :root:fullscreen .shell__main {
     /* Desconta o respiro do body, senao sobra scroll de exatamente essa folga. */
     height: calc(100dvh - 2 * var(--space-3));
+  }
+
+  :root:fullscreen .shell__main {
     grid-template-rows: auto auto minmax(0, 1fr);
   }
 
