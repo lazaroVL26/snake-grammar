@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it, vi } from 'vitest';
+import { beforeEach, describe, expect, it } from 'vitest';
 import { Overlays, type IdleView } from '../src/ui/overlays';
 import type { Report } from '../src/ui/report';
 
@@ -52,8 +52,6 @@ const calls = {
   start: [] as Array<{ mode: string; topic: string; nick: string }>,
   resume: 0,
   restart: 0,
-  copy: 0,
-  copyRanking: 0,
 };
 
 beforeEach(() => {
@@ -64,20 +62,10 @@ beforeEach(() => {
   calls.start = [];
   calls.resume = 0;
   calls.restart = 0;
-  calls.copy = 0;
-  calls.copyRanking = 0;
   overlays = new Overlays(root, {
     onStart: (mode, topic, nick) => calls.start.push({ mode, topic, nick }),
     onResume: () => (calls.resume += 1),
     onRestart: () => (calls.restart += 1),
-    onCopyReport: () => {
-      calls.copy += 1;
-      return Promise.resolve(true);
-    },
-    onCopyRanking: () => {
-      calls.copyRanking += 1;
-      return Promise.resolve(true);
-    },
   });
 });
 
@@ -160,16 +148,6 @@ describe('overlays — apelido e ranking', () => {
     );
     // Mesmo no: o painel nao foi redesenhado, entao o foco nao se perde.
     expect(root.querySelector('.ranking__position')).toBe(antes);
-  });
-
-  it('copiar ranking chama o callback', async () => {
-    overlays.showGameOver(report);
-    const button = Array.from(
-      root.querySelectorAll<HTMLButtonElement>('.panel__actions button'),
-    ).find((node) => node.textContent === 'Copiar ranking');
-    button?.click();
-    await vi.waitFor(() => expect(button?.textContent).toBe('Ranking copiado'));
-    expect(calls.copyRanking).toBe(1);
   });
 });
 
@@ -274,20 +252,16 @@ describe('overlays — relatorio final', () => {
     expect(items[1]?.textContent).toContain('Voce nao respondeu a tempo.');
   });
 
-  it('tem os botoes de jogar de novo e copiar relatorio', async () => {
+  it('a unica acao do fim de jogo e jogar de novo', () => {
     const buttons = Array.from(
       root.querySelectorAll<HTMLButtonElement>('.panel__actions button'),
     );
-    expect(buttons.map((b) => b.textContent)).toEqual([
-      'Jogar de novo',
-      'Copiar relatorio',
-      'Copiar ranking',
-    ]);
+    expect(buttons.map((b) => b.textContent)).toEqual(['Jogar de novo']);
     buttons[0]?.click();
     expect(calls.restart).toBe(1);
+  });
 
-    buttons[1]?.click();
-    await vi.waitFor(() => expect(buttons[1]?.textContent).toBe('Relatorio copiado'));
-    expect(calls.copy).toBe(1);
+  it('nao ha mais botoes de copiar', () => {
+    expect(root.textContent).not.toContain('Copiar');
   });
 });

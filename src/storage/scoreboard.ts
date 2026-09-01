@@ -105,13 +105,3 @@ export function clearScoreboard(): void {
     // Nada a fazer: sem armazenamento, nao ha ranking para limpar.
   }
 }
-
-/** Ranking em texto puro, para colar num documento da turma. */
-export function scoreboardToText(board: readonly ScoreEntry[], today: string): string {
-  if (board.length === 0) return `Ranking de ${today}\nNenhuma partida ainda.`;
-  const lines = board.map(
-    (entry, index) =>
-      `${index + 1}. ${entry.nick} — ${entry.score} pontos, ${entry.accuracy}% de precisao (${entry.topicLabel})`,
-  );
-  return [`Ranking de ${today}`, ...lines].join('\n');
-}

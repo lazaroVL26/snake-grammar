@@ -457,3 +457,20 @@ próprio aluno continuam funcionando — o que não aconteceria com `display: co
 Há fallback em `@supports not (grid-template-columns: subgrid)` com faixas fixas, que
 alinham do mesmo jeito. Medido em 1000px e 360px: as bordas direitas de pontuação e
 precisão são idênticas em todas as linhas, e nenhum apelido trunca.
+
+## 48. Os dois botões de copiar saíram
+
+Pedido do professor. Saíram "Copiar relatório" e "Copiar ranking"; no fim de jogo sobra
+"Jogar de novo".
+
+O de relatório era exigido pela §5.5 e pelo Definition of Done — a §5.5 foi atualizada. O
+relatório continua na tela, com precisão, desempenho por tempo verbal e a lista das frases
+erradas; o que sumiu foi só a cópia para a área de transferência.
+
+O de ranking já tinha perdido a razão de ser quando o servidor entrou (decisão 31): ele
+existia para o professor juntar máquinas que não se enxergavam, e hoje a lista da turma
+inteira vive em `data/scores.json`, no PC servidor.
+
+Junto saiu o código que ficou órfão: `reportToText` em `ui/report.ts` e `scoreboardToText`
+em `storage/scoreboard.ts`, com os testes que os cobriam. Se um dia a cópia fizer falta,
+está no histórico.

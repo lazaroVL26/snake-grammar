@@ -7,7 +7,6 @@ import {
   dayKey,
   loadScoreboard,
   saveScore,
-  scoreboardToText,
 } from '../src/storage/scoreboard';
 import type { ScoreEntry } from '../src/types';
 
@@ -143,20 +142,5 @@ describe('scoreboard — robustez', () => {
     saveScore(entry('Ana', 10), HOJE);
     clearScoreboard();
     expect(loadScoreboard(HOJE)).toEqual([]);
-  });
-});
-
-describe('scoreboard — texto para colar', () => {
-  it('numera as posicoes com pontuacao, precisao e conteudo', () => {
-    saveScore(entry('Ana', 90), HOJE);
-    saveScore(entry('Bruno', 40), HOJE);
-    const text = scoreboardToText(loadScoreboard(HOJE), '2026-09-01');
-    expect(text).toContain('Ranking de 2026-09-01');
-    expect(text).toContain('1. Ana — 90 pontos, 80% de precisao (Futuro)');
-    expect(text).toContain('2. Bruno — 40 pontos');
-  });
-
-  it('avisa quando ninguem jogou ainda', () => {
-    expect(scoreboardToText([], '2026-09-01')).toContain('Nenhuma partida ainda');
   });
 });

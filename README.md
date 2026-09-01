@@ -80,7 +80,7 @@ seguintes.
 Toda partida terminada entra no **ranking de hoje**: apelido, pontuação, precisão e
 conteúdo jogado. Ele fica numa **coluna ao lado do tabuleiro**, visível o tempo todo —
 inclusive durante a partida — mostrando o **top 10** do dia, com a sua linha destacada.
-O botão "Copiar ranking" leva a lista inteira, não só os dez primeiros. Em telas com menos de 960px a
+Em telas com menos de 960px a
 coluna desce para o fim da página, abaixo dos controles de toque. A tela de fim de jogo
 mostra a sua colocação ("2º lugar de 5 partidas hoje").
 
@@ -91,8 +91,8 @@ professor apertar — virou o dia, o ranking está limpo.
 > **Dois modos, conforme você sobe o jogo.** Com `npm run aula` (veja acima) o ranking é
 > **da turma inteira**, guardado no PC servidor — é o modo pensado para a sala. Se você
 > apenas abrir os arquivos estáticos sem o servidor, cada navegador cai no seu próprio
-> ranking local, e aí o botão **"Copiar ranking"** serve para juntar as máquinas num
-> documento compartilhado.
+> ranking local, e cada máquina fica com a sua lista. Para a turma disputar junto, suba o
+> servidor com `npm run aula`.
 
 ## Conteúdos disponíveis
 

@@ -63,7 +63,7 @@ export class RankingPanel {
     options: { highlight?: ScoreEntry | undefined; shared?: boolean } = {},
   ): void {
     const shared = options.shared !== false;
-    // So o topo cabe na coluna; "Copiar ranking" continua levando a lista toda.
+    // So o topo cabe na coluna lateral; o resto fica no arquivo do servidor.
     const visible = board.slice(0, CONFIG.SCOREBOARD_VISIBLE);
     this.root.replaceChildren(
       el('h2', { class: 'rank-side__title mb-0', text: 'Ranking de hoje' }),

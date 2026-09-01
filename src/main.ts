@@ -23,7 +23,7 @@ import { QuestionBankError, loadQuestions, questionsForTopic } from './quiz/ques
 import { QuestionSelector, presentQuestion } from './quiz/selector';
 import { DEFAULT_TOPIC, findTopic } from './quiz/topics';
 import { loadStats, recordGame, saveNick } from './storage/persistence';
-import { dayKey, scoreboardToText } from './storage/scoreboard';
+import { dayKey } from './storage/scoreboard';
 import { fetchRanking, submitScore, type RankingSnapshot } from './storage/ranking';
 import { buildShell, showBankError } from './ui/shell';
 import { Hud } from './ui/hud';
@@ -31,7 +31,7 @@ import { Overlays } from './ui/overlays';
 import { RankingPanel, positionLabel } from './ui/scoreboard';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
 import { toggleFullscreen } from './ui/fullscreen';
-import { buildReport, reportToText } from './ui/report';
+import { buildReport } from './ui/report';
 import type {
   ScoreEntry,
   AnswerMode,
@@ -121,8 +121,6 @@ const overlays = new Overlays(shell.overlay, {
   },
   onResume: () => enterCountdown(),
   onRestart: () => resetGame(),
-  onCopyReport: () => copyReport(),
-  onCopyRanking: () => copyRanking(),
 });
 
 const modal = new QuestionModal(shell.modalRoot, {
@@ -233,28 +231,6 @@ function finishGame(): void {
         : `${positionLabel(saved.position, saved.snapshot.board.length)} (so deste PC: servidor fora do ar)`,
     );
   });
-}
-
-async function copyReport(): Promise<boolean> {
-  const text = reportToText(
-    buildReport(state, best, byId, performance.now(), findTopic(topic).label, nick),
-  );
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
-}
-
-async function copyRanking(): Promise<boolean> {
-  const text = scoreboardToText(snapshot.board, snapshot.today);
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
 }
 
 function togglePause(): void {

@@ -129,35 +129,3 @@ export function formatDuration(ms: number): string {
   const seconds = totalSeconds % 60;
   return `${minutes}min ${String(seconds).padStart(2, '0')}s`;
 }
-
-/** Resumo em texto puro para o aluno colar no caderno ou no Moodle. */
-export function reportToText(report: Report): string {
-  const lines: string[] = [
-    'Snake Grammar',
-    ...(report.nick ? [`Aluno: ${report.nick}`] : []),
-    `Conteudo: ${report.topicLabel}`,
-    `Pontuacao: ${report.score} (recorde: ${report.bestScore})`,
-    `Comprimento final: ${report.finalLength} | Tempo: ${formatDuration(report.durationMs)}`,
-    `Acertos: ${report.correct} | Erros: ${report.wrong} | Precisao: ${report.accuracy}%`,
-    '',
-    'Desempenho por tempo verbal:',
-    ...report.byFocus.map(
-      (row) => `- ${FOCUS_LABEL[row.focus]}: ${row.correct} acertos, ${row.wrong} erros`,
-    ),
-  ];
-
-  if (report.missed.length > 0) {
-    lines.push('', 'Para revisar:');
-    report.missed.forEach((item, index) => {
-      lines.push(`${index + 1}. ${item.sentence}`);
-      lines.push(`   Resposta certa: ${item.answer}`);
-      if (item.chosen) lines.push(`   Voce marcou: ${item.chosen}`);
-      else lines.push('   Voce nao respondeu a tempo.');
-      lines.push(`   ${item.explanation}`);
-    });
-  } else {
-    lines.push('', 'Nenhum erro nesta partida.');
-  }
-
-  return lines.join('\n');
-}

@@ -15,8 +15,6 @@ export interface OverlayCallbacks {
   onStart: (mode: AnswerMode, topic: TopicId, nick: string) => void;
   onResume: () => void;
   onRestart: () => void;
-  onCopyReport: () => Promise<boolean>;
-  onCopyRanking: () => Promise<boolean>;
 }
 
 /** Camada sobre o canvas: inicio, pausa, contagem e relatorio final. */
@@ -199,28 +197,6 @@ export class Overlays {
     });
     again.addEventListener('click', () => this.callbacks.onRestart());
 
-    const copy = el('button', {
-      type: 'button',
-      class: 'button btn btn-outline-secondary',
-      text: 'Copiar relatorio',
-    });
-    copy.addEventListener('click', () => {
-      void this.callbacks.onCopyReport().then((done) => {
-        copy.textContent = done ? 'Relatorio copiado' : 'Nao foi possivel copiar';
-      });
-    });
-
-    const copyRanking = el('button', {
-      type: 'button',
-      class: 'button btn btn-outline-secondary',
-      text: 'Copiar ranking',
-    });
-    copyRanking.addEventListener('click', () => {
-      void this.callbacks.onCopyRanking().then((done) => {
-        copyRanking.textContent = done ? 'Ranking copiado' : 'Nao foi possivel copiar';
-      });
-    });
-
     this.show(
       el('h2', { class: 'panel__title', text: 'Fim de jogo' }),
       el('p', {
@@ -232,11 +208,7 @@ export class Overlays {
       focusTable(report),
       missedList(report),
       rankingBlock(),
-      el('div', { class: 'panel__actions d-flex flex-wrap gap-2' }, [
-        again,
-        copy,
-        copyRanking,
-      ]),
+      el('div', { class: 'panel__actions d-flex flex-wrap gap-2' }, [again]),
     );
     again.focus();
   }

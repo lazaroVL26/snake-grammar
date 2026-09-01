@@ -194,8 +194,8 @@ A tela de game over é parte do valor pedagógico. Deve mostrar:
   `past-perfect` e `contrast`.
 - Lista das **frases erradas** com a resposta correta e a explicação (é o material de
   revisão que o professor vai usar depois da partida).
-- Botões: "Jogar de novo" e "Copiar relatório" (copia um resumo em texto para a área de
-  transferência, para o aluno colar no caderno/Moodle).
+- Botão: "Jogar de novo". **Nada de copiar para a área de transferência** — o relatório é
+  para ler ali, e o ranking da turma já vive no servidor (§5.8).
 
 ### 5.7 Apelido e ranking do dia
 
@@ -205,16 +205,15 @@ lembrado entre partidas.
 Toda partida terminada entra no ranking do dia, com apelido, pontuação, precisão e
 conteúdo. O ranking fica numa **coluna própria ao lado do tabuleiro** (`aside.rank-side`),
 visível a partida inteira, mostrando o **top `SCOREBOARD_VISIBLE`** com a partida
-recém-jogada destacada. "Copiar ranking" continua levando a lista inteira. A tela de fim de jogo não
-repete a lista: mostra só a colocação.
+recém-jogada destacada. A tela de fim de jogo não repete a lista: mostra só a colocação.
 
 **O ranking zera a cada dia.** Cada entrada guarda o dia local em que foi jogada, e a
 leitura descarta o que não é de hoje — sem tarefa agendada. Guarda no máximo
 `SCOREBOARD_SIZE` partidas, ordenadas por pontuação; empate favorece quem jogou antes.
 
 **O ranking é da turma quando o servidor está no ar** (§5.8). Se ele não responde, o jogo
-cai para o ranking local daquele navegador e avisa na coluna. O botão "Copiar ranking"
-continua existindo para o professor juntar as máquinas num documento só.
+cai para o ranking local daquele navegador e avisa na coluna. Quando o servidor volta, a
+lista da turma reaparece sozinha.
 
 ### 5.8 Servidor de ranking (`server/`)
 
