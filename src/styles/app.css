@@ -724,9 +724,37 @@
   margin-top: var(--space-2);
 }
 
+/*
+ * As colunas ficam na lista, e cada linha as reaproveita com subgrid. Sem
+ * isso cada linha e um grid proprio, as faixas `auto` se dimensionam sozinhas
+ * e pontuacao e precisao nao alinham de uma linha para a outra.
+ */
+.ranking.list-group {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr) auto auto;
+  gap: 2px var(--space-2);
+}
+
 .ranking__row.list-group-item {
-  background: transparent;
-  border: 0;
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  padding: 3px var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+/* Navegador sem subgrid: faixas fixas, que alinham do mesmo jeito. */
+@supports not (grid-template-columns: subgrid) {
+  .ranking.list-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ranking__row.list-group-item {
+    grid-template-columns: 1.4rem minmax(0, 1fr) 3.2rem 2.6rem;
+    gap: var(--space-2);
+  }
 }
 
 /* O aviso de sem conexao usa o alerta do Bootstrap com a nossa cor. */

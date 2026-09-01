@@ -442,3 +442,18 @@ Com dados reais apareceu um defeito de layout: a coluna de precisão tinha `min-
 3,2rem e o `gap` era largo, sobrando **14px para o apelido**, que aparecia cortado. A
 coluna foi de 232px para 264px e as demais faixas encolheram; medido em 1280px, 960px e
 360px, nenhum apelido trunca.
+
+## 47. As colunas do ranking moram na lista, não em cada linha
+
+O professor viu o ranking "quebrado na tela". Cada `<li>` era um grid próprio, então as
+faixas `auto` de pontuação e precisão se dimensionavam de forma independente: com
+pontuações de tamanhos diferentes (300, 150, 90, 5) os números não alinhavam de uma linha
+para a outra, e a lista ficava torta.
+
+As colunas passaram para o `<ol>` e cada linha as reaproveita com `grid-template-columns:
+subgrid`. A linha continua sendo uma caixa, então o fundo e o contorno da partida do
+próprio aluno continuam funcionando — o que não aconteceria com `display: contents`.
+
+Há fallback em `@supports not (grid-template-columns: subgrid)` com faixas fixas, que
+alinham do mesmo jeito. Medido em 1000px e 360px: as bordas direitas de pontuação e
+precisão são idênticas em todas as linhas, e nenhum apelido trunca.
