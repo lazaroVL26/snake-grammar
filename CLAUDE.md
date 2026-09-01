@@ -13,7 +13,9 @@ Jogo web educativo usado como atividade de sala de aula em uma **aula de inglês
 **Snake**: a cobra se move em uma grade, come frutas e cresce.
 
 O diferencial: **toda vez que a cobra come uma fruta, o jogo congela e abre um modal
-com uma frase em inglês com lacuna** (gap-fill) sobre **Simple Past × Past Perfect**.
+com uma frase em inglês com lacuna** (gap-fill) sobre **tempos verbais do inglês**. Na
+tela inicial o aluno escolhe o conteúdo da rodada: Simple Past × Past Perfect (o conjunto
+original), Presente, Passado, Futuro ou todos misturados.
 
 - Resposta **certa** → +1 ponto e a cobra cresce 1 segmento.
 - Resposta **errada** → a cobra **perde 1 segmento** de comprimento (e não pontua).
@@ -240,7 +242,21 @@ export const CONFIG = {
 ```ts
 export type Vec = { x: number; y: number };
 export type Direction = 'up' | 'down' | 'left' | 'right';
-export type Focus = 'simple-past' | 'past-perfect' | 'contrast';
+export type Focus =
+  | 'simple-past'
+  | 'past-continuous'
+  | 'past-perfect'
+  | 'past-perfect-continuous'
+  | 'contrast'
+  | 'present-simple'
+  | 'present-continuous'
+  | 'present-perfect'
+  | 'present-perfect-continuous'
+  | 'future-will'
+  | 'future-going-to'
+  | 'future-continuous'
+  | 'future-perfect';
+export type TopicId = 'all' | 'present' | 'past' | 'future' | 'past-contrast';
 export type AnswerMode = 'choice' | 'typed';
 export type GamePhase =
   'idle' | 'countdown' | 'running' | 'paused' | 'question' | 'feedback' | 'gameover';
@@ -288,9 +304,28 @@ frase sem `___`, ou `accepted` que não contenha a alternativa correta normaliza
 
 ---
 
+### 7.4 Conteúdos do menu (`quiz/topics.ts`)
+
+A tela inicial oferece cinco conteúdos. Cada um é um conjunto de `Focus`; `all` aceita o
+banco inteiro. O padrão é `past-contrast`, o conteúdo original.
+
+| `TopicId`       | Rótulo                     | Tempos incluídos                                            |
+| --------------- | -------------------------- | ----------------------------------------------------------- |
+| `past-contrast` | Simple Past x Past Perfect | `simple-past`, `past-perfect`, `contrast`                   |
+| `present`       | Presente                   | simple, continuous, perfect, perfect continuous             |
+| `past`          | Passado                    | simple, continuous, perfect, perfect continuous, `contrast` |
+| `future`        | Futuro                     | will, going to, continuous, perfect                         |
+| `all`           | Todos os tempos            | banco inteiro                                               |
+
+Todo conteúdo precisa ter **pelo menos 12 questões e 4 por nível** — existe teste que
+falha se um conteúdo do menu ficar magro demais.
+
+---
+
 ## 8. Conteúdo pedagógico — regras inegociáveis
 
-O conteúdo é **Simple Past × Past Perfect**. Se você criar questões novas:
+O conteúdo são os **tempos verbais do inglês**, agrupados em conteúdos escolhíveis
+(§7.4). Se você criar questões novas:
 
 1. **A alternativa correta precisa ser a única gramaticalmente possível no contexto.**
    Nunca coloque como distrator uma forma que também estaria correta. Exemplo do erro:
@@ -480,6 +515,7 @@ Só considere a tarefa concluída quando **todos** os itens abaixo forem verdade
 - Sprites, imagens externas, ícones baixados: a cobra e a fruta são formas desenhadas no
   canvas.
 - Geração de questões por IA em runtime. O banco é estático.
-- Outros tempos verbais além de Simple Past e Past Perfect.
+- Tempos verbais fora dos 12 tempos cobertos pelo menu (nada de subjuntivo, condicionais,
+  voz passiva, modais ou reported speech como conteúdo próprio).
 - Refatorar o formato do `questions.seed.json`.
 - Adicionar biblioteca nova sem registrar o motivo em `DECISIONS.md`.

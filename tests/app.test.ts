@@ -2,6 +2,8 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONFIG } from '../src/config';
 import { loadQuestions } from '../src/quiz/questions';
+import { findTopic, includesFocus } from '../src/quiz/topics';
+import type { TopicId } from '../src/types';
 import type { Direction, Vec } from '../src/types';
 
 /**
@@ -214,6 +216,28 @@ function answerQuestion(correct: boolean): void {
  * Avanca so ate a contagem regressiva acabar. Passar disso deixaria a cobra
  * andar sem comando — e ela pode estar encostada na parede.
  */
+/** Marca um conteudo no menu da tela inicial. */
+function pickTopic(label: string): void {
+  const button = Array.from(
+    document.querySelectorAll<HTMLButtonElement>('.choices--topics .choice'),
+  ).find((node) => node.querySelector('.choice__label')?.textContent === label);
+  if (!button) throw new Error(`conteudo nao encontrado no menu: ${label}`);
+  button.click();
+}
+
+/** Tempo verbal da questao que esta aberta no modal. */
+function openQuestionFocus(): string {
+  const sentence = document.querySelector('.sentence')?.textContent ?? '';
+  const question = loadQuestions().find((item) => item.sentence === sentence);
+  if (!question) throw new Error(`questao nao encontrada: "${sentence}"`);
+  return question.focus;
+}
+
+function startGame(): void {
+  document.querySelector<HTMLButtonElement>('.button--primary')?.click();
+  skipCountdown();
+}
+
 function skipCountdown(): void {
   let seen = false;
   for (let frame = 0; frame < 400; frame += 1) {
@@ -354,5 +378,56 @@ describe('app — partida completa', () => {
     Object.defineProperty(document, 'hidden', { value: true, configurable: true });
     document.dispatchEvent(new Event('visibilitychange'));
     expect(text()).toContain('Jogo pausado');
+  });
+});
+
+describe('app — menu de conteudo', () => {
+  it('mostra os cinco conteudos com a contagem real de frases', () => {
+    const group = document.querySelector('.choices--topics');
+    const labels = Array.from(group?.querySelectorAll('.choice__label') ?? []).map(
+      (node) => node.textContent,
+    );
+    expect(labels).toEqual([
+      'Simple Past x Past Perfect',
+      'Presente',
+      'Passado',
+      'Futuro',
+      'Todos os tempos',
+    ]);
+    expect(group?.textContent).toContain(`${loadQuestions().length} frases`);
+  });
+
+  it.each<[string, TopicId]>([
+    ['Futuro', 'future'],
+    ['Presente', 'present'],
+    ['Passado', 'past'],
+  ])('escolher %s so traz questoes desse conteudo', (label, id) => {
+    pickTopic(label);
+    startGame();
+
+    const topic = findTopic(id);
+    for (let round = 0; round < 3; round += 1) {
+      driveUntilQuestion();
+      const focus = openQuestionFocus();
+      expect(includesFocus(topic, focus as never), `${label}: caiu ${focus}`).toBe(true);
+      answerQuestion(true);
+      skipCountdown();
+    }
+  });
+
+  it('o relatorio final registra o conteudo escolhido', () => {
+    pickTopic('Futuro');
+    startGame();
+    driveUntilQuestion();
+    answerQuestion(false);
+
+    expect(gameOver()).toBe(true);
+    expect(text()).toContain('Conteudo: Futuro');
+  });
+
+  it('sem escolher nada, joga o conteudo original', () => {
+    startGame();
+    driveUntilQuestion();
+    expect(['simple-past', 'past-perfect', 'contrast']).toContain(openQuestionFocus());
   });
 });

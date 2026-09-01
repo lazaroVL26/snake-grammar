@@ -2,7 +2,27 @@ export type Vec = { x: number; y: number };
 
 export type Direction = 'up' | 'down' | 'left' | 'right';
 
-export type Focus = 'simple-past' | 'past-perfect' | 'contrast';
+/**
+ * Tempo verbal de cada questao. Os tres primeiros nomes vem do banco original
+ * de Simple Past x Past Perfect e por isso mantem a grafia antiga.
+ */
+export type Focus =
+  | 'simple-past'
+  | 'past-perfect'
+  | 'contrast'
+  | 'past-continuous'
+  | 'past-perfect-continuous'
+  | 'present-simple'
+  | 'present-continuous'
+  | 'present-perfect'
+  | 'present-perfect-continuous'
+  | 'future-will'
+  | 'future-going-to'
+  | 'future-continuous'
+  | 'future-perfect';
+
+/** Conteudo que o aluno escolhe estudar na tela inicial. */
+export type TopicId = 'all' | 'present' | 'past' | 'future' | 'past-contrast';
 
 export type AnswerMode = 'choice' | 'typed';
 

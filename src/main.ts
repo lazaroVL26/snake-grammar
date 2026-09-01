@@ -17,15 +17,23 @@ import {
 } from './game/state';
 import { bindKeyboard } from './input/keyboard';
 import { bindSwipe, createDpad } from './input/touch';
-import { QuestionBankError, loadQuestions } from './quiz/questions';
+import { QuestionBankError, loadQuestions, questionsForTopic } from './quiz/questions';
 import { QuestionSelector, presentQuestion } from './quiz/selector';
+import { DEFAULT_TOPIC, findTopic } from './quiz/topics';
 import { loadStats, recordGame } from './storage/persistence';
 import { buildShell, showBankError } from './ui/shell';
 import { Hud } from './ui/hud';
 import { Overlays } from './ui/overlays';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
 import { buildReport, reportToText } from './ui/report';
-import type { AnswerMode, AttemptLog, Direction, GameState, Question } from './types';
+import type {
+  AnswerMode,
+  AttemptLog,
+  Direction,
+  GameState,
+  Question,
+  TopicId,
+} from './types';
 
 const root = document.getElementById('app');
 if (!root) throw new Error('Elemento #app nao encontrado no index.html.');
@@ -45,8 +53,10 @@ const rng = createRng(Date.now() >>> 0);
 const renderer = new Renderer(shell.canvas);
 const hud = new Hud(shell.hud);
 
+let topic: TopicId = DEFAULT_TOPIC;
+let pool: Question[] = questionsForTopic(findTopic(topic), bank);
 let state: GameState = createInitialState(rng, performance.now());
-let selector = new QuestionSelector(bank, rng);
+let selector = new QuestionSelector(pool, rng);
 let best = loadStats().bestScore;
 let mode: AnswerMode = 'choice';
 let currentQuestion: Question | null = null;
@@ -54,9 +64,17 @@ let countdownEndsAt = 0;
 
 const byId = new Map(bank.map((question) => [question.id, question]));
 
+/** Quantas frases cada conteudo do menu tem, para o aluno escolher com informacao. */
+function countFor(id: TopicId): number {
+  return questionsForTopic(findTopic(id), bank).length;
+}
+
 const overlays = new Overlays(shell.overlay, {
-  onStart: (chosen) => {
+  onStart: (chosen, chosenTopic) => {
     mode = chosen;
+    topic = chosenTopic;
+    pool = questionsForTopic(findTopic(topic), bank);
+    selector = new QuestionSelector(pool, rng);
     beginGame();
   },
   onResume: () => enterCountdown(),
@@ -92,11 +110,11 @@ function beginGame(): void {
 
 function resetGame(): void {
   state = createInitialState(rng, performance.now());
-  selector = new QuestionSelector(bank, rng);
+  selector = new QuestionSelector(pool, rng);
   currentQuestion = null;
   best = loadStats().bestScore;
   hud.update(state, best);
-  overlays.showIdle(best);
+  overlays.showIdle(best, countFor);
 }
 
 function askQuestion(): void {
@@ -135,11 +153,15 @@ function finishGame(): void {
   const stats = recordGame(state);
   best = stats.bestScore;
   hud.update(state, best);
-  overlays.showGameOver(buildReport(state, best, byId, performance.now()));
+  overlays.showGameOver(
+    buildReport(state, best, byId, performance.now(), findTopic(topic).label),
+  );
 }
 
 async function copyReport(): Promise<boolean> {
-  const text = reportToText(buildReport(state, best, byId, performance.now()));
+  const text = reportToText(
+    buildReport(state, best, byId, performance.now(), findTopic(topic).label),
+  );
   try {
     await navigator.clipboard.writeText(text);
     return true;
@@ -214,5 +236,5 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('resize', () => renderer.resize());
 
 hud.update(state, best);
-overlays.showIdle(best);
+overlays.showIdle(best, countFor);
 engine.start();

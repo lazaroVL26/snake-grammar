@@ -170,12 +170,7 @@
     "focus": "past-perfect",
     "sentence": "When the teacher came in, the students ___ the room.",
     "verbHint": "already leave",
-    "options": [
-      "had already left",
-      "have already left",
-      "already leave",
-      "are already leaving"
-    ],
+    "options": ["had already left", "have already left", "already leave", "are already leaving"],
     "answerIndex": 0,
     "accepted": ["had already left", "'d already left"],
     "explanation": "\"Already\" com dois momentos passados marca o que veio primeiro: had + particípio."
@@ -230,12 +225,7 @@
     "focus": "past-perfect",
     "sentence": "Before he moved to Japan, he ___ sushi.",
     "verbHint": "never eat",
-    "options": [
-      "had never eaten",
-      "has never eaten",
-      "never eats",
-      "was never eating"
-    ],
+    "options": ["had never eaten", "has never eaten", "never eats", "was never eating"],
     "answerIndex": 0,
     "accepted": ["had never eaten", "'d never eaten"],
     "explanation": "\"Never ... before\" com referência passada pede Past Perfect. Particípio de eat é eaten."
@@ -246,12 +236,7 @@
     "focus": "past-perfect",
     "sentence": "When I got to the office, someone ___ my computer.",
     "verbHint": "already turn on",
-    "options": [
-      "had already turned on",
-      "has already turned on",
-      "already turns on",
-      "was already turning on"
-    ],
+    "options": ["had already turned on", "has already turned on", "already turns on", "was already turning on"],
     "answerIndex": 0,
     "accepted": ["had already turned on", "'d already turned on"],
     "explanation": "Alguém ligou o computador antes de eu chegar. Ação anterior a outra ação passada: Past Perfect."
@@ -295,12 +280,7 @@
     "focus": "past-perfect",
     "sentence": "The house was quiet because the children ___ to bed.",
     "verbHint": "already go",
-    "options": [
-      "had already gone",
-      "have already gone",
-      "already go",
-      "were already going"
-    ],
+    "options": ["had already gone", "have already gone", "already go", "were already going"],
     "answerIndex": 0,
     "accepted": ["had already gone", "'d already gone"],
     "explanation": "O silêncio é consequência de algo que já tinha acontecido antes: Past Perfect."
@@ -344,12 +324,7 @@
     "focus": "contrast",
     "sentence": "When we arrived, the game ___ — we missed the first goal.",
     "verbHint": "already start",
-    "options": [
-      "had already started",
-      "already starts",
-      "has already started",
-      "is already starting"
-    ],
+    "options": ["had already started", "already starts", "has already started", "is already starting"],
     "answerIndex": 0,
     "accepted": ["had already started", "'d already started"],
     "explanation": "O jogo começou ANTES da nossa chegada. Ação mais antiga das duas: Past Perfect."
@@ -371,12 +346,7 @@
     "focus": "contrast",
     "sentence": "The train ___ when we got to the platform, so we took a taxi.",
     "verbHint": "already leave",
-    "options": [
-      "had already left",
-      "already left",
-      "has already left",
-      "was already leaving"
-    ],
+    "options": ["had already left", "already left", "has already left", "was already leaving"],
     "answerIndex": 0,
     "accepted": ["had already left", "'d already left"],
     "explanation": "O trem saiu antes de chegarmos — por isso o táxi. Ação anterior: Past Perfect."
@@ -464,12 +434,7 @@
     "focus": "contrast",
     "sentence": "The film ___ when I turned on the TV, so I saw only the ending.",
     "verbHint": "already begin",
-    "options": [
-      "had already begun",
-      "has already begun",
-      "already begins",
-      "had already began"
-    ],
+    "options": ["had already begun", "has already begun", "already begins", "had already began"],
     "answerIndex": 0,
     "accepted": ["had already begun", "'d already begun"],
     "explanation": "O filme começou antes de eu ligar a TV. Cuidado com o particípio: begin – began – begun."
@@ -484,5 +449,665 @@
     "answerIndex": 0,
     "accepted": ["turned"],
     "explanation": "Horário definido e ações na ordem em que ocorreram: Simple Past."
+  },
+  {
+    "id": "prs-001",
+    "level": 1,
+    "focus": "present-simple",
+    "sentence": "My brother ___ coffee every morning.",
+    "verbHint": "drink",
+    "options": ["drinks", "drink", "is drinking", "has drunk"],
+    "answerIndex": 0,
+    "accepted": ["drinks"],
+    "explanation": "\"Every morning\" marca hábito: Present Simple. Com he/she/it o verbo ganha -s."
+  },
+  {
+    "id": "prs-002",
+    "level": 1,
+    "focus": "present-simple",
+    "sentence": "Water ___ at 100 degrees Celsius.",
+    "verbHint": "boil",
+    "options": ["boils", "boil", "is boiling", "has boiled"],
+    "answerIndex": 0,
+    "accepted": ["boils"],
+    "explanation": "Fato científico sempre verdadeiro pede Present Simple. \"Water\" equivale a it, então leva -s."
+  },
+  {
+    "id": "prs-003",
+    "level": 2,
+    "focus": "present-simple",
+    "sentence": "She ___ meat. She has been a vegetarian since 2019.",
+    "verbHint": "not eat",
+    "options": ["doesn't eat", "don't eat", "isn't eating", "not eats"],
+    "answerIndex": 0,
+    "accepted": ["doesn't eat", "does not eat"],
+    "explanation": "Ser vegetariana é um hábito permanente, não algo do momento. A negativa com she é doesn't + verbo no infinitivo."
+  },
+  {
+    "id": "prs-004",
+    "level": 2,
+    "focus": "present-simple",
+    "sentence": "___ your parents live near the school these days?",
+    "verbHint": "do (auxiliar)",
+    "options": ["Do", "Does", "Are", "Did"],
+    "answerIndex": 0,
+    "accepted": ["do"],
+    "explanation": "Pergunta sobre situação atual no Present Simple. Com \"your parents\" (they) o auxiliar é do, não does."
+  },
+  {
+    "id": "prs-005",
+    "level": 3,
+    "focus": "present-simple",
+    "sentence": "The train ___ at 6:45 every weekday.",
+    "verbHint": "leave",
+    "options": ["leaves", "is leaving", "leave", "has left"],
+    "answerIndex": 0,
+    "accepted": ["leaves"],
+    "explanation": "Horário fixo de transporte usa Present Simple mesmo falando do futuro. \"The train\" é it, então leva -s."
+  },
+  {
+    "id": "prs-006",
+    "level": 3,
+    "focus": "present-simple",
+    "sentence": "Neither of my sisters ___ how to drive.",
+    "verbHint": "know",
+    "options": ["knows", "know", "is knowing", "don't know"],
+    "answerIndex": 0,
+    "accepted": ["knows"],
+    "explanation": "\"Neither of\" pede verbo no singular, e know é verbo de estado: não aceita forma contínua."
+  },
+  {
+    "id": "prc-001",
+    "level": 1,
+    "focus": "present-continuous",
+    "sentence": "Be quiet! The baby ___ .",
+    "verbHint": "sleep",
+    "options": ["is sleeping", "sleeps", "slept", "has slept"],
+    "answerIndex": 0,
+    "accepted": ["is sleeping", "'s sleeping"],
+    "explanation": "A ação está acontecendo neste momento, por isso Present Continuous: am/is/are + verbo com -ing."
+  },
+  {
+    "id": "prc-002",
+    "level": 1,
+    "focus": "present-continuous",
+    "sentence": "Look! It ___ outside.",
+    "verbHint": "rain",
+    "options": ["is raining", "rains", "rained", "has rained"],
+    "answerIndex": 0,
+    "accepted": ["is raining", "'s raining"],
+    "explanation": "\"Look!\" mostra que a chuva está acontecendo agora, na frente de quem fala: Present Continuous."
+  },
+  {
+    "id": "prc-003",
+    "level": 2,
+    "focus": "present-continuous",
+    "sentence": "I can't talk now. I ___ dinner.",
+    "verbHint": "cook",
+    "options": ["am cooking", "cook", "cooked", "have cooked"],
+    "answerIndex": 0,
+    "accepted": ["am cooking", "'m cooking"],
+    "explanation": "\"Now\" e a impossibilidade de falar mostram uma ação em andamento: am + cooking."
+  },
+  {
+    "id": "prc-004",
+    "level": 2,
+    "focus": "present-continuous",
+    "sentence": "They ___ in a hotel this month while their flat is being painted.",
+    "verbHint": "stay",
+    "options": ["are staying", "stay", "stayed", "have stayed"],
+    "answerIndex": 0,
+    "accepted": ["are staying", "'re staying"],
+    "explanation": "Situação temporária, com prazo para acabar, vai para o Present Continuous, não para o Present Simple."
+  },
+  {
+    "id": "prc-005",
+    "level": 3,
+    "focus": "present-continuous",
+    "sentence": "What ___ you doing at the moment?",
+    "verbHint": "be (auxiliar)",
+    "options": ["are", "do", "is", "were"],
+    "answerIndex": 0,
+    "accepted": ["are"],
+    "explanation": "\"At the moment\" pede Present Continuous, e a pergunta com you usa o auxiliar are."
+  },
+  {
+    "id": "prc-006",
+    "level": 3,
+    "focus": "present-continuous",
+    "sentence": "Right now the students ___ a test, so please don't knock.",
+    "verbHint": "take",
+    "options": ["are taking", "take", "took", "have taken"],
+    "answerIndex": 0,
+    "accepted": ["are taking", "'re taking"],
+    "explanation": "\"Right now\" deixa claro que a prova está em andamento: Present Continuous."
+  },
+  {
+    "id": "prp-001",
+    "level": 1,
+    "focus": "present-perfect",
+    "sentence": "I ___ my homework already.",
+    "verbHint": "finish",
+    "options": ["have finished", "am finishing", "finish", "had finished"],
+    "answerIndex": 0,
+    "accepted": ["have finished", "'ve finished"],
+    "explanation": "\"Already\" com resultado que vale agora pede Present Perfect: have + particípio."
+  },
+  {
+    "id": "prp-002",
+    "level": 1,
+    "focus": "present-perfect",
+    "sentence": "She ___ never been to Japan.",
+    "verbHint": "have (auxiliar)",
+    "options": ["has", "have", "is", "did"],
+    "answerIndex": 0,
+    "accepted": ["has", "'s"],
+    "explanation": "Experiência de vida com \"never\" usa Present Perfect. Com she o auxiliar é has."
+  },
+  {
+    "id": "prp-003",
+    "level": 2,
+    "focus": "present-perfect",
+    "sentence": "We ___ in this city since 2015.",
+    "verbHint": "live",
+    "options": ["have lived", "live", "lived", "are living"],
+    "answerIndex": 0,
+    "accepted": ["have lived", "'ve lived"],
+    "explanation": "\"Since\" marca algo que começou no passado e continua até hoje: Present Perfect."
+  },
+  {
+    "id": "prp-004",
+    "level": 2,
+    "focus": "present-perfect",
+    "sentence": "He can't play today because he ___ his ankle.",
+    "verbHint": "hurt",
+    "options": ["has hurt", "hurts", "is hurting", "will hurt"],
+    "answerIndex": 0,
+    "accepted": ["has hurt", "'s hurt"],
+    "explanation": "A lesão é passada, mas o resultado atrapalha agora. Passado com efeito no presente é Present Perfect."
+  },
+  {
+    "id": "prp-005",
+    "level": 3,
+    "focus": "present-perfect",
+    "sentence": "I ___ that film three times this month.",
+    "verbHint": "see",
+    "options": ["have seen", "am seeing", "see", "had seen"],
+    "answerIndex": 0,
+    "accepted": ["have seen", "'ve seen"],
+    "explanation": "\"This month\" é um período que ainda não terminou, então a contagem vai no Present Perfect."
+  },
+  {
+    "id": "prp-006",
+    "level": 3,
+    "focus": "present-perfect",
+    "sentence": "The train ___ yet, so we still have time for a coffee.",
+    "verbHint": "not arrive",
+    "options": ["hasn't arrived", "isn't arriving", "doesn't arrive", "wasn't arriving"],
+    "answerIndex": 0,
+    "accepted": ["hasn't arrived", "has not arrived"],
+    "explanation": "\"Yet\" na negativa pede Present Perfect: algo esperado que até agora não aconteceu."
+  },
+  {
+    "id": "prpc-001",
+    "level": 1,
+    "focus": "present-perfect-continuous",
+    "sentence": "She is exhausted. She ___ all day.",
+    "verbHint": "work",
+    "options": ["has been working", "is working", "works", "was working"],
+    "answerIndex": 0,
+    "accepted": ["has been working", "'s been working"],
+    "explanation": "O cansaço agora é resultado de uma atividade longa que vem até este momento: has been + verbo com -ing."
+  },
+  {
+    "id": "prpc-002",
+    "level": 1,
+    "focus": "present-perfect-continuous",
+    "sentence": "It ___ since Monday and the river is rising.",
+    "verbHint": "rain",
+    "options": ["has been raining", "is raining", "rains", "was raining"],
+    "answerIndex": 0,
+    "accepted": ["has been raining", "'s been raining"],
+    "explanation": "\"Since Monday\" com efeito visível agora pede Present Perfect Continuous, que enfatiza a duração."
+  },
+  {
+    "id": "prpc-003",
+    "level": 2,
+    "focus": "present-perfect-continuous",
+    "sentence": "How long ___ you been studying English?",
+    "verbHint": "have (auxiliar)",
+    "options": ["have", "has", "are", "did"],
+    "answerIndex": 0,
+    "accepted": ["have"],
+    "explanation": "\"How long ... been + -ing\" é Present Perfect Continuous. Com you o auxiliar é have."
+  },
+  {
+    "id": "prpc-004",
+    "level": 2,
+    "focus": "present-perfect-continuous",
+    "sentence": "My hands are dirty because I ___ in the garden.",
+    "verbHint": "work",
+    "options": ["have been working", "am working", "worked", "was working"],
+    "answerIndex": 0,
+    "accepted": ["have been working", "'ve been working"],
+    "explanation": "As mãos sujas agora explicam a atividade recente e prolongada: have been + verbo com -ing."
+  },
+  {
+    "id": "prpc-005",
+    "level": 3,
+    "focus": "present-perfect-continuous",
+    "sentence": "They ___ for the exam since eight this morning and they are still at it.",
+    "verbHint": "study",
+    "options": ["have been studying", "are studying", "studied", "had been studying"],
+    "answerIndex": 0,
+    "accepted": ["have been studying", "'ve been studying"],
+    "explanation": "A ação começou no passado, continua agora e a duração importa: Present Perfect Continuous."
+  },
+  {
+    "id": "prpc-006",
+    "level": 3,
+    "focus": "present-perfect-continuous",
+    "sentence": "He ___ about that trip for months, so buy him the ticket.",
+    "verbHint": "talk",
+    "options": ["has been talking", "is talking", "talks", "was talking"],
+    "answerIndex": 0,
+    "accepted": ["has been talking", "'s been talking"],
+    "explanation": "\"For months\" até agora, com insistência, pede Present Perfect Continuous."
+  },
+  {
+    "id": "pac-001",
+    "level": 1,
+    "focus": "past-continuous",
+    "sentence": "I ___ TV when the lights went out.",
+    "verbHint": "watch",
+    "options": ["was watching", "am watching", "have watched", "watch"],
+    "answerIndex": 0,
+    "accepted": ["was watching"],
+    "explanation": "A ação já estava em andamento quando outra a interrompeu: Past Continuous com I usa was."
+  },
+  {
+    "id": "pac-002",
+    "level": 1,
+    "focus": "past-continuous",
+    "sentence": "At 9 p.m. last night we ___ dinner.",
+    "verbHint": "have",
+    "options": ["were having", "are having", "have had", "have"],
+    "answerIndex": 0,
+    "accepted": ["were having"],
+    "explanation": "Hora exata no passado, com a ação em andamento naquele instante: were + verbo com -ing."
+  },
+  {
+    "id": "pac-003",
+    "level": 2,
+    "focus": "past-continuous",
+    "sentence": "While she ___ to work, she saw an accident.",
+    "verbHint": "drive",
+    "options": ["was driving", "drives", "is driving", "has driven"],
+    "answerIndex": 0,
+    "accepted": ["was driving"],
+    "explanation": "\"While\" apresenta a ação longa que servia de pano de fundo: Past Continuous."
+  },
+  {
+    "id": "pac-004",
+    "level": 2,
+    "focus": "past-continuous",
+    "sentence": "They ___ football when it started to snow.",
+    "verbHint": "play",
+    "options": ["were playing", "play", "are playing", "have played"],
+    "answerIndex": 0,
+    "accepted": ["were playing"],
+    "explanation": "O jogo já acontecia quando a neve começou. Com they o Past Continuous usa were."
+  },
+  {
+    "id": "pac-005",
+    "level": 3,
+    "focus": "past-continuous",
+    "sentence": "The sun ___ and the birds were singing when we left the house.",
+    "verbHint": "shine",
+    "options": ["was shining", "shines", "has shone", "is shining"],
+    "answerIndex": 0,
+    "accepted": ["was shining"],
+    "explanation": "Descrição do cenário em volta de um momento passado usa Past Continuous."
+  },
+  {
+    "id": "pac-006",
+    "level": 3,
+    "focus": "past-continuous",
+    "sentence": "What ___ you doing when I called you last night?",
+    "verbHint": "be (auxiliar)",
+    "options": ["were", "was", "are", "did"],
+    "answerIndex": 0,
+    "accepted": ["were"],
+    "explanation": "Pergunta sobre a ação em andamento num momento passado. Com you o auxiliar é were."
+  },
+  {
+    "id": "papc-001",
+    "level": 1,
+    "focus": "past-perfect-continuous",
+    "sentence": "She was tired because she ___ for three hours.",
+    "verbHint": "run",
+    "options": ["had been running", "was running", "has been running", "is running"],
+    "answerIndex": 0,
+    "accepted": ["had been running", "'d been running"],
+    "explanation": "O cansaço passado se explica por uma atividade anterior e longa: had been + verbo com -ing."
+  },
+  {
+    "id": "papc-002",
+    "level": 1,
+    "focus": "past-perfect-continuous",
+    "sentence": "They ___ for the bus for twenty minutes when it finally came.",
+    "verbHint": "wait",
+    "options": ["had been waiting", "have been waiting", "are waiting", "waits"],
+    "answerIndex": 0,
+    "accepted": ["had been waiting", "'d been waiting"],
+    "explanation": "A espera durou até o momento passado em que o ônibus chegou: Past Perfect Continuous."
+  },
+  {
+    "id": "papc-003",
+    "level": 2,
+    "focus": "past-perfect-continuous",
+    "sentence": "The ground was wet because it ___ all night.",
+    "verbHint": "rain",
+    "options": ["had been raining", "has been raining", "is raining", "rains"],
+    "answerIndex": 0,
+    "accepted": ["had been raining", "'d been raining"],
+    "explanation": "A chuva é a causa anterior de um estado já passado, e a duração importa: had been raining."
+  },
+  {
+    "id": "papc-004",
+    "level": 2,
+    "focus": "past-perfect-continuous",
+    "sentence": "He ___ English for two years before he moved to Canada.",
+    "verbHint": "study",
+    "options": ["had been studying", "has been studying", "is studying", "studies"],
+    "answerIndex": 0,
+    "accepted": ["had been studying", "'d been studying"],
+    "explanation": "\"Before\" + passado coloca o estudo antes da mudança, com duração marcada por for."
+  },
+  {
+    "id": "papc-005",
+    "level": 3,
+    "focus": "past-perfect-continuous",
+    "sentence": "By the time the doctor arrived, the child ___ for almost an hour.",
+    "verbHint": "cry",
+    "options": ["had been crying", "has been crying", "is crying", "cries"],
+    "answerIndex": 0,
+    "accepted": ["had been crying", "'d been crying"],
+    "explanation": "\"By the time\" + passado exige Past Perfect, e \"for almost an hour\" pede a forma contínua."
+  },
+  {
+    "id": "papc-006",
+    "level": 3,
+    "focus": "past-perfect-continuous",
+    "sentence": "We ___ about her all morning when she suddenly walked in.",
+    "verbHint": "talk",
+    "options": ["had been talking", "have been talking", "are talking", "talk"],
+    "answerIndex": 0,
+    "accepted": ["had been talking", "'d been talking"],
+    "explanation": "A conversa vinha desde antes do momento passado em que ela entrou: had been talking."
+  },
+  {
+    "id": "fwl-001",
+    "level": 1,
+    "focus": "future-will",
+    "sentence": "The phone is ringing. I ___ it.",
+    "verbHint": "get",
+    "options": ["will get", "am getting", "get", "got"],
+    "answerIndex": 0,
+    "accepted": ["will get", "'ll get"],
+    "explanation": "Decisão tomada na hora, no momento da fala, usa will."
+  },
+  {
+    "id": "fwl-002",
+    "level": 1,
+    "focus": "future-will",
+    "sentence": "I think it ___ cold tomorrow.",
+    "verbHint": "be",
+    "options": ["will be", "is", "was", "is being"],
+    "answerIndex": 0,
+    "accepted": ["will be", "'ll be"],
+    "explanation": "Depois de \"I think\", a previsão sobre o futuro vai com will."
+  },
+  {
+    "id": "fwl-003",
+    "level": 2,
+    "focus": "future-will",
+    "sentence": "Don't worry, I ___ your secret.",
+    "verbHint": "keep",
+    "options": ["will keep", "keep", "am keeping", "kept"],
+    "answerIndex": 0,
+    "accepted": ["will keep", "'ll keep"],
+    "explanation": "Promessa feita no momento da fala usa will."
+  },
+  {
+    "id": "fwl-004",
+    "level": 2,
+    "focus": "future-will",
+    "sentence": "That bag looks heavy. I ___ you.",
+    "verbHint": "help",
+    "options": ["will help", "help", "am helping", "helped"],
+    "answerIndex": 0,
+    "accepted": ["will help", "'ll help"],
+    "explanation": "Oferta espontânea de ajuda, decidida na hora: will."
+  },
+  {
+    "id": "fwl-005",
+    "level": 3,
+    "focus": "future-will",
+    "sentence": "She probably ___ late again — she always is.",
+    "verbHint": "arrive",
+    "options": ["will arrive", "arrives", "arrived", "is arriving"],
+    "answerIndex": 0,
+    "accepted": ["will arrive", "'ll arrive"],
+    "explanation": "\"Probably\" marca previsão baseada em opinião, e previsão assim usa will."
+  },
+  {
+    "id": "fwl-006",
+    "level": 3,
+    "focus": "future-will",
+    "sentence": "Nobody knows what ___ happen next year.",
+    "verbHint": "will (auxiliar)",
+    "options": ["will", "does", "is", "did"],
+    "answerIndex": 0,
+    "accepted": ["will", "'ll"],
+    "explanation": "Previsão incerta sobre o futuro: o auxiliar é will, seguido do verbo no infinitivo sem to."
+  },
+  {
+    "id": "fgt-001",
+    "level": 1,
+    "focus": "future-going-to",
+    "sentence": "Look at those clouds — it's ___ rain.",
+    "verbHint": "go",
+    "options": ["going to", "will", "going", "gone to"],
+    "answerIndex": 0,
+    "accepted": ["going to"],
+    "explanation": "Depois de \"it's\", a única forma possível é going to + verbo. A evidência visível no presente é a marca típica do going to."
+  },
+  {
+    "id": "fgt-002",
+    "level": 1,
+    "focus": "future-going-to",
+    "sentence": "We have already saved the money, so we're ___ buy a house next year.",
+    "verbHint": "go",
+    "options": ["going to", "will", "going", "go"],
+    "answerIndex": 0,
+    "accepted": ["going to"],
+    "explanation": "Plano decidido antes da conversa usa going to, e depois de \"we're\" só cabe going to + verbo."
+  },
+  {
+    "id": "fgt-003",
+    "level": 2,
+    "focus": "future-going-to",
+    "sentence": "She's ___ study medicine — she has already applied.",
+    "verbHint": "go",
+    "options": ["going to", "will", "gone to", "going"],
+    "answerIndex": 0,
+    "accepted": ["going to"],
+    "explanation": "A inscrição já feita mostra intenção anterior: going to. Depois de \"she's\" nenhuma outra forma encaixa."
+  },
+  {
+    "id": "fgt-004",
+    "level": 2,
+    "focus": "future-going-to",
+    "sentence": "Careful! You're ___ drop that plate.",
+    "verbHint": "go",
+    "options": ["going to", "will", "going", "go to"],
+    "answerIndex": 0,
+    "accepted": ["going to"],
+    "explanation": "Previsão baseada no que se vê acontecendo agora usa going to, e \"you're\" exige going to + verbo."
+  },
+  {
+    "id": "fgt-005",
+    "level": 3,
+    "focus": "future-going-to",
+    "sentence": "They aren't ___ come to the party; they told me yesterday.",
+    "verbHint": "go",
+    "options": ["going to", "will", "going", "go"],
+    "answerIndex": 0,
+    "accepted": ["going to"],
+    "explanation": "A decisão já era conhecida ontem, então é going to. Depois de \"aren't\" só a forma going to funciona."
+  },
+  {
+    "id": "fgt-006",
+    "level": 3,
+    "focus": "future-going-to",
+    "sentence": "___ you going to tell her the truth?",
+    "verbHint": "be (auxiliar)",
+    "options": ["Are", "Do", "Will", "Is"],
+    "answerIndex": 0,
+    "accepted": ["are"],
+    "explanation": "Pergunta com going to usa o verbo be como auxiliar, e com you a forma é are."
+  },
+  {
+    "id": "fcn-001",
+    "level": 1,
+    "focus": "future-continuous",
+    "sentence": "This time tomorrow I ___ on a plane to Lisbon.",
+    "verbHint": "fly",
+    "options": ["will be flying", "will fly", "flies", "flew"],
+    "answerIndex": 0,
+    "accepted": ["will be flying", "'ll be flying"],
+    "explanation": "\"This time tomorrow\" aponta um instante futuro com a ação já em andamento: will be + verbo com -ing."
+  },
+  {
+    "id": "fcn-002",
+    "level": 1,
+    "focus": "future-continuous",
+    "sentence": "This time next week, they ___ on the beach.",
+    "verbHint": "lie",
+    "options": ["will be lying", "will lie", "lie", "lay"],
+    "answerIndex": 0,
+    "accepted": ["will be lying", "'ll be lying"],
+    "explanation": "O momento futuro é exato e a ação estará acontecendo nele: Future Continuous."
+  },
+  {
+    "id": "fcn-003",
+    "level": 2,
+    "focus": "future-continuous",
+    "sentence": "At midnight tonight the whole family ___ , so send a message tomorrow.",
+    "verbHint": "sleep",
+    "options": ["will be sleeping", "will sleep", "sleeps", "slept"],
+    "answerIndex": 0,
+    "accepted": ["will be sleeping", "'ll be sleeping"],
+    "explanation": "Hora exata no futuro com a ação em curso naquele instante pede will be + verbo com -ing."
+  },
+  {
+    "id": "fcn-004",
+    "level": 2,
+    "focus": "future-continuous",
+    "sentence": "This time tomorrow I ___ for you at the station.",
+    "verbHint": "wait",
+    "options": ["will be waiting", "will wait", "wait", "waited"],
+    "answerIndex": 0,
+    "accepted": ["will be waiting", "'ll be waiting"],
+    "explanation": "\"This time tomorrow\" marca o instante em que a espera já estará acontecendo: Future Continuous."
+  },
+  {
+    "id": "fcn-005",
+    "level": 3,
+    "focus": "future-continuous",
+    "sentence": "___ you be using the car tomorrow morning? I need it.",
+    "verbHint": "will (auxiliar)",
+    "options": ["Will", "Do", "Are", "Would"],
+    "answerIndex": 0,
+    "accepted": ["will"],
+    "explanation": "Pergunta no Future Continuous começa com will + sujeito + be + verbo com -ing."
+  },
+  {
+    "id": "fcn-006",
+    "level": 3,
+    "focus": "future-continuous",
+    "sentence": "This time next month she ___ in her new office in Berlin.",
+    "verbHint": "work",
+    "options": ["will be working", "will work", "works", "worked"],
+    "answerIndex": 0,
+    "accepted": ["will be working", "'ll be working"],
+    "explanation": "O momento futuro é exato e a ação estará em andamento nele: will be working."
+  },
+  {
+    "id": "fpf-001",
+    "level": 1,
+    "focus": "future-perfect",
+    "sentence": "By 2030 she ___ her degree.",
+    "verbHint": "finish",
+    "options": ["will have finished", "have finished", "has finished", "is finishing"],
+    "answerIndex": 0,
+    "accepted": ["will have finished", "'ll have finished"],
+    "explanation": "\"By 2030\" marca um prazo futuro até o qual a ação já estará concluída: will have + particípio."
+  },
+  {
+    "id": "fpf-002",
+    "level": 1,
+    "focus": "future-perfect",
+    "sentence": "By the time the film ends, I ___ asleep.",
+    "verbHint": "fall",
+    "options": ["will have fallen", "have fallen", "am falling", "fell"],
+    "answerIndex": 0,
+    "accepted": ["will have fallen", "'ll have fallen"],
+    "explanation": "\"By the time\" apontando para o futuro pede Future Perfect: algo terminado antes daquele momento."
+  },
+  {
+    "id": "fpf-003",
+    "level": 2,
+    "focus": "future-perfect",
+    "sentence": "In August they ___ married for twenty years.",
+    "verbHint": "be",
+    "options": ["will have been", "have been", "are being", "were"],
+    "answerIndex": 0,
+    "accepted": ["will have been", "'ll have been"],
+    "explanation": "O tempo se completa numa data futura, então a contagem vai para o Future Perfect."
+  },
+  {
+    "id": "fpf-004",
+    "level": 2,
+    "focus": "future-perfect",
+    "sentence": "By next Friday I ___ all my exams.",
+    "verbHint": "take",
+    "options": ["will have taken", "have taken", "am taking", "took"],
+    "answerIndex": 0,
+    "accepted": ["will have taken", "'ll have taken"],
+    "explanation": "\"By next Friday\" é o prazo futuro em que tudo já terá acontecido: will have + particípio."
+  },
+  {
+    "id": "fpf-005",
+    "level": 3,
+    "focus": "future-perfect",
+    "sentence": "Don't come at seven — by then the shop ___ .",
+    "verbHint": "close",
+    "options": ["will have closed", "has closed", "is closing", "closed"],
+    "answerIndex": 0,
+    "accepted": ["will have closed", "'ll have closed"],
+    "explanation": "\"By then\" olha para um momento futuro e diz o que já terá acontecido antes dele."
+  },
+  {
+    "id": "fpf-006",
+    "level": 3,
+    "focus": "future-perfect",
+    "sentence": "By the time you read this message, my plane ___ .",
+    "verbHint": "leave",
+    "options": ["will have left", "has left", "is leaving", "left"],
+    "answerIndex": 0,
+    "accepted": ["will have left", "'ll have left"],
+    "explanation": "A partida acontece antes do momento futuro da leitura: Future Perfect."
   }
 ]

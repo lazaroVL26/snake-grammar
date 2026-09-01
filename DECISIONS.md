@@ -148,3 +148,35 @@ Efeito colateral que vale registrar: com `INITIAL_LENGTH: 3`, **o primeiro erro 
 encerrando a partida** — antes por 3 → 2, agora por 3 → 1. A penalidade maior só muda o
 jogo depois do segundo acerto. Se a intenção for dar mais fôlego ao aluno antes da morte
 súbita, o ajuste é subir `INITIAL_LENGTH`, não mexer na penalidade.
+
+## 22. Menu de conteúdos: grupos de tempos, não tempos avulsos
+
+Pedido do professor: deixar o aluno escolher o que estudar, cobrindo todos os tempos do
+inglês. O menu oferece **cinco conteúdos** — Simple Past × Past Perfect, Presente,
+Passado, Futuro e Todos — em vez de listar os 13 valores de `Focus` um a um.
+
+Motivo: um tempo verbal sozinho renderia 6 frases, e a partida repetiria as mesmas em
+poucos minutos. Agrupado, o menor conteúdo tem 24. A granularidade fina existe onde ela
+importa de verdade: **o relatório final separa o desempenho por tempo verbal**, então quem
+escolheu "Presente" ainda descobre que errou só o Present Perfect Continuous. Criar um
+conteúdo novo é acrescentar uma entrada em `quiz/topics.ts`.
+
+## 23. Os três `Focus` antigos mantiveram a grafia original
+
+`simple-past`, `past-perfect` e `contrast` continuam com esses nomes, mesmo que a
+convenção nova pedisse `past-simple`. Renomear obrigaria a reescrever as 41 entradas
+existentes de `questions.seed.json`, que a §7.2 manda não mexer. As 60 questões novas usam
+`<tempo>-<aspecto>`; a mistura está documentada no próprio `types.ts`.
+
+## 24. Nos itens de "going to", a lacuna cai na forma, não na escolha will × going to
+
+A §8.1 exige que a alternativa correta seja a **única** possível. A fronteira entre `will`
+e `going to` não é dessas: "Look at those clouds, it will rain" é gramatical, só menos
+idiomático que "it's going to rain". Oferecer `will` como distrator quebraria a regra.
+
+Por isso as frases de `future-going-to` põem o auxiliar antes da lacuna — "it's ___ rain"
+— de modo que só `going to` encaixa, e quem ensina o gatilho (evidência visível, plano
+anterior) é a explicação em português. O mesmo cuidado vale nos itens de `future-perfect`,
+onde `will finish` nunca aparece ao lado de `will have finished`, e nos de
+`present-perfect-continuous`, que não oferecem o present perfect simples quando as duas
+formas seriam aceitáveis.

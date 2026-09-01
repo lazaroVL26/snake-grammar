@@ -31,7 +31,7 @@ export function buildShell(root: HTMLElement): Shell {
         el('h1', { class: 'shell__title', text: 'Snake Grammar' }),
         el('p', {
           class: 'shell__sub',
-          text: 'Simple Past x Past Perfect',
+          text: 'Passado, presente e futuro',
         }),
       ]),
       hud,

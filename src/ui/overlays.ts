@@ -1,9 +1,10 @@
-import type { AnswerMode } from '../types';
+import type { AnswerMode, TopicId } from '../types';
+import { DEFAULT_TOPIC, TOPICS } from '../quiz/topics';
 import { el } from './dom';
 import { FOCUS_LABEL, REASON_LABEL, formatDuration, type Report } from './report';
 
 export interface OverlayCallbacks {
-  onStart: (mode: AnswerMode) => void;
+  onStart: (mode: AnswerMode, topic: TopicId) => void;
   onResume: () => void;
   onRestart: () => void;
   onCopyReport: () => Promise<boolean>;
@@ -12,6 +13,7 @@ export interface OverlayCallbacks {
 /** Camada sobre o canvas: inicio, pausa, contagem e relatorio final. */
 export class Overlays {
   private mode: AnswerMode = 'choice';
+  private topic: TopicId = DEFAULT_TOPIC;
 
   constructor(
     private readonly root: HTMLElement,
@@ -20,6 +22,10 @@ export class Overlays {
 
   get answerMode(): AnswerMode {
     return this.mode;
+  }
+
+  get contentTopic(): TopicId {
+    return this.topic;
   }
 
   hide(): void {
@@ -34,47 +40,44 @@ export class Overlays {
     return panel;
   }
 
-  showIdle(bestScore: number): void {
-    const modeGroup = el('div', {
-      class: 'modes',
-      role: 'radiogroup',
-      'aria-label': 'Como responder',
-    });
-    const options: Array<[AnswerMode, string, string]> = [
-      ['choice', 'Multipla escolha', 'Escolha entre 4 alternativas (teclas 1 a 4).'],
-      ['typed', 'Digitando', 'Escreva a forma verbal e confirme com Enter.'],
-    ];
-    const buttons = options.map(([mode, label, help]) => {
-      const button = el(
-        'button',
+  showIdle(bestScore: number, questionCount: (topic: TopicId) => number): void {
+    const topicGroup = radioGroup(
+      'O que voce quer estudar?',
+      TOPICS.map((topic) => ({
+        value: topic.id,
+        label: topic.label,
+        detail: `${topic.summary} ${questionCount(topic.id)} frases.`,
+      })),
+      this.topic,
+      (value) => (this.topic = value),
+      'topics',
+    );
+
+    const modeGroup = radioGroup(
+      'Como responder',
+      [
         {
-          type: 'button',
-          class: 'mode',
-          role: 'radio',
-          'aria-checked': String(this.mode === mode),
-          title: help,
+          value: 'choice' as AnswerMode,
+          label: 'Multipla escolha',
+          detail: 'Teclas 1 a 4.',
         },
-        [label],
-      );
-      button.addEventListener('click', () => {
-        this.mode = mode;
-        buttons.forEach((other, index) => {
-          const isCurrent = options[index]?.[0] === mode;
-          other.setAttribute('aria-checked', String(isCurrent));
-          other.classList.toggle('mode--on', isCurrent);
-        });
-      });
-      button.classList.toggle('mode--on', this.mode === mode);
-      return button;
-    });
-    modeGroup.append(...buttons);
+        {
+          value: 'typed' as AnswerMode,
+          label: 'Digitando',
+          detail: 'Escreva e confirme.',
+        },
+      ],
+      this.mode,
+      (value) => (this.mode = value),
+      'modes',
+    );
 
     const start = el('button', {
       type: 'button',
       class: 'button button--primary',
       text: 'Comecar',
     });
-    start.addEventListener('click', () => this.callbacks.onStart(this.mode));
+    start.addEventListener('click', () => this.callbacks.onStart(this.mode, this.topic));
 
     this.show(
       el('h2', { class: 'panel__title', text: 'Snake Grammar' }),
@@ -82,6 +85,7 @@ export class Overlays {
         class: 'panel__lead',
         text: 'Coma a fruta, responda a frase em ingles. Acertou, a cobra cresce. Errou, ela encolhe.',
       }),
+      topicGroup,
       modeGroup,
       start,
       el('p', { class: 'panel__note', text: `Recorde atual: ${bestScore} pontos` }),
@@ -140,6 +144,7 @@ export class Overlays {
         class: 'panel__lead',
         text: report.reason ? REASON_LABEL[report.reason] : 'Partida encerrada.',
       }),
+      el('p', { class: 'panel__note', text: `Conteudo: ${report.topicLabel}` }),
       summary(report),
       focusTable(report),
       missedList(report),
@@ -211,4 +216,54 @@ function missedList(report: Report): HTMLElement {
       ),
     ),
   ]);
+}
+
+interface RadioOption<T extends string> {
+  value: T;
+  label: string;
+  detail: string;
+}
+
+/** Grupo de escolha unica navegavel por Tab, com estado em aria-checked. */
+function radioGroup<T extends string>(
+  legend: string,
+  options: ReadonlyArray<RadioOption<T>>,
+  selected: T,
+  onPick: (value: T) => void,
+  variant: string,
+): HTMLElement {
+  const list = el('div', {
+    class: `choices choices--${variant}`,
+    role: 'radiogroup',
+    'aria-label': legend,
+  });
+
+  const buttons = options.map((option) => {
+    const button = el(
+      'button',
+      {
+        type: 'button',
+        class: 'choice',
+        role: 'radio',
+        'aria-checked': String(option.value === selected),
+      },
+      [
+        el('span', { class: 'choice__label', text: option.label }),
+        el('span', { class: 'choice__detail', text: option.detail }),
+      ],
+    );
+    button.classList.toggle('choice--on', option.value === selected);
+    button.addEventListener('click', () => {
+      onPick(option.value);
+      buttons.forEach((other, index) => {
+        const isCurrent = options[index]?.value === option.value;
+        other.setAttribute('aria-checked', String(isCurrent));
+        other.classList.toggle('choice--on', isCurrent);
+      });
+    });
+    return button;
+  });
+
+  list.append(el('p', { class: 'choices__legend', text: legend }), ...buttons);
+  return list;
 }

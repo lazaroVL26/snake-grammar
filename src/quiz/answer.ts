@@ -23,6 +23,10 @@ export function contractionVariants(value: string): string[] {
   const variants = new Set<string>([base]);
   if (base.startsWith('had ')) variants.add(`'d ${base.slice(4)}`);
   if (base.startsWith("'d ")) variants.add(`had ${base.slice(3)}`);
+  if (base.startsWith('will ')) variants.add(`'ll ${base.slice(5)}`);
+  if (base.startsWith("'ll ")) variants.add(`will ${base.slice(4)}`);
+  if (base.startsWith('have ')) variants.add(`'ve ${base.slice(5)}`);
+  if (base.startsWith("'ve ")) variants.add(`have ${base.slice(4)}`);
   if (base.startsWith('did not ')) variants.add(`didn't ${base.slice(8)}`);
   if (base.startsWith("didn't ")) variants.add(`did not ${base.slice(7)}`);
   if (base === 'did not') variants.add("didn't");

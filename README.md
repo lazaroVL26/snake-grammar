@@ -1,7 +1,8 @@
 # Snake Grammar
 
 Jogo web educativo para aula de inglês: o clássico Snake, mas **cada fruta comida abre
-uma frase com lacuna sobre Simple Past × Past Perfect**.
+uma frase com lacuna sobre tempos verbais do inglês**. Na tela inicial o aluno escolhe o
+conteúdo da rodada.
 
 - Resposta certa → +10 pontos e a cobra **cresce** 1 segmento.
 - Resposta errada (ou tempo esgotado) → a cobra **encolhe 2 segmentos**.
@@ -9,6 +10,22 @@ uma frase com lacuna sobre Simple Past × Past Perfect**.
 
 No fim da partida o aluno recebe um relatório com precisão, desempenho por tempo verbal
 e a lista das frases erradas com explicação — o material de revisão da aula.
+
+## Conteúdos disponíveis
+
+O menu da tela inicial tem cinco opções. O banco traz **101 frases**:
+
+| Conteúdo                   | O que cai                                                        | Frases |
+| -------------------------- | ---------------------------------------------------------------- | ------ |
+| Simple Past x Past Perfect | O conjunto original: o que aconteceu antes do que já era passado | 41     |
+| Presente                   | Present simple, continuous, perfect e perfect continuous         | 24     |
+| Passado                    | Past simple, continuous, perfect e perfect continuous            | 53     |
+| Futuro                     | Will, going to, future continuous e future perfect               | 24     |
+| Todos os tempos            | Passado, presente e futuro embaralhados                          | 101    |
+
+O conteúdo escolhido aparece no relatório final, e o desempenho continua separado por
+tempo verbal — dá para ver que o aluno acerta Present Perfect mas erra Present Perfect
+Continuous.
 
 Interface em português do Brasil, exercício em inglês (nível A2–B1).
 
@@ -92,13 +109,35 @@ acrescentar novos objetos no mesmo formato e rodar `npm run build`.
 | ------------- | ---------------------------------------------------------------------- |
 | `id`          | Único no arquivo inteiro. Sugestão: `sp-`, `pp-` ou `ct-` + número     |
 | `level`       | `1` (fácil), `2` (médio) ou `3` (difícil)                              |
-| `focus`       | `simple-past`, `past-perfect` ou `contrast`                            |
+| `focus`       | O tempo verbal da frase (lista completa abaixo)                        |
 | `sentence`    | Exatamente uma lacuna, escrita como `___` (três sublinhados)           |
 | `verbHint`    | Verbo no infinitivo, mostrado como pista                               |
 | `options`     | Exatamente 4 alternativas, sem repetição                               |
 | `answerIndex` | Índice (0 a 3) da alternativa correta em `options`                     |
 | `accepted`    | Formas aceitas no modo digitado; precisa conter a alternativa correta  |
 | `explanation` | 1 ou 2 frases **em português**, dizendo por que aquele tempo é o certo |
+
+Valores válidos de `focus`, e em que conteúdo do menu cada um cai:
+
+| `focus`                      | Conteúdo do menu                     |
+| ---------------------------- | ------------------------------------ |
+| `simple-past`                | Passado • Simple Past x Past Perfect |
+| `past-continuous`            | Passado                              |
+| `past-perfect`               | Passado • Simple Past x Past Perfect |
+| `past-perfect-continuous`    | Passado                              |
+| `contrast`                   | Passado • Simple Past x Past Perfect |
+| `present-simple`             | Presente                             |
+| `present-continuous`         | Presente                             |
+| `present-perfect`            | Presente                             |
+| `present-perfect-continuous` | Presente                             |
+| `future-will`                | Futuro                               |
+| `future-going-to`            | Futuro                               |
+| `future-continuous`          | Futuro                               |
+| `future-perfect`             | Futuro                               |
+
+Todos caem também em "Todos os tempos". Para criar um conteúdo novo no menu, acrescente
+uma entrada em [`src/quiz/topics.ts`](src/quiz/topics.ts) — o menu, o filtro das questões
+e o relatório se ajustam sozinhos.
 
 O jogo puxa `level: 1` nas 5 primeiras frutas, `level: 2` da 6ª à 12ª e `level: 3` daí em
 diante. Se um nível acabar, ele cai para o nível mais próximo disponível — então vale a
@@ -123,7 +162,9 @@ O arquivo é validado no carregamento. Se algo estiver errado, o jogo **não abr
 uma tela de erro listando os problemas e registra no console. Rode `npm run test` para
 checar antes da aula — o teste `tests/questions.test.ts` roda sobre o arquivo real e
 acusa id duplicado, número de opções diferente de 4, `answerIndex` inválido, frase sem
-`___` e `accepted` que não contém a resposta correta.
+`___` e `accepted` que não contém a resposta correta. Outro teste falha se algum conteúdo
+do menu ficar com menos de 12 frases ou menos de 4 por nível — se você criar um conteúdo
+novo, ele avisa enquanto ainda falta material.
 
 ---
 

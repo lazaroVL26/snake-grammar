@@ -4,6 +4,7 @@ import { Overlays } from '../src/ui/overlays';
 import type { Report } from '../src/ui/report';
 
 const report: Report = {
+  topicLabel: 'Passado',
   score: 40,
   bestScore: 120,
   finalLength: 2,
@@ -37,7 +38,12 @@ const report: Report = {
 
 let root: HTMLElement;
 let overlays: Overlays;
-const calls = { start: [] as string[], resume: 0, restart: 0, copy: 0 };
+const calls = {
+  start: [] as Array<{ mode: string; topic: string }>,
+  resume: 0,
+  restart: 0,
+  copy: 0,
+};
 
 beforeEach(() => {
   document.body.replaceChildren();
@@ -49,7 +55,7 @@ beforeEach(() => {
   calls.restart = 0;
   calls.copy = 0;
   overlays = new Overlays(root, {
-    onStart: (mode) => calls.start.push(mode),
+    onStart: (mode, topic) => calls.start.push({ mode, topic }),
     onResume: () => (calls.resume += 1),
     onRestart: () => (calls.restart += 1),
     onCopyReport: () => {
@@ -61,23 +67,62 @@ beforeEach(() => {
 
 describe('overlays — tela inicial', () => {
   it('mostra o recorde e comeca em multipla escolha', () => {
-    overlays.showIdle(120);
+    overlays.showIdle(120, () => 41);
     expect(root.hidden).toBe(false);
     expect(root.textContent).toContain('Recorde atual: 120 pontos');
     expect(overlays.answerMode).toBe('choice');
   });
 
   it('permite trocar para o modo digitado antes de comecar', () => {
-    overlays.showIdle(0);
-    const typed = Array.from(root.querySelectorAll<HTMLButtonElement>('.mode')).find(
-      (button) => button.textContent === 'Digitando',
+    overlays.showIdle(0, () => 41);
+    const typed = Array.from(root.querySelectorAll<HTMLButtonElement>('.choice')).find(
+      (button) => button.textContent?.startsWith('Digitando'),
     );
     typed?.click();
     expect(overlays.answerMode).toBe('typed');
     expect(typed?.getAttribute('aria-checked')).toBe('true');
 
     root.querySelector<HTMLButtonElement>('.button--primary')?.click();
-    expect(calls.start).toEqual(['typed']);
+    expect(calls.start).toEqual([{ mode: 'typed', topic: 'past-contrast' }]);
+  });
+});
+
+describe('overlays — menu de conteudo', () => {
+  beforeEach(() => overlays.showIdle(0, (topic) => (topic === 'all' ? 101 : 41)));
+
+  it('lista os cinco conteudos com resumo e quantidade de frases', () => {
+    const group = root.querySelector('.choices--topics');
+    expect(group?.getAttribute('role')).toBe('radiogroup');
+    const labels = Array.from(group?.querySelectorAll('.choice__label') ?? []).map(
+      (node) => node.textContent,
+    );
+    expect(labels).toEqual([
+      'Simple Past x Past Perfect',
+      'Presente',
+      'Passado',
+      'Futuro',
+      'Todos os tempos',
+    ]);
+    expect(group?.textContent).toContain('101 frases');
+  });
+
+  it('comeca em Simple Past x Past Perfect, o conteudo original', () => {
+    expect(overlays.contentTopic).toBe('past-contrast');
+    const first = root.querySelector('.choices--topics .choice');
+    expect(first?.getAttribute('aria-checked')).toBe('true');
+  });
+
+  it('escolher outro conteudo marca so ele e vai junto no comecar', () => {
+    const buttons = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.choices--topics .choice'),
+    );
+    buttons[3]?.click();
+    expect(overlays.contentTopic).toBe('future');
+    expect(buttons[3]?.getAttribute('aria-checked')).toBe('true');
+    expect(buttons[0]?.getAttribute('aria-checked')).toBe('false');
+
+    root.querySelector<HTMLButtonElement>('.button--primary')?.click();
+    expect(calls.start).toEqual([{ mode: 'choice', topic: 'future' }]);
   });
 });
 
@@ -107,8 +152,9 @@ describe('overlays — pausa e contagem', () => {
 describe('overlays — relatorio final', () => {
   beforeEach(() => overlays.showGameOver(report));
 
-  it('explica o motivo do fim de jogo', () => {
+  it('explica o motivo do fim de jogo e o conteudo estudado', () => {
     expect(root.textContent).toContain('A cobra ficou curta demais.');
+    expect(root.textContent).toContain('Conteudo: Passado');
   });
 
   it('mostra pontuacao, recorde, comprimento, tempo e precisao', () => {

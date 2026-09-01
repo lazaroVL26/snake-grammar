@@ -3,9 +3,36 @@ import { correctAnswer, fillGap } from '../quiz/answer';
 
 export const FOCUS_LABEL: Record<Focus, string> = {
   'simple-past': 'Simple Past',
+  'past-continuous': 'Past Continuous',
   'past-perfect': 'Past Perfect',
+  'past-perfect-continuous': 'Past Perfect Continuous',
+  'present-simple': 'Present Simple',
+  'present-continuous': 'Present Continuous',
+  'present-perfect': 'Present Perfect',
+  'present-perfect-continuous': 'Present Perfect Continuous',
+  'future-will': 'Future — will',
+  'future-going-to': 'Future — going to',
+  'future-continuous': 'Future Continuous',
+  'future-perfect': 'Future Perfect',
   contrast: 'Contraste',
 };
+
+/** Ordem estavel do relatorio: passado, presente, futuro. */
+export const FOCUS_ORDER: readonly Focus[] = [
+  'simple-past',
+  'past-continuous',
+  'past-perfect',
+  'past-perfect-continuous',
+  'contrast',
+  'present-simple',
+  'present-continuous',
+  'present-perfect',
+  'present-perfect-continuous',
+  'future-will',
+  'future-going-to',
+  'future-continuous',
+  'future-perfect',
+];
 
 export const REASON_LABEL: Record<GameOverReason, string> = {
   wall: 'A cobra bateu na parede.',
@@ -28,6 +55,8 @@ export interface MissedItem {
 }
 
 export interface Report {
+  /** Conteudo escolhido no menu, como o aluno leu na tela inicial. */
+  topicLabel: string;
   score: number;
   bestScore: number;
   finalLength: number;
@@ -45,17 +74,17 @@ export function buildReport(
   bestScore: number,
   questionsById: Map<string, Question>,
   now: number,
+  topicLabel = 'Todos os tempos',
 ): Report {
   const { correctCount, wrongCount, score } = state.stats;
   const total = correctCount + wrongCount;
 
-  const byFocus: FocusRow[] = (
-    ['simple-past', 'past-perfect', 'contrast'] as Focus[]
-  ).map((focus) => ({
+  // So entram no relatorio os tempos que realmente cairam na partida.
+  const byFocus: FocusRow[] = FOCUS_ORDER.map((focus) => ({
     focus,
     correct: count(state.attempts, focus, true),
     wrong: count(state.attempts, focus, false),
-  }));
+  })).filter((row) => row.correct + row.wrong > 0);
 
   const missed: MissedItem[] = state.attempts
     .filter((attempt) => !attempt.correct)
@@ -72,6 +101,7 @@ export function buildReport(
     });
 
   return {
+    topicLabel,
     score,
     bestScore,
     finalLength: state.snake.segments.length,
@@ -99,7 +129,8 @@ export function formatDuration(ms: number): string {
 /** Resumo em texto puro para o aluno colar no caderno ou no Moodle. */
 export function reportToText(report: Report): string {
   const lines: string[] = [
-    'Snake Grammar — Simple Past x Past Perfect',
+    'Snake Grammar',
+    `Conteudo: ${report.topicLabel}`,
     `Pontuacao: ${report.score} (recorde: ${report.bestScore})`,
     `Comprimento final: ${report.finalLength} | Tempo: ${formatDuration(report.durationMs)}`,
     `Acertos: ${report.correct} | Erros: ${report.wrong} | Precisao: ${report.accuracy}%`,
