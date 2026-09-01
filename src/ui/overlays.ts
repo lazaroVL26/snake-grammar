@@ -1,8 +1,7 @@
-import type { AnswerMode, ScoreEntry, TopicId } from '../types';
+import type { AnswerMode, TopicId } from '../types';
 import { DEFAULT_TOPIC, TOPICS } from '../quiz/topics';
 import { CONFIG } from '../config';
 import { el } from './dom';
-import { positionLabel } from './scoreboard';
 import { FOCUS_LABEL, REASON_LABEL, formatDuration, type Report } from './report';
 
 /** Tudo que a tela inicial precisa mostrar. */
@@ -10,14 +9,6 @@ export interface IdleView {
   bestScore: number;
   nick: string;
   questionCount: (topic: TopicId) => number;
-}
-
-/** Colocacao da partida que acabou, para destacar no fim de jogo. */
-export interface RankingView {
-  board: readonly ScoreEntry[];
-  entry: ScoreEntry;
-  position: number;
-  today: string;
 }
 
 export interface OverlayCallbacks {
@@ -186,7 +177,13 @@ export class Overlays {
     );
   }
 
-  showGameOver(report: Report, ranking?: RankingView): void {
+  /** Escreve a colocacao quando o servidor responde, sem remontar o painel. */
+  setRankingPosition(label: string): void {
+    const node = this.root.querySelector('.ranking__position');
+    if (node) node.textContent = label;
+  }
+
+  showGameOver(report: Report): void {
     const again = el('button', {
       type: 'button',
       class: 'button button--primary',
@@ -226,7 +223,7 @@ export class Overlays {
       summary(report),
       focusTable(report),
       missedList(report),
-      rankingBlock(ranking),
+      rankingBlock(),
       el('div', { class: 'panel__actions' }, [again, copy, copyRanking]),
     );
     again.focus();
@@ -297,12 +294,13 @@ function missedList(report: Report): HTMLElement {
   ]);
 }
 
-/** A lista completa fica na coluna ao lado do tabuleiro; aqui so a colocacao. */
-function rankingBlock(ranking?: RankingView): HTMLElement {
-  if (!ranking) return el('div', { hidden: true });
+/** A lista completa fica na coluna ao lado; aqui so a colocacao, que chega depois. */
+function rankingBlock(): HTMLElement {
   return el('p', {
     class: 'ranking__position',
-    text: positionLabel(ranking.position, ranking.board.length),
+    role: 'status',
+    'aria-live': 'polite',
+    text: 'Enviando para o ranking da turma...',
   });
 }
 

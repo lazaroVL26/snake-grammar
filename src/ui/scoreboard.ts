@@ -56,15 +56,23 @@ export function positionLabel(position: number, total: number): string {
 export class RankingPanel {
   constructor(private readonly root: HTMLElement) {}
 
-  update(board: readonly ScoreEntry[], today: string, highlight?: ScoreEntry): void {
+  update(
+    board: readonly ScoreEntry[],
+    today: string,
+    options: { highlight?: ScoreEntry | undefined; shared?: boolean } = {},
+  ): void {
+    const shared = options.shared !== false;
     this.root.replaceChildren(
       el('h2', { class: 'rank-side__title', text: 'Ranking de hoje' }),
       el('p', { class: 'rank-side__date', text: today }),
-      scoreboardList(board, highlight),
-      el('p', {
-        class: 'rank-side__note',
-        text: 'A lista zera todo dia.',
-      }),
+      scoreboardList(board, options.highlight),
+      shared
+        ? el('p', { class: 'rank-side__note', text: 'Toda a turma. Zera todo dia.' })
+        : el('p', {
+            class: 'rank-side__note rank-side__note--offline',
+            role: 'status',
+            text: 'Sem conexao com o servidor. Mostrando so as partidas deste PC.',
+          }),
     );
   }
 }

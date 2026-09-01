@@ -42,9 +42,13 @@ em inglês.** Nunca traduza as frases do exercício.
 - **ESLint + Prettier**.
 - **Zero dependências de runtime.** Tudo que vai para o bundle final deve ser código
   próprio. Dependências apenas em `devDependencies`.
-- Persistência apenas em `localStorage`. **Sem backend, sem banco de dados, sem API
-  externa, sem chamada de rede em runtime.**
-- Deve rodar 100% offline depois do build (`dist/` servido como arquivos estáticos).
+- **Servidor próprio permitido, e só ele** (`server/`): Node com módulos internos apenas,
+  zero dependências, sem banco de dados e sem API externa. Ele serve `dist/` e o ranking da
+  turma. Nada mais pode fazer chamada de rede.
+- No navegador, a persistência local continua em `localStorage`: recorde, apelido e o
+  ranking de reserva de quando o servidor não responde.
+- Sem o servidor, `dist/` continua rodando 100% offline como arquivos estáticos — só que
+  aí cada navegador tem o seu próprio ranking.
 - Alvo: navegadores modernos (Chrome/Edge/Firefox/Safari atuais). Sem polyfills legados.
 
 ---
@@ -57,6 +61,8 @@ npm run dev        # servidor de desenvolvimento
 npm run build      # type-check + build de produção em dist/
 npm run preview    # serve o build
 npm run test       # vitest run
+npm run aula       # build + servidor do ranking para a turma (§5.8)
+npm run serve      # só o servidor, sem rebuild
 npm run test:watch
 npm run lint       # eslint --max-warnings=0
 npm run format     # prettier --write
@@ -83,6 +89,9 @@ snake-grammar/
 ├─ CLAUDE.md
 ├─ content/
 │  └─ questions.seed.json      # banco de questões (fornecido, ver §8)
+├─ server/                     # servidor de ranking da turma (§5.8)
+│  ├─ index.mjs                # HTTP: serve dist/ e a API
+│  └─ scores.mjs               # ranking do dia em arquivo JSON
 └─ src/
    ├─ main.ts                  # bootstrap: monta DOM, instancia Game, liga input
    ├─ types.ts                 # todos os tipos compartilhados
@@ -198,8 +207,27 @@ repete a lista: mostra só a colocação.
 leitura descarta o que não é de hoje — sem tarefa agendada. Guarda no máximo
 `SCOREBOARD_SIZE` partidas, ordenadas por pontuação; empate favorece quem jogou antes.
 
-Como não há servidor (§2), o ranking é por navegador. O botão "Copiar ranking" existe para
-o professor juntar as máquinas num documento só.
+**O ranking é da turma quando o servidor está no ar** (§5.8). Se ele não responde, o jogo
+cai para o ranking local daquele navegador e avisa na coluna. O botão "Copiar ranking"
+continua existindo para o professor juntar as máquinas num documento só.
+
+### 5.8 Servidor de ranking (`server/`)
+
+Node puro, sem dependências, iniciado com `npm run aula`. Serve `dist/` e a API na mesma
+porta (padrão 8080), então não há CORS nem configuração nos PCs dos alunos.
+
+- `GET /api/scores` → `{ today, board }` com o ranking de hoje.
+- `POST /api/scores` → guarda a partida e devolve `{ today, board, entry, position }`.
+- `GET /api/health` → `{ ok: true }`.
+
+Regras que só o servidor pode garantir, e por isso moram nele:
+
+- **A data e o horário são do servidor.** O relógio errado de um aluno não fragmenta o dia.
+- **Escritas serializadas** numa fila, com troca de arquivo por `rename`. Trinta alunos
+  terminando junto não perdem partida nem deixam o JSON pela metade.
+- **Nada confia no cliente:** apelido, pontuação e precisão são limitados, corpo acima de
+  4 KB é recusado, e `../` na URL não sai de `dist/`.
+- **Cada apelido aparece uma vez**, com a melhor partida do dia.
 
 ### 5.6 Máquina de estados
 
@@ -534,7 +562,9 @@ Só considere a tarefa concluída quando **todos** os itens abaixo forem verdade
 
 ## 13. Fora de escopo (não faça)
 
-- Multiplayer, ranking online, contas de usuário, backend.
+- Multiplayer em tempo real (a cobra de um aluno não aparece na tela do outro), contas de
+  usuário com senha, banco de dados, serviço de nuvem. O servidor de ranking em `server/`
+  é a única coisa fora do navegador, e ele é deliberadamente mínimo.
 - Áudio e trilha sonora (pode existir um toggle desligado por padrão apenas se sobrar
   tempo — não é requisito).
 - Sprites, imagens externas, ícones baixados: a cobra e a fruta são formas desenhadas no

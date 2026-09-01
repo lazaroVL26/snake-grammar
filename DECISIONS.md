@@ -248,3 +248,62 @@ coluna lateral é redesenhada a partir de `loadScoreboard()`, que reserializa tu
 
 O teste de ponta a ponta pegou o defeito. A comparação passou a ser por conteúdo
 (`playedAt` + `nick` + `score`), que sobrevive à ida e volta pelo JSON.
+
+## 31. Entrou um servidor, porque ranking de turma não existe sem ele
+
+O professor vai hospedar e a turma joga simultaneamente, cada aluno num PC. Com o ranking
+em `localStorage`, cada máquina teria a sua lista e ninguém disputaria com ninguém — a
+limitação que eu já tinha registrado na decisão 25. Perguntei, e ele escolheu ranking
+compartilhado. A §2 e a §13 do `CLAUDE.md` foram atualizadas: backend deixou de ser
+proibido, mas só este.
+
+O servidor é Node com módulos internos apenas: `http`, `fs`, `path`, `os`. **Zero
+dependências**, nada de Express, nada de banco. São dois arquivos e nenhum passo de build,
+o que mantém a promessa de "roda em qualquer PC com Node instalado".
+
+Ele serve `dist/` e a API na mesma porta. Isso evita CORS, evita configurar endereço de API
+no cliente e reduz o que pode dar errado na sala para uma coisa só: a porta estar liberada.
+
+## 32. O relógio e a data são do servidor, não do aluno
+
+Cada PC da escola pode ter a data errada. Se o cliente carimbasse `date`, um aluno com o
+relógio em 2019 sumiria do ranking do dia e outro poderia ressuscitar a lista de ontem.
+`sanitizeEntry` descarta `playedAt` e `date` que venham no corpo e usa o relógio do
+servidor. O reset diário passa a ser uma decisão de um relógio só.
+
+## 33. Escritas em fila, arquivo trocado por rename
+
+Trinta alunos podem terminar a partida no mesmo segundo. Um `read-modify-write` ingênuo
+perderia partidas nos pontos de `await`, e uma escrita interrompida deixaria o JSON pela
+metade — perdendo o dia inteiro.
+
+Toda operação passa por uma fila (`this.queue = this.queue.then(...)`), e a gravação
+escreve num `.tmp` e faz `rename`, que é atômico no mesmo sistema de arquivos. Há teste com
+40 escritas simultâneas e com 30 POSTs de verdade por HTTP, conferindo que nenhuma se perde
+e que todas as leituras concorrentes veem a mesma lista.
+
+## 34. Cada aluno aparece uma vez, com a melhor partida
+
+Guardar todas as partidas e listar todas faria quem joga dez vezes ocupar o ranking
+inteiro. O arquivo continua guardando o histórico do dia (até 500 partidas), mas a lista
+devolvida é deduplicada por apelido, mantendo a melhor. Comparação sem diferenciar
+maiúsculas: "ana" e "ANA" são a mesma pessoa.
+
+## 35. Sem servidor, o jogo não quebra — degrada
+
+Se o servidor cair no meio da aula, `fetchRanking` e `submitScore` caem para o
+`localStorage` daquele PC e a coluna avisa "Sem conexão com o servidor". A partida é
+gravada localmente **sempre**, mesmo quando o envio dá certo, então nada se perde. Quando o
+servidor volta, a lista da turma reaparece na atualização seguinte.
+
+As chamadas têm `AbortSignal.timeout(3s)`: servidor lento não pode travar a tela do aluno.
+A tela de fim de jogo aparece na hora, com "Enviando para o ranking...", e a colocação
+entra quando a resposta chega — atualizando só aquele parágrafo, para não remontar o painel
+e roubar o foco do teclado.
+
+## 36. A lista se atualiza sozinha, mas não em aba escondida
+
+A coluna do ranking consulta o servidor a cada 5 segundos, **só com a aba visível** — trinta
+navegadores em segundo plano batendo no servidor não ajudariam ninguém. Ao voltar para a
+aba, a atualização é imediata, sem esperar o próximo ciclo. Respostas fora de ordem são
+descartadas por um contador de geração.

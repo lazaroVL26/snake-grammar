@@ -10,10 +10,13 @@
     "preview": "vite preview",
     "test": "vitest run",
     "test:watch": "vitest",
-    "lint": "eslint . --ext .ts,.cjs --max-warnings=0",
-    "format": "prettier --write ."
+    "lint": "eslint . --ext .ts,.cjs,.mjs --max-warnings=0",
+    "format": "prettier --write .",
+    "serve": "node server/index.mjs",
+    "aula": "npm run build && node server/index.mjs"
   },
   "devDependencies": {
+    "@types/node": "^26.4.0",
     "@typescript-eslint/eslint-plugin": "^7.18.0",
     "@typescript-eslint/parser": "^7.18.0",
     "eslint": "^8.57.1",

@@ -11,6 +11,66 @@ conteúdo da rodada.
 No fim da partida o aluno recebe um relatório com precisão, desempenho por tempo verbal
 e a lista das frases erradas com explicação — o material de revisão da aula.
 
+## Hospedar para a turma (vários PCs ao mesmo tempo)
+
+Este é o modo de usar em sala: **um PC seu roda o servidor** e os alunos acessam pelo
+navegador, cada um no seu computador. Todos disputam o **mesmo ranking**, que atualiza
+sozinho a cada 5 segundos.
+
+No PC que vai servir:
+
+```bash
+npm run aula
+```
+
+Isso compila o jogo e sobe o servidor. Ele imprime os endereços, algo assim:
+
+```
+Snake Grammar servindo na porta 8080
+  neste PC:      http://localhost:8080
+  para a turma:  http://192.168.1.148:8080
+  ranking em:    /caminho/do/projeto/data/scores.json
+```
+
+Dite para a turma o endereço da linha **"para a turma"**. É só abrir no navegador — não
+precisa instalar nada nos PCs dos alunos.
+
+### Liberar a porta no firewall
+
+Se os alunos não conseguirem abrir, quase sempre é o firewall do PC servidor. No Linux com
+`ufw`:
+
+```bash
+sudo ufw allow 8080/tcp
+```
+
+Para usar outra porta, defina `PORT`:
+
+```bash
+PORT=3000 npm run aula
+```
+
+### O que o servidor faz
+
+- Serve o jogo (os arquivos de `dist/`) e a API do ranking na mesma porta — sem CORS, sem
+  configuração extra nos PCs dos alunos.
+- Guarda o ranking em `data/scores.json`, no PC servidor. **É o único lugar que precisa de
+  backup** se você quiser guardar o resultado de uma aula.
+- Zera o ranking a cada dia, pelo relógio **do servidor** — assim o PC de um aluno com a
+  data errada não bagunça a lista de todo mundo.
+- Cada aluno aparece **uma vez**, com a melhor partida do dia. Quem joga dez vezes não
+  ocupa a lista inteira.
+- Valida tudo que chega pela rede: apelido, pontuação e precisão são limitados, e corpo
+  acima de 4 KB é recusado. A porta fica aberta para a rede da escola, então nada confia no
+  que o navegador manda.
+
+### Se o servidor cair no meio da aula
+
+O jogo continua funcionando. A coluna do ranking passa a mostrar **só as partidas daquele
+PC** e avisa: "Sem conexão com o servidor". Quando o servidor volta, a lista da turma
+reaparece sozinha na atualização seguinte. Nenhuma partida é perdida — cada PC também
+guarda as próprias no navegador.
+
 ## Apelido e ranking do dia
 
 Antes de começar, o aluno escreve um **apelido** — sem ele a partida não inicia, porque o
@@ -27,13 +87,11 @@ mostra a sua colocação ("2º lugar de 5 partidas hoje").
 ao abrir o jogo, o que não é de hoje é descartado. Não há tarefa agendada nem nada para o
 professor apertar — virou o dia, o ranking está limpo.
 
-> **Importante — o ranking é por navegador.** O jogo não tem servidor (a especificação
-> proíbe backend e exige funcionar offline), então o ranking mora no `localStorage` da
-> máquina onde se joga. Num laboratório, **cada computador tem o seu próprio ranking**; os
-> alunos não disputam entre máquinas. Para uma classificação da turma inteira, use o botão
-> **"Copiar ranking"** na tela de fim de jogo: ele copia a lista do dia em texto, e os
-> alunos colam num documento compartilhado. Uma disputa ao vivo entre máquinas exigiria um
-> servidor, que está fora do escopo definido em `CLAUDE.md`.
+> **Dois modos, conforme você sobe o jogo.** Com `npm run aula` (veja acima) o ranking é
+> **da turma inteira**, guardado no PC servidor — é o modo pensado para a sala. Se você
+> apenas abrir os arquivos estáticos sem o servidor, cada navegador cai no seu próprio
+> ranking local, e aí o botão **"Copiar ranking"** serve para juntar as máquinas num
+> documento compartilhado.
 
 ## Conteúdos disponíveis
 

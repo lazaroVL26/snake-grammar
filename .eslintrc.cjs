@@ -5,7 +5,7 @@ module.exports = {
   parserOptions: { ecmaVersion: 2022, sourceType: 'module' },
   plugins: ['@typescript-eslint'],
   extends: ['eslint:recommended', 'plugin:@typescript-eslint/recommended', 'prettier'],
-  ignorePatterns: ['dist', 'node_modules', 'coverage'],
+  ignorePatterns: ['dist', 'node_modules', 'coverage', 'data'],
   rules: {
     'no-console': ['error', { allow: ['error'] }],
     '@typescript-eslint/no-explicit-any': 'error',

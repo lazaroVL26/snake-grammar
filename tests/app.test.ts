@@ -278,8 +278,53 @@ function hudCell(index: number): string {
   return document.querySelectorAll('.hud__cell')[index]?.textContent ?? '';
 }
 
+/** Espera as promessas do ranking resolverem (envio e releitura). */
+async function flush(): Promise<void> {
+  for (let i = 0; i < 8; i += 1) await Promise.resolve();
+}
+
+/** Servidor de mentira: guarda as partidas e responde como o real. */
+function fakeServer(): { calls: number } {
+  const stored: Array<Record<string, unknown>> = [];
+  const state = { calls: 0 };
+  vi.stubGlobal(
+    'fetch',
+    vi.fn((_url: string, init?: RequestInit) => {
+      state.calls += 1;
+      if (init?.method === 'POST') {
+        const body = JSON.parse(String(init.body)) as Record<string, unknown>;
+        const entry = { ...body, playedAt: 1_000 + stored.length, date: dayKey() };
+        stored.push(entry);
+        const board = [...stored].sort(
+          (a, b) =>
+            Number(b.score) - Number(a.score) || Number(a.playedAt) - Number(b.playedAt),
+        );
+        return Promise.resolve({
+          ok: true,
+          status: 201,
+          json: () =>
+            Promise.resolve({
+              today: dayKey(),
+              board,
+              entry,
+              position: board.indexOf(entry) + 1,
+            }),
+        });
+      }
+      return Promise.resolve({
+        ok: true,
+        status: 200,
+        json: () => Promise.resolve({ today: dayKey(), board: [...stored] }),
+      });
+    }),
+  );
+  return state;
+}
+
 beforeEach(async () => {
   vi.resetModules();
+  // Sem servidor por padrao: os testes de jogo exercitam o modo offline.
+  vi.stubGlobal('fetch', vi.fn().mockRejectedValue(new Error('sem servidor')));
   vi.useFakeTimers({
     toFake: [
       'setTimeout',
@@ -310,6 +355,7 @@ beforeEach(async () => {
 
 afterEach(() => {
   vi.useRealTimers();
+  vi.unstubAllGlobals();
 });
 
 describe('app — boot', () => {
@@ -462,10 +508,11 @@ describe('app — apelido e ranking do dia', () => {
     expect(document.querySelector('.countdown')).toBeNull();
   });
 
-  it('a partida terminada entra no ranking com o apelido', () => {
+  it('a partida terminada entra no ranking com o apelido', async () => {
     startGame('Duda');
     driveUntilQuestion();
     answerQuestion(false);
+    await flush();
 
     expect(gameOver()).toBe(true);
     const mine = document.querySelector('.ranking__row--mine');
@@ -477,11 +524,12 @@ describe('app — apelido e ranking do dia', () => {
     expect(raw).toContain(`"date":"${dayKey()}"`);
   });
 
-  it('a segunda partida entra no mesmo ranking e ordena por pontuacao', () => {
+  it('a segunda partida entra no mesmo ranking e ordena por pontuacao', async () => {
     // Primeira partida: erra de cara, fica com 0 ponto.
     startGame('Ana');
     driveUntilQuestion();
     answerQuestion(false);
+    await flush();
     document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
 
     // Segunda: acerta uma antes de morrer, entao passa a primeira.
@@ -491,6 +539,7 @@ describe('app — apelido e ranking do dia', () => {
     skipCountdown();
     driveUntilQuestion();
     answerQuestion(false);
+    await flush();
 
     expect(gameOver()).toBe(true);
     const nicks = Array.from(document.querySelectorAll('.ranking__nick')).map(
@@ -500,10 +549,11 @@ describe('app — apelido e ranking do dia', () => {
     expect(text()).toContain('1o lugar de 2 partidas hoje');
   });
 
-  it('o apelido fica lembrado para a partida seguinte', () => {
+  it('o apelido fica lembrado para a partida seguinte', async () => {
     startGame('Duda');
     driveUntilQuestion();
     answerQuestion(false);
+    await flush();
     document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
 
     const field = document.querySelector<HTMLInputElement>('.nick__field');
@@ -521,10 +571,11 @@ describe('app — apelido e ranking do dia', () => {
     expect(document.querySelector<HTMLElement>('.overlay')?.hidden).toBe(true);
   });
 
-  it('a coluna do ranking continua visivel depois de voltar para a tela inicial', () => {
+  it('a coluna do ranking continua visivel depois de voltar para a tela inicial', async () => {
     startGame('Duda');
     driveUntilQuestion();
     answerQuestion(false);
+    await flush();
     document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
 
     const side = document.querySelector('.rank-side');
@@ -533,7 +584,7 @@ describe('app — apelido e ranking do dia', () => {
     expect(side?.querySelector('.ranking')?.textContent).toContain('Duda');
   });
 
-  it('partidas de ontem nao aparecem no ranking de hoje', () => {
+  it('partidas de ontem nao aparecem no ranking de hoje', async () => {
     const ontem = new Date(Date.now() - 24 * 60 * 60 * 1000);
     window.localStorage.setItem(
       CONFIG.SCORE_STORAGE_KEY,
@@ -554,11 +605,96 @@ describe('app — apelido e ranking do dia', () => {
     startGame('Duda');
     driveUntilQuestion();
     answerQuestion(false);
+    await flush();
 
     expect(gameOver()).toBe(true);
     const nicks = Array.from(document.querySelectorAll('.ranking__nick')).map(
       (node) => node.textContent,
     );
     expect(nicks).toEqual(['Duda']);
+  });
+});
+
+describe('app — ranking da turma pelo servidor', () => {
+  it('envia a partida ao servidor e mostra a lista que ele devolve', async () => {
+    const server = fakeServer();
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+    await flush();
+
+    expect(server.calls).toBeGreaterThan(0);
+    const side = document.querySelector('.rank-side');
+    expect(side?.textContent).toContain('Duda');
+    expect(side?.textContent).toContain('Toda a turma');
+    expect(side?.textContent).not.toContain('Sem conexao');
+  });
+
+  it('mostra a colocacao vinda do servidor no fim de jogo', async () => {
+    fakeServer();
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+    await flush();
+    expect(text()).toContain('Primeira partida do dia.');
+  });
+
+  // Sem partida em curso de proposito: avancar o relogio com a cobra andando
+  // acabaria a partida e enviaria pontuacao, poluindo a contagem de chamadas.
+  it('a lista se atualiza sozinha enquanto a turma joga', async () => {
+    const server = fakeServer();
+    await fetch('/api/scores', {
+      method: 'POST',
+      body: JSON.stringify({
+        nick: 'Outro',
+        score: 500,
+        accuracy: 90,
+        correct: 5,
+        wrong: 1,
+        topicLabel: 'Futuro',
+      }),
+    });
+    const antes = server.calls;
+
+    vi.advanceTimersByTime(5_000);
+    await flush();
+
+    expect(server.calls).toBeGreaterThan(antes);
+    expect(document.querySelector('.rank-side')?.textContent).toContain('Outro');
+    expect(document.querySelector('.rank-side')?.textContent).toContain('Toda a turma');
+  });
+
+  it('nao consulta o servidor com a aba escondida, e atualiza ao voltar', async () => {
+    const server = fakeServer();
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'hidden',
+      configurable: true,
+    });
+    const antes = server.calls;
+
+    vi.advanceTimersByTime(20_000);
+    await flush();
+    expect(server.calls).toBe(antes);
+
+    Object.defineProperty(document, 'visibilityState', {
+      value: 'visible',
+      configurable: true,
+    });
+    Object.defineProperty(document, 'hidden', { value: false, configurable: true });
+    document.dispatchEvent(new Event('visibilitychange'));
+    await flush();
+    expect(server.calls).toBeGreaterThan(antes);
+  });
+
+  it('sem servidor, avisa que a lista e so deste PC', async () => {
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+    await flush();
+
+    const side = document.querySelector('.rank-side');
+    expect(side?.textContent).toContain('Sem conexao com o servidor');
+    expect(side?.textContent).toContain('Duda');
+    expect(text()).toContain('servidor fora do ar');
   });
 });

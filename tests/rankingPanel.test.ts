@@ -40,9 +40,15 @@ describe('RankingPanel — coluna ao lado do tabuleiro', () => {
     expect(rows[1]?.textContent).toContain('Ana');
   });
 
-  it('avisa que a lista zera todo dia', () => {
+  it('avisa que a lista e da turma e zera todo dia', () => {
     panel.update(board, '2026-09-01');
-    expect(root.textContent).toContain('A lista zera todo dia.');
+    expect(root.textContent).toContain('Toda a turma. Zera todo dia.');
+  });
+
+  it('avisa quando o servidor caiu e a lista e so deste PC', () => {
+    panel.update(board, '2026-09-01', { shared: false });
+    expect(root.textContent).toContain('Sem conexao com o servidor');
+    expect(root.querySelector('.rank-side__note--offline')).not.toBeNull();
   });
 
   it('avisa quando ninguem jogou ainda', () => {
@@ -53,7 +59,7 @@ describe('RankingPanel — coluna ao lado do tabuleiro', () => {
 
   it('destaca a partida recem-jogada', () => {
     const mine = board[1] as ScoreEntry;
-    panel.update(board, '2026-09-01', mine);
+    panel.update(board, '2026-09-01', { highlight: mine });
     const highlighted = root.querySelector('.ranking__row--mine');
     expect(highlighted?.textContent).toContain('Ana');
     expect(highlighted?.getAttribute('aria-current')).toBe('true');

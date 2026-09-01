@@ -1,7 +1,6 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Overlays, type IdleView } from '../src/ui/overlays';
-import type { ScoreEntry } from '../src/types';
 import type { Report } from '../src/ui/report';
 
 const report: Report = {
@@ -37,29 +36,6 @@ const report: Report = {
   ],
   reason: 'too-short',
 };
-
-const board: ScoreEntry[] = [
-  {
-    nick: 'Bruno',
-    score: 90,
-    accuracy: 90,
-    correct: 9,
-    wrong: 1,
-    topicLabel: 'Futuro',
-    playedAt: 1_000,
-    date: '2026-09-01',
-  },
-  {
-    nick: 'Ana',
-    score: 40,
-    accuracy: 50,
-    correct: 2,
-    wrong: 2,
-    topicLabel: 'Presente',
-    playedAt: 2_000,
-    date: '2026-09-01',
-  },
-];
 
 function idleView(overrides: Partial<IdleView> = {}): IdleView {
   return {
@@ -167,16 +143,23 @@ describe('overlays — apelido e ranking', () => {
     expect(root.textContent).not.toContain('Ranking de hoje');
   });
 
-  it('o fim de jogo mostra so a colocacao, sem repetir a lista', () => {
-    const entry = board[1] as ScoreEntry;
-    overlays.showGameOver(report, { board, entry, position: 2, today: '2026-09-01' });
-    expect(root.textContent).toContain('2o lugar de 2 partidas hoje');
+  it('o fim de jogo avisa que esta enviando, sem repetir a lista', () => {
+    overlays.showGameOver(report);
+    expect(root.querySelector('.ranking__position')?.textContent).toContain(
+      'Enviando para o ranking',
+    );
     expect(root.querySelector('.ranking')).toBeNull();
   });
 
-  it('sem ranking, o fim de jogo nao mostra colocacao', () => {
+  it('a colocacao entra quando o servidor responde, sem remontar o painel', () => {
     overlays.showGameOver(report);
-    expect(root.querySelector('.ranking__position')).toBeNull();
+    const antes = root.querySelector('.ranking__position');
+    overlays.setRankingPosition('2o lugar de 7 partidas hoje.');
+    expect(root.querySelector('.ranking__position')?.textContent).toBe(
+      '2o lugar de 7 partidas hoje.',
+    );
+    // Mesmo no: o painel nao foi redesenhado, entao o foco nao se perde.
+    expect(root.querySelector('.ranking__position')).toBe(antes);
   });
 
   it('copiar ranking chama o callback', async () => {

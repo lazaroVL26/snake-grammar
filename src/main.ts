@@ -21,20 +21,16 @@ import { QuestionBankError, loadQuestions, questionsForTopic } from './quiz/ques
 import { QuestionSelector, presentQuestion } from './quiz/selector';
 import { DEFAULT_TOPIC, findTopic } from './quiz/topics';
 import { loadStats, recordGame, saveNick } from './storage/persistence';
-import {
-  dayKey,
-  loadScoreboard,
-  saveScore,
-  scoreboardToText,
-} from './storage/scoreboard';
+import { dayKey, scoreboardToText } from './storage/scoreboard';
+import { fetchRanking, submitScore, type RankingSnapshot } from './storage/ranking';
 import { buildShell, showBankError } from './ui/shell';
 import { Hud } from './ui/hud';
 import { Overlays } from './ui/overlays';
-import { RankingPanel } from './ui/scoreboard';
+import { RankingPanel, positionLabel } from './ui/scoreboard';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
 import { buildReport, reportToText } from './ui/report';
-import type { RankingView } from './ui/overlays';
 import type {
+  ScoreEntry,
   AnswerMode,
   AttemptLog,
   Direction,
@@ -61,6 +57,8 @@ const rng = createRng(Date.now() >>> 0);
 const renderer = new Renderer(shell.canvas);
 const hud = new Hud(shell.hud);
 const rankingPanel = new RankingPanel(shell.ranking);
+/** De quanto em quanto tempo a coluna do ranking se atualiza sozinha. */
+const RANKING_POLL_MS = 5_000;
 
 let topic: TopicId = DEFAULT_TOPIC;
 let pool: Question[] = questionsForTopic(findTopic(topic), bank);
@@ -71,7 +69,10 @@ let mode: AnswerMode = 'choice';
 let currentQuestion: Question | null = null;
 let countdownEndsAt = 0;
 let nick = loadStats().nick;
-let ranking: RankingView | null = null;
+let snapshot: RankingSnapshot = { board: [], today: dayKey(), shared: true };
+let mine: ScoreEntry | undefined;
+/** Descarta resposta antiga que chegue depois de uma mais nova. */
+let rankingGeneration = 0;
 
 const byId = new Map(bank.map((question) => [question.id, question]));
 
@@ -80,9 +81,20 @@ function showIdleScreen(): void {
   overlays.showIdle({ bestScore: best, nick, questionCount: countFor });
 }
 
-/** Redesenha a coluna do ranking ao lado do tabuleiro. */
-function refreshRanking(): void {
-  rankingPanel.update(loadScoreboard(), dayKey(), ranking?.entry);
+function paintRanking(): void {
+  rankingPanel.update(snapshot.board, snapshot.today, {
+    highlight: mine,
+    shared: snapshot.shared,
+  });
+}
+
+/** Busca o ranking da turma no servidor e redesenha a coluna. */
+async function refreshRanking(): Promise<void> {
+  const generation = (rankingGeneration += 1);
+  const fresh = await fetchRanking(dayKey());
+  if (generation !== rankingGeneration) return;
+  snapshot = fresh;
+  paintRanking();
 }
 
 /** Quantas frases cada conteudo do menu tem, para o aluno escolher com informacao. */
@@ -186,18 +198,32 @@ function finishGame(): void {
     findTopic(topic).label,
     nick,
   );
-  const saved = saveScore({
-    nick,
-    score: report.score,
-    accuracy: report.accuracy,
-    correct: report.correct,
-    wrong: report.wrong,
-    topicLabel: report.topicLabel,
-    playedAt: Date.now(),
+  // A tela de fim de jogo aparece na hora; a colocacao entra quando o
+  // servidor responder, para o aluno nao ficar esperando a rede.
+  overlays.showGameOver(report);
+
+  const generation = (rankingGeneration += 1);
+  void submitScore(
+    {
+      nick,
+      score: report.score,
+      accuracy: report.accuracy,
+      correct: report.correct,
+      wrong: report.wrong,
+      topicLabel: report.topicLabel,
+    },
+    dayKey(),
+  ).then((saved) => {
+    if (generation !== rankingGeneration) return;
+    snapshot = saved.snapshot;
+    mine = saved.entry;
+    paintRanking();
+    overlays.setRankingPosition(
+      saved.snapshot.shared
+        ? positionLabel(saved.position, saved.snapshot.board.length)
+        : `${positionLabel(saved.position, saved.snapshot.board.length)} (so deste PC: servidor fora do ar)`,
+    );
   });
-  ranking = { ...saved, today: dayKey() };
-  refreshRanking();
-  overlays.showGameOver(report, ranking);
 }
 
 async function copyReport(): Promise<boolean> {
@@ -213,7 +239,7 @@ async function copyReport(): Promise<boolean> {
 }
 
 async function copyRanking(): Promise<boolean> {
-  const text = scoreboardToText(ranking?.board ?? loadScoreboard(), dayKey());
+  const text = scoreboardToText(snapshot.board, snapshot.today);
   try {
     await navigator.clipboard.writeText(text);
     return true;
@@ -283,11 +309,23 @@ bindSwipe(shell.canvas, turn);
 
 window.addEventListener('blur', pauseIfRunning);
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) pauseIfRunning();
+  if (document.hidden) {
+    pauseIfRunning();
+    return;
+  }
+  // Voltou para a aba: a turma jogou enquanto isso, entao atualiza na hora.
+  void refreshRanking();
 });
 window.addEventListener('resize', () => renderer.resize());
 
 hud.update(state, best);
 showIdleScreen();
-refreshRanking();
+paintRanking();
+void refreshRanking();
+
+// Varios alunos jogam ao mesmo tempo: a lista precisa acompanhar sozinha.
+window.setInterval(() => {
+  if (document.visibilityState === 'visible') void refreshRanking();
+}, RANKING_POLL_MS);
+
 engine.start();
