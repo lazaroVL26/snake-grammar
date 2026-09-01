@@ -793,3 +793,205 @@
 :root:fullscreen .hints {
   display: none;
 }
+
+/* ================================================================
+ * Estados e personalidade.
+ * Vem depois da convivencia com o Bootstrap e usa duas classes, senao
+ * `.choice.list-group-item` venceria e o item marcado ficaria invisivel.
+ * ================================================================ */
+
+/* ---------- itens de escolha (conteudo e modo de resposta) ---------- */
+
+.choices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.choices__legend {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.choice.list-group-item {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  padding-left: calc(var(--space-3) + 6px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Barra de acento a esquerda: some quando o item nao esta marcado. */
+.choice.list-group-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--snake);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-fast) var(--easing);
+}
+
+.choice__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.choice__detail {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.choice.choice--on {
+  border-color: var(--snake);
+  background: color-mix(in srgb, var(--snake) 15%, var(--bg));
+}
+
+.choice.choice--on::before {
+  transform: scaleX(1);
+}
+
+.choice.choice--on .choice__label {
+  color: var(--snake-head);
+}
+
+.choice.choice--on .choice__detail {
+  color: var(--text);
+}
+
+/* Marca "escolhido" desenhada em CSS — a UI nao usa emoji (CLAUDE.md 9.5). */
+.choice.choice--on .choice__label::after {
+  content: '';
+  display: inline-block;
+  width: 0.42em;
+  height: 0.72em;
+  margin-left: 0.5em;
+  border: solid var(--snake);
+  border-width: 0 0.16em 0.16em 0;
+  transform: rotate(45deg) translateY(-0.12em);
+}
+
+/* Dois modos de resposta lado a lado quando cabe. */
+@media (min-width: 420px) {
+  .choices--modes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- alternativas do modal ---------- */
+
+.option.list-group-item {
+  font-family: var(--font-mono);
+  padding: var(--space-3);
+}
+
+.option.option--selected {
+  border-color: var(--snake);
+  background: color-mix(in srgb, var(--snake) 15%, var(--bg));
+  color: var(--snake-head);
+}
+
+.option.option--selected .option__key {
+  border-color: var(--snake);
+  color: var(--snake-head);
+}
+
+.option.option--ok {
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, var(--bg));
+  color: var(--ok);
+}
+
+.option.option--err {
+  border-color: var(--err);
+  background: color-mix(in srgb, var(--err) 12%, var(--bg));
+  color: var(--err);
+  text-decoration: line-through;
+}
+
+/* ---------- ranking ---------- */
+
+.ranking__row.list-group-item {
+  display: grid;
+  grid-template-columns: 1.6rem minmax(0, 1fr) auto 3.2rem;
+  gap: var(--space-2);
+  align-items: baseline;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.ranking__row.list-group-item::before {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Pod~io ganha cor, sem emoji: ouro, prata e bronze da nossa paleta. */
+.ranking__row.list-group-item:nth-child(1)::before {
+  color: var(--snake);
+}
+
+.ranking__row.list-group-item:nth-child(2)::before {
+  color: var(--text);
+}
+
+.ranking__row.list-group-item:nth-child(3)::before {
+  color: var(--fruit);
+}
+
+.ranking__row.ranking__row--mine {
+  background: color-mix(in srgb, var(--snake) 20%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--snake) 45%, transparent);
+}
+
+.ranking__row--mine .ranking__nick {
+  color: var(--snake-head);
+  font-weight: 600;
+}
+
+.ranking__score {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* ---------- personalidade ---------- */
+
+.shell__title {
+  /* Marca-texto sob o titulo: a assinatura do caderno de idiomas. */
+  background-image: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--snake) 45%, transparent) 0.18em,
+    transparent 0.18em
+  );
+  padding-inline: 0.1em;
+}
+
+.shell__sub {
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.hud__value {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud__label {
+  font-size: 0.66rem;
+}
+
+.panel__title,
+.rank-side__title {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.countdown {
+  font-family: var(--font-display);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--snake) 45%, transparent);
+}

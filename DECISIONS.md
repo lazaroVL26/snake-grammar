@@ -385,3 +385,33 @@ esconde a moldura do navegador.
 
 Resultado num monitor de 1920x1080, sem D-pad: tabuleiro de 640px para **916px**, sem
 barra de rolagem.
+
+## 43. Regressão do Bootstrap: os estados de seleção sumiram
+
+O professor relatou que não dava para saber qual conteúdo estava marcado e que havia texto
+grudado. Eram dois defeitos meus, da migração para o Bootstrap:
+
+**O bloco `.choice` inteiro foi apagado.** Ao enxugar o `app.css` removi o trecho entre os
+botões e o ranking, e junto foram `.choice`, `.choice__label`, `.choice__detail` e
+`.choice--on`. Sem eles, valia o `display: block` do `.list-group-item`: rótulo e descrição
+viraram uma linha só ("Simple Past x Past PerfectO que aconteceu antes...") e o item
+marcado ficou idêntico aos outros.
+
+**As regras de convivência venciam os estados.** `.choice.list-group-item` tem duas classes
+e vinha depois de `.choice--on`, que tem uma — o mesmo valia para `.option--selected`,
+`.option--ok`, `.option--err` e `.ranking__row--mine`. Ou seja, **a alternativa marcada no
+quiz e a linha do próprio aluno no ranking também estavam sem destaque**, não só o menu.
+
+Agora os estados usam duas classes (`.choice.choice--on`) e ficam depois da convivência.
+Todos os pares novos foram conferidos em contraste: o menor é 4,99:1, ainda AA.
+
+## 44. O item marcado usa quatro sinais, não só cor
+
+Depender de um fundo levemente tingido era o que tornava a seleção difícil de enxergar.
+O item marcado agora tem barra de acento à esquerda, borda, rótulo em `--snake-head` e uma
+marca de conferido desenhada em CSS — sem emoji, como manda a §9.5. Quatro sinais
+independentes, e nenhum deles exige distinguir tons próximos.
+
+A tipografia ganhou papel maior: Bricolage Grotesque nos rótulos das escolhas, nos números
+do ranking e nas pontuações; marca-texto sob o título, no amarelo da cobra, fechando com a
+direção de arte de "caderno de idiomas encontrando fliperama" da §9.1.
