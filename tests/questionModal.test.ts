@@ -67,7 +67,7 @@ afterEach(() => {
 describe('questionModal — estrutura e acessibilidade', () => {
   it('abre como dialogo modal com a frase e a lacuna', () => {
     modal.open(presented, 'choice');
-    const dialog = document.querySelector('.modal');
+    const dialog = document.querySelector('.question-modal');
     expect(dialog?.getAttribute('role')).toBe('dialog');
     expect(dialog?.getAttribute('aria-modal')).toBe('true');
     expect(document.querySelector('.sentence')?.textContent).toBe(question.sentence);
@@ -164,6 +164,67 @@ describe('questionModal — multipla escolha', () => {
   });
 });
 
+describe('questionModal — so uma alternativa fica verde', () => {
+  // Caso real do banco (sp-001, ct-002...): a certa e uma forma simples e os
+  // distratores sao "had X"/"have X", que terminam com a mesma palavra.
+  const armadilha: Question = {
+    id: 'ct-002',
+    level: 2,
+    focus: 'contrast',
+    sentence: 'We arrived at 8:00 and the game ___ ten minutes later.',
+    verbHint: 'start',
+    options: ['started', 'had started', 'has started', 'starts'],
+    answerIndex: 0,
+    accepted: ['started'],
+    explanation: 'Sequencia de fatos no passado: Simple Past.',
+  };
+  const apresentada: PresentedQuestion = {
+    question: armadilha,
+    options: ['had started', 'started', 'has started', 'starts'],
+    answerIndex: 1,
+  };
+
+  const verdes = (): string[] =>
+    Array.from(document.querySelectorAll<HTMLButtonElement>('.option--ok')).map(
+      (b) => b.dataset.option ?? '',
+    );
+
+  it('acertando, so a alternativa certa fica verde', () => {
+    modal.open(apresentada, 'choice');
+    press('2', 'Digit2');
+    press('Enter');
+    expect(answered[0]?.correct).toBe(true);
+    expect(verdes()).toEqual(['started']);
+  });
+
+  it('errando, a certa fica verde e so a marcada fica vermelha', () => {
+    modal.open(apresentada, 'choice');
+    press('1', 'Digit1');
+    press('Enter');
+    expect(answered[0]?.correct).toBe(false);
+    expect(verdes()).toEqual(['started']);
+    const vermelhas = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.option--err'),
+    ).map((b) => b.dataset.option);
+    expect(vermelhas).toEqual(['had started']);
+  });
+
+  it('cada alternativa guarda o proprio texto, sem o numero do atalho', () => {
+    modal.open(apresentada, 'choice');
+    const textos = Array.from(
+      document.querySelectorAll<HTMLButtonElement>('.option'),
+    ).map((b) => b.dataset.option);
+    expect(textos).toEqual(['had started', 'started', 'has started', 'starts']);
+  });
+
+  it('no estouro de tempo, nada fica vermelho e so a certa fica verde', () => {
+    modal.open(apresentada, 'choice');
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS + 100);
+    expect(verdes()).toEqual(['started']);
+    expect(document.querySelectorAll('.option--err').length).toBe(0);
+  });
+});
+
 describe('questionModal — modo digitado', () => {
   it('foca o campo e aceita a contracao', () => {
     modal.open(presented, 'typed');
@@ -187,6 +248,56 @@ describe('questionModal — modo digitado', () => {
 });
 
 describe('questionModal — cronometro', () => {
+  const largura = (): number =>
+    Number.parseFloat(
+      document.querySelector<HTMLElement>('.timer__bar')?.style.width ?? '0',
+    );
+
+  it('a barra comeca cheia e encolhe conforme o tempo passa', () => {
+    modal.open(presented, 'choice');
+    expect(largura()).toBeCloseTo(100, 0);
+
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS / 4);
+    const umQuarto = largura();
+    expect(umQuarto).toBeLessThan(100);
+    expect(umQuarto).toBeGreaterThan(60);
+
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS / 4);
+    const metade = largura();
+    expect(metade).toBeLessThan(umQuarto);
+    expect(metade).toBeCloseTo(50, 0);
+  });
+
+  it('a barra corre a cada quadro, nao aos saltos', () => {
+    modal.open(presented, 'choice');
+    const leituras: number[] = [];
+    for (let i = 0; i < 6; i += 1) {
+      vi.advanceTimersByTime(16);
+      leituras.push(largura());
+    }
+    // Cada quadro precisa encolher um pouco: e isso que faz a barra "correr".
+    for (let i = 1; i < leituras.length; i += 1) {
+      expect(leituras[i], `quadro ${i}`).toBeLessThan(leituras[i - 1] as number);
+    }
+  });
+
+  it('a barra chega a zero e vira vermelha no fim', () => {
+    modal.open(presented, 'choice');
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS * 0.8);
+    const bar = document.querySelector<HTMLElement>('.timer__bar');
+    expect(bar?.dataset.low).toBe('true');
+    vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS * 0.2 + 50);
+    expect(largura()).toBe(0);
+  });
+
+  it('o texto do cronometro acompanha os segundos', () => {
+    modal.open(presented, 'choice');
+    expect(document.querySelector('.timer__text')?.textContent).toBe('20s');
+    vi.advanceTimersByTime(5_000);
+    // Restam ~15,008s: o arredondamento e para cima, entao 16s esta certo.
+    expect(document.querySelector('.timer__text')?.textContent).toMatch(/^1[56]s$/);
+  });
+
   it('estourar o tempo conta como erro com chosen null', () => {
     modal.open(presented, 'choice');
     vi.advanceTimersByTime(CONFIG.QUESTION_TIME_MS + 100);

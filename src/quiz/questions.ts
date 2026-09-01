@@ -1,10 +1,25 @@
 import seed from '../../content/questions.seed.json';
 import type { Focus, Question } from '../types';
 import { acceptedForms, normalize } from './answer';
+import { includesFocus, type Topic } from './topics';
 
 export const GAP = '___';
 
-const FOCUSES: readonly Focus[] = ['simple-past', 'past-perfect', 'contrast'];
+const FOCUSES: readonly Focus[] = [
+  'simple-past',
+  'past-continuous',
+  'past-perfect',
+  'past-perfect-continuous',
+  'contrast',
+  'present-simple',
+  'present-continuous',
+  'present-perfect',
+  'present-perfect-continuous',
+  'future-will',
+  'future-going-to',
+  'future-continuous',
+  'future-perfect',
+];
 const LEVELS = [1, 2, 3];
 
 export class QuestionBankError extends Error {
@@ -104,3 +119,11 @@ export function loadQuestions(data: unknown = seed): Question[] {
 }
 
 export const QUESTION_BANK: readonly unknown[] = seed as readonly unknown[];
+
+/** Questoes de um conteudo. 'all' devolve o banco inteiro. */
+export function questionsForTopic(
+  topic: Topic,
+  bank: readonly Question[] = loadQuestions(),
+): Question[] {
+  return bank.filter((question) => includesFocus(topic, question.focus));
+}

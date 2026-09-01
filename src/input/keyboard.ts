@@ -15,6 +15,7 @@ export interface KeyboardHandlers {
   onDirection: (direction: Direction) => void;
   onTogglePause: () => void;
   onConfirm: () => void;
+  onToggleFullscreen: () => void;
 }
 
 /** Teclado global do jogo. O modal cuida das proprias teclas e para a propagacao. */
@@ -28,6 +29,12 @@ export function bindKeyboard(handlers: KeyboardHandlers): () => void {
     if (direction) {
       event.preventDefault();
       handlers.onDirection(direction);
+      return;
+    }
+
+    if (event.code === 'KeyF') {
+      event.preventDefault();
+      handlers.onToggleFullscreen();
       return;
     }
 

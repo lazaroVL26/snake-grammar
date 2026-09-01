@@ -13,7 +13,9 @@ Jogo web educativo usado como atividade de sala de aula em uma **aula de inglês
 **Snake**: a cobra se move em uma grade, come frutas e cresce.
 
 O diferencial: **toda vez que a cobra come uma fruta, o jogo congela e abre um modal
-com uma frase em inglês com lacuna** (gap-fill) sobre **Simple Past × Past Perfect**.
+com uma frase em inglês com lacuna** (gap-fill) sobre **tempos verbais do inglês**. Na
+tela inicial o aluno escolhe o conteúdo da rodada: Simple Past × Past Perfect (o conjunto
+original), Presente, Passado, Futuro ou todos misturados.
 
 - Resposta **certa** → +1 ponto e a cobra cresce 1 segmento.
 - Resposta **errada** → a cobra **perde 1 segmento** de comprimento (e não pontua).
@@ -34,15 +36,22 @@ em inglês.** Nunca traduza as frases do exercício.
 - **Vanilla TS + Canvas 2D** para o jogo. **Não use React, Vue, Svelte, Phaser ou
   qualquer game engine.** O tabuleiro é desenhado no `<canvas>`; HUD, modais e overlays
   são DOM comum.
-- **CSS puro** com custom properties (`:root`). Sem Tailwind, sem CSS-in-JS, sem
-  frameworks de UI.
+- **Bootstrap 5 como base de componentes**, instalado via npm (nunca CDN, para não
+  quebrar o offline) e **só o CSS** — o JavaScript do Bootstrap não entra, porque o modal
+  da pergunta tem comportamento próprio (foco preso, Esc bloqueado, cronômetro).
+  A paleta e a tipografia continuam sendo as nossas: `styles/bootstrap-theme.css` traduz
+  os tokens de `tokens.css` para as variáveis do Bootstrap. Sem Tailwind, sem CSS-in-JS.
 - **Vitest** para testes unitários da lógica pura.
 - **ESLint + Prettier**.
-- **Zero dependências de runtime.** Tudo que vai para o bundle final deve ser código
-  próprio. Dependências apenas em `devDependencies`.
-- Persistência apenas em `localStorage`. **Sem backend, sem banco de dados, sem API
-  externa, sem chamada de rede em runtime.**
-- Deve rodar 100% offline depois do build (`dist/` servido como arquivos estáticos).
+- **Uma única dependência de runtime: o `bootstrap`** (CSS). Qualquer outra precisa ser
+  justificada em `DECISIONS.md` antes de entrar. O resto do bundle é código próprio.
+- **Servidor próprio permitido, e só ele** (`server/`): Node com módulos internos apenas,
+  zero dependências, sem banco de dados e sem API externa. Ele serve `dist/` e o ranking da
+  turma. Nada mais pode fazer chamada de rede.
+- No navegador, a persistência local continua em `localStorage`: recorde, apelido e o
+  ranking de reserva de quando o servidor não responde.
+- Sem o servidor, `dist/` continua rodando 100% offline como arquivos estáticos — só que
+  aí cada navegador tem o seu próprio ranking.
 - Alvo: navegadores modernos (Chrome/Edge/Firefox/Safari atuais). Sem polyfills legados.
 
 ---
@@ -55,6 +64,8 @@ npm run dev        # servidor de desenvolvimento
 npm run build      # type-check + build de produção em dist/
 npm run preview    # serve o build
 npm run test       # vitest run
+npm run aula       # build + servidor do ranking para a turma (§5.8)
+npm run serve      # só o servidor, sem rebuild
 npm run test:watch
 npm run lint       # eslint --max-warnings=0
 npm run format     # prettier --write
@@ -81,6 +92,9 @@ snake-grammar/
 ├─ CLAUDE.md
 ├─ content/
 │  └─ questions.seed.json      # banco de questões (fornecido, ver §8)
+├─ server/                     # servidor de ranking da turma (§5.8)
+│  ├─ index.mjs                # HTTP: serve dist/ e a API
+│  └─ scores.mjs               # ranking do dia em arquivo JSON
 └─ src/
    ├─ main.ts                  # bootstrap: monta DOM, instancia Game, liga input
    ├─ types.ts                 # todos os tipos compartilhados
@@ -105,10 +119,12 @@ snake-grammar/
    │  ├─ keyboard.ts
    │  └─ touch.ts              # swipe + D-pad na tela em telas pequenas
    ├─ storage/
-   │  └─ persistence.ts        # recorde e estatísticas em localStorage
+   │  ├─ persistence.ts        # recorde, estatísticas e apelido em localStorage
+   │  └─ scoreboard.ts         # ranking do dia, com reset diário
    └─ styles/
-      ├─ tokens.css
-      └─ app.css
+      ├─ tokens.css            # paleta e tipografia (fonte da verdade)
+      ├─ bootstrap-theme.css   # traduz os tokens para as variáveis do Bootstrap
+      └─ app.css               # o que é só nosso: tabuleiro, lacuna, ranking, D-pad
 ```
 
 **Regra de ouro da arquitetura:** `src/game/` e `src/quiz/` são **lógica pura e
@@ -164,8 +180,9 @@ testável** — não podem importar nada de `src/ui/`, `src/input/` nem tocar em
 - **Game over por encolhimento:** se após a penalidade o comprimento ficar **< 3**, o
   jogo termina com a mensagem "A cobra ficou curta demais". Não deixe o comprimento
   chegar a 0 nem gerar índice negativo.
-- Recorde (`bestScore`) e estatísticas ficam em `localStorage` na chave
-  `snake-grammar:v1`.
+- Recorde (`bestScore`), estatísticas e apelido ficam em `localStorage` na chave
+  `snake-grammar:v1`. O ranking do dia fica na chave separada
+  `snake-grammar:scores:v1` (§5.7).
 
 ### 5.5 Fim de jogo — relatório
 
@@ -177,8 +194,44 @@ A tela de game over é parte do valor pedagógico. Deve mostrar:
   `past-perfect` e `contrast`.
 - Lista das **frases erradas** com a resposta correta e a explicação (é o material de
   revisão que o professor vai usar depois da partida).
-- Botões: "Jogar de novo" e "Copiar relatório" (copia um resumo em texto para a área de
-  transferência, para o aluno colar no caderno/Moodle).
+- Botão: "Jogar de novo". **Nada de copiar para a área de transferência** — o relatório é
+  para ler ali, e o ranking da turma já vive no servidor (§5.8).
+
+### 5.7 Apelido e ranking do dia
+
+Antes de começar, o aluno escreve um apelido; sem ele a partida não inicia. O apelido é
+lembrado entre partidas.
+
+Toda partida terminada entra no ranking do dia, com apelido, pontuação, precisão e
+conteúdo. O ranking fica numa **coluna própria ao lado do tabuleiro** (`aside.rank-side`),
+visível a partida inteira, mostrando o **top `SCOREBOARD_VISIBLE`** com a partida
+recém-jogada destacada. A tela de fim de jogo não repete a lista: mostra só a colocação.
+
+**O ranking zera a cada dia.** Cada entrada guarda o dia local em que foi jogada, e a
+leitura descarta o que não é de hoje — sem tarefa agendada. Guarda no máximo
+`SCOREBOARD_SIZE` partidas, ordenadas por pontuação; empate favorece quem jogou antes.
+
+**O ranking é da turma quando o servidor está no ar** (§5.8). Se ele não responde, o jogo
+cai para o ranking local daquele navegador e avisa na coluna. Quando o servidor volta, a
+lista da turma reaparece sozinha.
+
+### 5.8 Servidor de ranking (`server/`)
+
+Node puro, sem dependências, iniciado com `npm run aula`. Serve `dist/` e a API na mesma
+porta (padrão 8080), então não há CORS nem configuração nos PCs dos alunos.
+
+- `GET /api/scores` → `{ today, board }` com o ranking de hoje.
+- `POST /api/scores` → guarda a partida e devolve `{ today, board, entry, position }`.
+- `GET /api/health` → `{ ok: true }`.
+
+Regras que só o servidor pode garantir, e por isso moram nele:
+
+- **A data e o horário são do servidor.** O relógio errado de um aluno não fragmenta o dia.
+- **Escritas serializadas** numa fila, com troca de arquivo por `rename`. Trinta alunos
+  terminando junto não perdem partida nem deixam o JSON pela metade.
+- **Nada confia no cliente:** apelido, pontuação e precisão são limitados, corpo acima de
+  4 KB é recusado, e `../` na URL não sai de `dist/`.
+- **Cada apelido aparece uma vez**, com a melhor partida do dia.
 
 ### 5.6 Máquina de estados
 
@@ -228,6 +281,10 @@ export const CONFIG = {
   WRAP_WALLS: false,
   DIRECTION_BUFFER: 2,
   STORAGE_KEY: 'snake-grammar:v1',
+  SCORE_STORAGE_KEY: 'snake-grammar:scores:v1',
+  SCOREBOARD_SIZE: 20,
+  SCOREBOARD_VISIBLE: 10,
+  NICK_MAX_LENGTH: 16,
 } as const;
 ```
 
@@ -240,7 +297,21 @@ export const CONFIG = {
 ```ts
 export type Vec = { x: number; y: number };
 export type Direction = 'up' | 'down' | 'left' | 'right';
-export type Focus = 'simple-past' | 'past-perfect' | 'contrast';
+export type Focus =
+  | 'simple-past'
+  | 'past-continuous'
+  | 'past-perfect'
+  | 'past-perfect-continuous'
+  | 'contrast'
+  | 'present-simple'
+  | 'present-continuous'
+  | 'present-perfect'
+  | 'present-perfect-continuous'
+  | 'future-will'
+  | 'future-going-to'
+  | 'future-continuous'
+  | 'future-perfect';
+export type TopicId = 'all' | 'present' | 'past' | 'future' | 'past-contrast';
 export type AnswerMode = 'choice' | 'typed';
 export type GamePhase =
   'idle' | 'countdown' | 'running' | 'paused' | 'question' | 'feedback' | 'gameover';
@@ -288,9 +359,28 @@ frase sem `___`, ou `accepted` que não contenha a alternativa correta normaliza
 
 ---
 
+### 7.4 Conteúdos do menu (`quiz/topics.ts`)
+
+A tela inicial oferece cinco conteúdos. Cada um é um conjunto de `Focus`; `all` aceita o
+banco inteiro. O padrão é `past-contrast`, o conteúdo original.
+
+| `TopicId`       | Rótulo                     | Tempos incluídos                                            |
+| --------------- | -------------------------- | ----------------------------------------------------------- |
+| `past-contrast` | Simple Past x Past Perfect | `simple-past`, `past-perfect`, `contrast`                   |
+| `present`       | Presente                   | simple, continuous, perfect, perfect continuous             |
+| `past`          | Passado                    | simple, continuous, perfect, perfect continuous, `contrast` |
+| `future`        | Futuro                     | will, going to, continuous, perfect                         |
+| `all`           | Todos os tempos            | banco inteiro                                               |
+
+Todo conteúdo precisa ter **pelo menos 12 questões e 4 por nível** — existe teste que
+falha se um conteúdo do menu ficar magro demais.
+
+---
+
 ## 8. Conteúdo pedagógico — regras inegociáveis
 
-O conteúdo é **Simple Past × Past Perfect**. Se você criar questões novas:
+O conteúdo são os **tempos verbais do inglês**, agrupados em conteúdos escolhíveis
+(§7.4). Se você criar questões novas:
 
 1. **A alternativa correta precisa ser a única gramaticalmente possível no contexto.**
    Nunca coloque como distrator uma forma que também estaria correta. Exemplo do erro:
@@ -318,7 +408,9 @@ Nada de "neon verde em fundo preto" — o visual é **caderno de idiomas encontr
 fliperama**: fundo azul-noite, grade como papel pautado, e a cobra em amarelo de
 marca-texto.
 
-Tokens (defina em `styles/tokens.css`, use **só** estes):
+Tokens (defina em `styles/tokens.css`, use **só** estes). O Bootstrap entra depois deles e
+é reconfigurado por `styles/bootstrap-theme.css` — nenhum componente pode usar cor crua do
+Bootstrap:
 
 ```css
 --bg: #0e1a2b; /* fundo da página */
@@ -331,15 +423,30 @@ Tokens (defina em `styles/tokens.css`, use **só** estes):
 --err: #ee6c5d; /* erro */
 --text: #eae7e1;
 --muted: #9aaec8;
+--accent: #7cc6ff; /* azul de fliperama: sequência, atalhos 1–4 */
 ```
 
 Tipografia (3 papéis, carregadas do Google Fonts no `index.html` com `display=swap`):
 
-- Display / títulos: **Bricolage Grotesque**, peso 700, tracking apertado.
+A tipografia é **inteira de fliperama**, em duas faces:
+
+- **Press Start 2P** (`--font-arcade`, também `--font-display`): título, placar, contagem
+  regressiva, ranking, botões e rótulo curto. Só em número e rótulo — **nunca em texto
+  corrido**, onde ela dobra a largura e cansa a leitura.
+- **VT323** (`--font-ui` e `--font-mono`): tudo que é para ler — frase do exercício,
+  explicação, alternativas, menus. É fonte de terminal CRT, retrô do mesmo jeito, mas com
+  altura de x e espaçamento que aguentam frase inteira.
+
+VT323 desenha pequeno: a base do corpo é `--text-base` (1.15rem) e a frase do exercício
+vai a 1.6rem, senão o aluno lê apertado.
+
 - Corpo / UI: **Inter**.
-- **Frase do exercício: IBM Plex Mono** — a frase em inglês aparece sempre em
-  monoespaçada, com a lacuna renderizada como um sublinhado que pulsa como cursor de
-  caderno. Essa é a assinatura visual do projeto.
+- **Frase do exercício: sempre monoespaçada** (hoje VT323), com a lacuna renderizada como
+  um sublinhado que pulsa como cursor de caderno. Essa é a assinatura visual do projeto.
+
+O placar pulsa quando o número muda, e a sequência de acertos acende em `--accent`.
+Brilhos saem sempre de `--glow-snake` / `--glow-accent`, derivados da paleta — nunca uma
+cor nova solta.
 
 Momento de assinatura: ao acertar, o verbo escolhido **se encaixa na lacuna** (transição
 curta de 200ms, escala + cor `--ok`) e só então o modal fecha e a cauda cresce. Ao errar,
@@ -351,15 +458,43 @@ o feedback vira troca de estado instantânea.
 
 ### 9.2 Layout
 
-- Coluna única centralizada, largura máxima ~640px.
+- A coluna do jogo (`div.shell__main`) é um elemento próprio, irmão do ranking. **Isso é
+  estrutural, não estética:** com os dois no mesmo grid o ranking teria que atravessar
+  linhas, e `grid-row: 1 / -1` não vale sem `grid-template-rows` explícito — o ranking
+  acabava ocupando só a primeira linha e esticando o cabeçalho, empurrando o HUD para
+  baixo dele.
+- **O tabuleiro acompanha a resolução.** Piso de 480px, teto em `--board-max` (1040px), e
+  o limite real é a altura livre: `100dvh` menos o que fica acima e abaixo. Assim ele
+  cresce num monitor grande sem nunca criar rolagem. Em tela baixa (≤820px de altura) a
+  linha de dicas some para virar espaço de jogo.
+- A partir de 960px de viewport, uma coluna lateral de 264px com o ranking do dia aparece
+  à direita, grudada no topo (`position: sticky`); abaixo disso ela desce para o fim da
+  página, depois do D-pad.
 - HUD acima do canvas: pontos • comprimento • acertos/erros • recorde.
 - Abaixo do canvas: uma linha discreta com os controles.
+- Botão de **tela cheia** no cabeçalho (tecla `F`). Maximiza a página inteira, nunca só o
+  tabuleiro: o modal da pergunta vive fora do canvas e sumiria. A partir de 960px o
+  tabuleiro cresce para ocupar a altura livre; abaixo disso a tela cheia só tira a moldura
+  do navegador.
 - Responsivo até 360px de largura: o canvas encolhe proporcionalmente e o D-pad de toque
   aparece abaixo dele.
+
+### 9.2b Convite de tela cheia
+
+Na **primeira visita** a tela inicial mostra um convite para jogar em tela cheia, com dois
+botões: "Jogar em tela cheia" e "Agora não". Qualquer um dos dois marca
+`seenFullscreenHint` em `localStorage` e o convite não volta.
+
+Tela cheia só pode ser pedida a partir de um gesto do usuário, então **não existe
+maximizar sozinho** quando a página abre — o convite tem que ser clicável. O texto diz
+como sair (Esc ou F), para o aluno não se sentir preso, e o convite não rouba o foco do
+campo de apelido.
 
 ### 9.3 Modal da pergunta
 
 - `role="dialog"`, `aria-modal="true"`, foco preso dentro do modal (focus trap).
+  A classe é `question-modal`, **não** `modal`: `.modal` é do Bootstrap e traz
+  `display: none`, que esconderia o diálogo.
 - **Esc não fecha** o modal — a pergunta é obrigatória. Esc dentro do modal não faz nada.
 - Alternativas navegáveis por `Tab`/setas, selecionáveis pelas teclas **1–4**, confirmação
   com `Enter`.
@@ -474,12 +609,15 @@ Só considere a tarefa concluída quando **todos** os itens abaixo forem verdade
 
 ## 13. Fora de escopo (não faça)
 
-- Multiplayer, ranking online, contas de usuário, backend.
+- Multiplayer em tempo real (a cobra de um aluno não aparece na tela do outro), contas de
+  usuário com senha, banco de dados, serviço de nuvem. O servidor de ranking em `server/`
+  é a única coisa fora do navegador, e ele é deliberadamente mínimo.
 - Áudio e trilha sonora (pode existir um toggle desligado por padrão apenas se sobrar
   tempo — não é requisito).
 - Sprites, imagens externas, ícones baixados: a cobra e a fruta são formas desenhadas no
   canvas.
 - Geração de questões por IA em runtime. O banco é estático.
-- Outros tempos verbais além de Simple Past e Past Perfect.
+- Tempos verbais fora dos 12 tempos cobertos pelo menu (nada de subjuntivo, condicionais,
+  voz passiva, modais ou reported speech como conteúdo próprio).
 - Refatorar o formato do `questions.seed.json`.
 - Adicionar biblioteca nova sem registrar o motivo em `DECISIONS.md`.

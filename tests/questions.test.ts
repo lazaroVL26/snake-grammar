@@ -7,6 +7,9 @@ import {
   validateQuestions,
 } from '../src/quiz/questions';
 import { normalize } from '../src/quiz/answer';
+import { questionsForTopic } from '../src/quiz/questions';
+import { TOPICS } from '../src/quiz/topics';
+import { FOCUS_ORDER } from '../src/ui/report';
 import type { Question } from '../src/types';
 
 const bank = seed as Question[];
@@ -52,9 +55,7 @@ describe('questions.seed.json — integridade do arquivo real', () => {
   it('level e focus estao dentro dos valores permitidos', () => {
     for (const question of bank) {
       expect([1, 2, 3], question.id).toContain(question.level);
-      expect(['simple-past', 'past-perfect', 'contrast'], question.id).toContain(
-        question.focus,
-      );
+      expect(FOCUS_ORDER as readonly string[], question.id).toContain(question.focus);
     }
   });
 
@@ -64,9 +65,23 @@ describe('questions.seed.json — integridade do arquivo real', () => {
     }
   });
 
-  it('cobre os tres niveis e os tres focos', () => {
+  it('cobre os tres niveis e todos os tempos verbais anunciados no menu', () => {
     expect(new Set(bank.map((q) => q.level)).size).toBe(3);
-    expect(new Set(bank.map((q) => q.focus)).size).toBe(3);
+    const present = new Set(bank.map((q) => q.focus));
+    for (const focus of FOCUS_ORDER) {
+      expect(present, `nenhuma questao de ${focus}`).toContain(focus);
+    }
+  });
+
+  it('cada conteudo do menu tem questao suficiente em cada nivel', () => {
+    for (const topic of TOPICS) {
+      const questions = questionsForTopic(topic, bank);
+      expect(questions.length, topic.id).toBeGreaterThanOrEqual(12);
+      for (const level of [1, 2, 3] as const) {
+        const atLevel = questions.filter((question) => question.level === level);
+        expect(atLevel.length, `${topic.id} nivel ${level}`).toBeGreaterThanOrEqual(4);
+      }
+    }
   });
 });
 

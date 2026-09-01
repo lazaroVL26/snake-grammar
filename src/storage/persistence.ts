@@ -1,7 +1,12 @@
 import { CONFIG } from '../config';
 import type { GameState } from '../types';
+import { cleanNick } from './scoreboard';
 
 export interface PersistedStats {
+  /** Apelido do aluno, lembrado entre partidas. */
+  nick: string;
+  /** O convite de tela cheia so aparece na primeira visita. */
+  seenFullscreenHint: boolean;
   bestScore: number;
   bestStreak: number;
   gamesPlayed: number;
@@ -10,6 +15,8 @@ export interface PersistedStats {
 }
 
 const EMPTY: PersistedStats = {
+  nick: '',
+  seenFullscreenHint: false,
   bestScore: 0,
   bestStreak: 0,
   gamesPlayed: 0,
@@ -30,6 +37,8 @@ export function loadStats(): PersistedStats {
     if (typeof parsed !== 'object' || parsed === null) return { ...EMPTY };
     const data = parsed as Record<string, unknown>;
     return {
+      nick: typeof data.nick === 'string' ? cleanNick(data.nick) : '',
+      seenFullscreenHint: data.seenFullscreenHint === true,
       bestScore: isFiniteNumber(data.bestScore) ? data.bestScore : 0,
       bestStreak: isFiniteNumber(data.bestStreak) ? data.bestStreak : 0,
       gamesPlayed: isFiniteNumber(data.gamesPlayed) ? data.gamesPlayed : 0,
@@ -53,6 +62,8 @@ export function saveStats(stats: PersistedStats): void {
 export function recordGame(state: GameState): PersistedStats {
   const previous = loadStats();
   const updated: PersistedStats = {
+    nick: previous.nick,
+    seenFullscreenHint: previous.seenFullscreenHint,
     bestScore: Math.max(previous.bestScore, state.stats.score),
     bestStreak: Math.max(previous.bestStreak, state.stats.bestStreak),
     gamesPlayed: previous.gamesPlayed + 1,
@@ -61,4 +72,14 @@ export function recordGame(state: GameState): PersistedStats {
   };
   saveStats(updated);
   return updated;
+}
+
+/** Lembra o apelido para o aluno nao redigitar a cada partida. */
+export function saveNick(nick: string): void {
+  saveStats({ ...loadStats(), nick: cleanNick(nick) });
+}
+
+/** Marca o convite de tela cheia como visto: ele nao volta a aparecer. */
+export function markFullscreenHintSeen(): void {
+  saveStats({ ...loadStats(), seenFullscreenHint: true });
 }

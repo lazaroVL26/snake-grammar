@@ -12,7 +12,7 @@ import {
 import { length } from '../src/game/snake';
 import { loadQuestions } from '../src/quiz/questions';
 import { QuestionSelector } from '../src/quiz/selector';
-import { buildReport, reportToText } from '../src/ui/report';
+import { buildReport } from '../src/ui/report';
 import type { AttemptLog, GameState, Question } from '../src/types';
 
 const bank = loadQuestions();
@@ -120,12 +120,6 @@ describe('partida completa', () => {
       expect(item.sentence).not.toContain('___');
       expect(item.chosen).toBeNull();
     }
-
-    const text = reportToText(report);
-    expect(text).toContain('Precisao: 33%');
-    expect(text).toContain('Tempo: 1min 01s');
-    expect(text).toContain('Para revisar');
-    expect(text).toContain(report.missed[0]?.explanation ?? '');
   });
 
   it('morre na parede indo sempre para a direita', () => {

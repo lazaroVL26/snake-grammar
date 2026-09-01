@@ -1,38 +1,66 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-size: 16px;
-  line-height: 1.5;
-  min-height: 100dvh;
-  padding: var(--space-5) var(--space-4) var(--space-6);
-}
-
-:focus-visible {
-  outline: 2px solid var(--snake-head);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ---------- estrutura ---------- */
-
 .shell {
   width: min(100%, var(--shell-width));
   margin: 0 auto;
   display: grid;
   gap: var(--space-4);
+}
+
+/* O modal e fixo na tela: nao deve ocupar celula do grid. */
+.modal-root {
+  display: contents;
+}
+
+/* ---------- coluna do ranking ---------- */
+
+.rank-side {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.rank-side__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.rank-side__date {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.rank-side__note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+/* A coluna do jogo: cabecalho, placar, tabuleiro, dicas e D-pad. */
+.shell__main {
+  display: grid;
+  gap: var(--space-4);
+  min-width: 0;
+}
+
+@media (min-width: 960px) {
+  .shell {
+    /* Acompanha a resolucao em vez de travar em 640px + ranking. */
+    width: min(100%, calc(var(--board-max) + var(--rank-width) + var(--space-4)));
+    grid-template-columns: minmax(0, 1fr) var(--rank-width);
+    align-items: start;
+  }
+
+  .shell > .rank-side {
+    position: sticky;
+    top: var(--space-5);
+  }
 }
 
 .shell__head {
@@ -97,10 +125,45 @@ body {
 
 /* ---------- tabuleiro ---------- */
 
+/*
+ * O tabuleiro e quadrado, entao a altura da tela e que limita o quanto ele
+ * pode crescer: sem esse teto, uma tela larga e baixa criaria rolagem.
+ * `--board-chrome` e o que fica acima e abaixo dele (cabecalho, placar,
+ * dicas, D-pad) — quando o D-pad aparece, o desconto e maior.
+ */
 .board {
   position: relative;
   aspect-ratio: 1 / 1;
   width: 100%;
+  --board-chrome: 15rem;
+  /*
+   * Piso de 480px: abaixo disso vale mais deixar a pagina rolar do que
+   * espremer o tabuleiro a ponto de atrapalhar o jogo.
+   */
+  max-width: min(100%, max(480px, calc(100dvh - var(--board-chrome))), var(--board-max));
+  margin-inline: auto;
+}
+
+/* Notebook baixo (1366x768 e afins): a linha de dicas vira espaco de jogo. */
+@media (min-width: 960px) and (max-height: 820px) {
+  body {
+    padding-block: var(--space-3);
+  }
+
+  .hints {
+    display: none;
+  }
+
+  .board {
+    --board-chrome: 11rem;
+  }
+}
+
+@media (max-width: 640px), (pointer: coarse) {
+  .board {
+    /* D-pad na tela: sobra menos altura para o tabuleiro. */
+    --board-chrome: 26rem;
+  }
 }
 
 .board__canvas {
@@ -179,52 +242,88 @@ body {
 
 /* ---------- botoes ---------- */
 
-.button {
-  font: inherit;
-  font-weight: 600;
-  border: 1px solid var(--grid);
-  background: var(--bg);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-4);
-  cursor: pointer;
-  transition: background var(--motion-fast) var(--easing);
+/* ---------- apelido e ranking ---------- */
+
+.nick {
+  display: grid;
+  gap: var(--space-1);
 }
 
-.button:hover {
-  background: var(--grid);
+.nick__warning {
+  margin: 0;
+  color: var(--err);
+  font-size: 0.75rem;
+  min-height: 1em;
 }
 
-.button--primary {
-  background: var(--snake);
-  border-color: var(--snake);
-  color: var(--bg);
+.nick__warning:empty {
+  min-height: 0;
 }
 
-.button--primary:hover {
-  background: var(--snake-head);
-}
-
-.modes {
-  display: flex;
+.ranking-block {
+  display: grid;
   gap: var(--space-2);
 }
 
-.mode {
-  font: inherit;
-  flex: 1;
-  border: 1px solid var(--grid);
-  background: var(--bg);
-  color: var(--muted);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2);
-  cursor: pointer;
+.ranking {
+  list-style: none;
+  counter-reset: rank;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 0.85rem;
 }
 
-.mode--on {
-  border-color: var(--snake);
-  color: var(--text);
-  background: color-mix(in srgb, var(--snake) 16%, var(--bg));
+.ranking__row {
+  counter-increment: rank;
+  display: grid;
+  grid-template-columns: 1.6rem 1fr auto auto;
+  gap: var(--space-2);
+  align-items: baseline;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.ranking__row::before {
+  content: counter(rank) '.';
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking__row--mine {
+  background: color-mix(in srgb, var(--snake) 18%, transparent);
+}
+
+.ranking__row--mine .ranking__nick {
+  color: var(--snake-head);
+  font-weight: 600;
+}
+
+.ranking__nick {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranking__score {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking__accuracy {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  font-size: 0.72rem;
+  min-width: 2.4rem;
+  text-align: right;
+}
+
+.ranking__position {
+  margin: 0;
+  color: var(--snake);
+  font-weight: 600;
+  font-size: 0.9rem;
 }
 
 /* ---------- relatorio ---------- */
@@ -321,7 +420,7 @@ body {
   display: none;
 }
 
-.modal {
+.question-modal {
   background: var(--surface);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
@@ -360,18 +459,6 @@ body {
   display: flex;
   align-items: center;
   gap: var(--space-2);
-}
-
-.timer__bar {
-  height: 6px;
-  flex: 1;
-  background: var(--snake);
-  border-radius: 999px;
-  transition: background var(--motion-fast) var(--easing);
-}
-
-.timer__bar[data-low='true'] {
-  background: var(--err);
 }
 
 .timer__text {
@@ -487,21 +574,6 @@ body {
   opacity: 1;
 }
 
-.typed {
-  font: inherit;
-  font-family: var(--font-mono);
-  background: var(--bg);
-  border: 1px solid var(--grid);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  padding: var(--space-3);
-  width: 100%;
-}
-
-.typed::placeholder {
-  color: var(--muted);
-}
-
 .feedback {
   display: grid;
   gap: var(--space-1);
@@ -590,7 +662,7 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .modal {
+  .question-modal {
     padding: var(--space-4);
   }
 
@@ -615,4 +687,682 @@ body {
   .gap--filled {
     transform: none;
   }
+}
+
+/* ---------- convivencia com o Bootstrap ---------- */
+
+/* O .container-lg do Bootstrap seria largo demais: quem manda e a nossa medida. */
+.shell {
+  max-width: min(100%, var(--shell-width));
+}
+
+@media (min-width: 641px) and (max-width: 959.98px) {
+  /* Entre o celular e a coluna dupla, o tabuleiro tambem ganha o espaco. */
+  .shell {
+    max-width: min(100%, var(--board-max));
+    width: min(100%, var(--board-max));
+  }
+}
+
+@media (min-width: 960px) {
+  .shell {
+    max-width: min(100%, calc(var(--board-max) + var(--rank-width) + var(--space-4)));
+  }
+}
+
+/* O cartao do HUD nao pode herdar a borda do .card generico. */
+.hud .card {
+  border: 0;
+}
+
+/* A cor da barra do cronometro e nossa, nao a primaria do Bootstrap. */
+.timer__track {
+  --bs-progress-bg: var(--grid);
+  --bs-progress-height: 6px;
+  --bs-progress-border-radius: 999px;
+}
+
+/*
+ * A largura e reescrita a cada quadro pelo cronometro, entao nao pode haver
+ * transicao nela: o .progress-bar do Bootstrap traz `transition: width .6s`,
+ * que faria a barra correr atrasada. Só a cor faz a passagem suave.
+ */
+.timer__bar {
+  /*
+   * A cor vai direto na propriedade, nao so na variavel do Bootstrap: quando
+   * so a custom property muda, a transicao nao reinterpola e a barra fica
+   * presa no amarelo mesmo com o tempo acabando.
+   */
+  --bs-progress-bar-bg: var(--snake);
+  background-color: var(--snake);
+  transition: background-color var(--motion-fast) var(--easing);
+}
+
+.timer__bar[data-low='true'] {
+  --bs-progress-bar-bg: var(--err);
+  background-color: var(--err);
+}
+
+/* Alternativas e ranking usam list-group, mas com o nosso espacamento. */
+.answers.list-group,
+.ranking.list-group {
+  --bs-list-group-border-width: 0;
+}
+
+.option.list-group-item {
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.option.list-group-item + .option.list-group-item {
+  margin-top: var(--space-2);
+}
+
+.choice.list-group-item {
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.choice.list-group-item + .choice.list-group-item {
+  margin-top: var(--space-2);
+}
+
+/*
+ * As colunas ficam na lista, e cada linha as reaproveita com subgrid. Sem
+ * isso cada linha e um grid proprio, as faixas `auto` se dimensionam sozinhas
+ * e pontuacao e precisao nao alinham de uma linha para a outra.
+ */
+.ranking.list-group {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr) auto auto;
+  gap: 2px var(--space-2);
+}
+
+.ranking__row.list-group-item {
+  display: grid;
+  grid-column: 1 / -1;
+  grid-template-columns: subgrid;
+  align-items: baseline;
+  padding: 3px var(--space-1);
+  border-radius: var(--radius-sm);
+}
+
+/* Navegador sem subgrid: faixas fixas, que alinham do mesmo jeito. */
+@supports not (grid-template-columns: subgrid) {
+  .ranking.list-group {
+    display: flex;
+    flex-direction: column;
+  }
+
+  .ranking__row.list-group-item {
+    grid-template-columns: 1.4rem minmax(0, 1fr) 3.2rem 2.6rem;
+    gap: var(--space-2);
+  }
+}
+
+/* O aviso de sem conexao usa o alerta do Bootstrap com a nossa cor. */
+.rank-side__note--offline {
+  --bs-alert-color: var(--err);
+  --bs-alert-bg: color-mix(in srgb, var(--err) 12%, transparent);
+  --bs-alert-border-color: color-mix(in srgb, var(--err) 35%, transparent);
+  font-size: 0.72rem;
+}
+
+.ranking__position.alert {
+  --bs-alert-color: var(--snake);
+  --bs-alert-bg: color-mix(in srgb, var(--snake) 12%, transparent);
+  --bs-alert-border-color: color-mix(in srgb, var(--snake) 30%, transparent);
+}
+
+/* ---------- tela cheia ---------- */
+
+.fullscreen-toggle {
+  margin-left: auto;
+}
+
+/*
+ * Em tela cheia o ganho tem que ser o tabuleiro maior, nao so a moldura do
+ * navegador sumindo. A altura manda: com aspect-ratio 1/1, a largura segue.
+ */
+:root:fullscreen {
+  --shell-width: min(96vw, 1100px);
+}
+
+:root:fullscreen body {
+  padding-block: var(--space-3);
+}
+
+/*
+ * A linha do tabuleiro fica flexivel em vez de eu chutar uma folga fixa: o
+ * espaco acima e abaixo muda conforme o D-pad aparece ou nao.
+ * Linha 1 e o cabecalho, 2 e o HUD, 3 e o tabuleiro; o resto vem depois.
+ */
+/*
+ * So onde o ranking fica ao lado. Em tela estreita ele entra no fluxo, e
+ * espremer tudo numa altura fixa reduziria o tabuleiro a alguns pixels — la a
+ * tela cheia apenas tira a moldura do navegador e a pagina continua rolando.
+ */
+@media (min-width: 960px) {
+  :root:fullscreen .shell,
+  :root:fullscreen .shell__main {
+    /* Desconta o respiro do body, senao sobra scroll de exatamente essa folga. */
+    height: calc(100dvh - 2 * var(--space-3));
+  }
+
+  :root:fullscreen .shell__main {
+    grid-template-rows: auto auto minmax(0, 1fr);
+  }
+
+  :root:fullscreen .board {
+    width: auto;
+    max-width: 100%;
+    height: 100%;
+    margin-inline: auto;
+  }
+}
+
+/* Em tela cheia o titulo rouba espaco vertical que o tabuleiro aproveita. */
+:root:fullscreen .shell__title {
+  font-size: 1.5rem;
+}
+
+:root:fullscreen .hints {
+  display: none;
+}
+
+/* ================================================================
+ * Estados e personalidade.
+ * Vem depois da convivencia com o Bootstrap e usa duas classes, senao
+ * `.choice.list-group-item` venceria e o item marcado ficaria invisivel.
+ * ================================================================ */
+
+/* ---------- itens de escolha (conteudo e modo de resposta) ---------- */
+
+.choices {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.choices__legend {
+  grid-column: 1 / -1;
+  margin: 0;
+}
+
+.choice.list-group-item {
+  display: grid;
+  gap: 2px;
+  padding: var(--space-3);
+  padding-left: calc(var(--space-3) + 6px);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Barra de acento a esquerda: some quando o item nao esta marcado. */
+.choice.list-group-item::before {
+  content: '';
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 4px;
+  background: var(--snake);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform var(--motion-fast) var(--easing);
+}
+
+.choice__label {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.015em;
+  font-size: 1rem;
+  line-height: 1.25;
+}
+
+.choice__detail {
+  color: var(--muted);
+  font-size: 0.78rem;
+  line-height: 1.35;
+}
+
+.choice.choice--on {
+  border-color: var(--snake);
+  background: color-mix(in srgb, var(--snake) 15%, var(--bg));
+}
+
+.choice.choice--on::before {
+  transform: scaleX(1);
+}
+
+.choice.choice--on .choice__label {
+  color: var(--snake-head);
+}
+
+.choice.choice--on .choice__detail {
+  color: var(--text);
+}
+
+/* Marca "escolhido" desenhada em CSS — a UI nao usa emoji (CLAUDE.md 9.5). */
+.choice.choice--on .choice__label::after {
+  content: '';
+  display: inline-block;
+  width: 0.42em;
+  height: 0.72em;
+  margin-left: 0.5em;
+  border: solid var(--snake);
+  border-width: 0 0.16em 0.16em 0;
+  transform: rotate(45deg) translateY(-0.12em);
+}
+
+/* Dois modos de resposta lado a lado quando cabe. */
+@media (min-width: 420px) {
+  .choices--modes {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+/* ---------- alternativas do modal ---------- */
+
+.option.list-group-item {
+  font-family: var(--font-mono);
+  padding: var(--space-3);
+}
+
+.option.option--selected {
+  border-color: var(--snake);
+  background: color-mix(in srgb, var(--snake) 15%, var(--bg));
+  color: var(--snake-head);
+}
+
+.option.option--selected .option__key {
+  border-color: var(--snake);
+  color: var(--snake-head);
+}
+
+.option.option--ok {
+  border-color: var(--ok);
+  background: color-mix(in srgb, var(--ok) 14%, var(--bg));
+  color: var(--ok);
+}
+
+.option.option--err {
+  border-color: var(--err);
+  background: color-mix(in srgb, var(--err) 12%, var(--bg));
+  color: var(--err);
+  text-decoration: line-through;
+}
+
+/* ---------- ranking ---------- */
+
+/*
+ * A coluna do apelido e a que pode crescer; as outras ficam no minimo. Com
+ * gap e precisao largos demais sobravam 14px para o nome, que aparecia cortado.
+ */
+.ranking__row.list-group-item {
+  display: grid;
+  grid-template-columns: 1.4rem minmax(0, 1fr) auto auto;
+  gap: var(--space-1);
+  align-items: baseline;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.ranking__row.list-group-item::before {
+  font-family: var(--font-display);
+  font-weight: 700;
+  color: var(--muted);
+}
+
+/* Pod~io ganha cor, sem emoji: ouro, prata e bronze da nossa paleta. */
+.ranking__row.list-group-item:nth-child(1)::before {
+  color: var(--snake);
+}
+
+.ranking__row.list-group-item:nth-child(2)::before {
+  color: var(--text);
+}
+
+.ranking__row.list-group-item:nth-child(3)::before {
+  color: var(--fruit);
+}
+
+.ranking__row.ranking__row--mine {
+  background: color-mix(in srgb, var(--snake) 20%, transparent);
+  outline: 1px solid color-mix(in srgb, var(--snake) 45%, transparent);
+}
+
+.ranking__row--mine .ranking__nick {
+  color: var(--snake-head);
+  font-weight: 600;
+}
+
+.ranking__score {
+  font-family: var(--font-display);
+  font-weight: 700;
+}
+
+/* ---------- personalidade ---------- */
+
+.shell__title {
+  /* Marca-texto sob o titulo: a assinatura do caderno de idiomas. */
+  background-image: linear-gradient(
+    to top,
+    color-mix(in srgb, var(--snake) 45%, transparent) 0.18em,
+    transparent 0.18em
+  );
+  padding-inline: 0.1em;
+}
+
+.shell__sub {
+  color: var(--muted);
+  letter-spacing: 0.02em;
+}
+
+.hud__value {
+  font-size: 1.35rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.hud__label {
+  font-size: 0.66rem;
+}
+
+.panel__title,
+.rank-side__title {
+  font-family: var(--font-display);
+  letter-spacing: -0.03em;
+}
+
+.countdown {
+  font-family: var(--font-display);
+  text-shadow: 0 0 24px color-mix(in srgb, var(--snake) 45%, transparent);
+}
+
+/* ================================================================
+ * Fliperama: tipografia de placar, brilhos e reacao ao ponto.
+ * A paleta continua a mesma; o que muda e onde ela aparece.
+ * ================================================================ */
+
+.shell__title {
+  font-family: var(--font-arcade);
+  font-size: clamp(0.85rem, 3.2vw, 1.4rem);
+  line-height: 1.5;
+  letter-spacing: 0;
+  color: var(--snake-head);
+  text-shadow: var(--glow-snake);
+}
+
+.shell__sub {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+
+/* ---------- placar ---------- */
+
+.hud__cell .card {
+  border: 1px solid var(--grid);
+  box-shadow: inset 0 1px 0 color-mix(in srgb, var(--text) 6%, transparent);
+}
+
+.hud__value {
+  font-family: var(--font-arcade);
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--snake-head);
+  text-shadow: var(--glow-snake);
+}
+
+.hud__label {
+  font-family: var(--font-mono);
+  letter-spacing: 0.1em;
+}
+
+/* Pontuacao pulsa quando muda: o feedback de "ganhei ponto". */
+@keyframes hud-bump {
+  0% {
+    transform: scale(1);
+  }
+  40% {
+    transform: scale(1.22);
+  }
+  100% {
+    transform: scale(1);
+  }
+}
+
+.hud__value--bump {
+  animation: hud-bump var(--motion-base) var(--easing);
+  transform-origin: left center;
+}
+
+/* Sequencia de acertos acende o placar em azul de fliperama. */
+.hud[data-streak='0'] .hud__cell:nth-child(3) .hud__value {
+  color: var(--snake-head);
+}
+
+.hud:not([data-streak='0']) .hud__cell:nth-child(3) .hud__value {
+  color: var(--accent);
+  text-shadow: var(--glow-accent);
+}
+
+/* ---------- tabuleiro ---------- */
+
+.board__canvas {
+  box-shadow:
+    0 0 0 1px var(--grid),
+    0 0 28px color-mix(in srgb, var(--snake) 14%, transparent);
+}
+
+/* ---------- contagem regressiva ---------- */
+
+.countdown {
+  font-family: var(--font-arcade);
+  font-size: clamp(2.5rem, 14vw, 5rem);
+  color: var(--snake-head);
+  text-shadow: var(--glow-snake);
+}
+
+/* ---------- atalhos das alternativas ---------- */
+
+.option__key {
+  font-family: var(--font-arcade);
+  font-size: 0.6rem;
+  color: var(--accent);
+  border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+  padding: 4px 5px;
+  line-height: 1;
+}
+
+.option--selected .option__key {
+  color: var(--bg);
+  background: var(--snake);
+  border-color: var(--snake);
+}
+
+/* ---------- ranking ---------- */
+
+.ranking__row.list-group-item::before {
+  font-family: var(--font-arcade);
+  font-size: 0.62rem;
+}
+
+.ranking__score {
+  font-family: var(--font-arcade);
+  font-size: 0.7rem;
+  color: var(--snake-head);
+}
+
+.ranking__row.list-group-item:nth-child(1) .ranking__score {
+  text-shadow: var(--glow-snake);
+}
+
+.rank-side__title {
+  font-family: var(--font-arcade);
+  font-size: 0.72rem;
+  line-height: 1.6;
+  color: var(--snake-head);
+}
+
+/* ---------- fim de jogo ---------- */
+
+.panel__title {
+  font-family: var(--font-arcade);
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: var(--snake-head);
+  text-shadow: var(--glow-snake);
+}
+
+.ranking__position.alert {
+  font-family: var(--font-arcade);
+  font-size: 0.62rem;
+  line-height: 1.7;
+}
+
+/* Sem movimento para quem pediu sem movimento (CLAUDE.md 9.1). */
+@media (prefers-reduced-motion: reduce) {
+  .hud__value--bump {
+    animation: none;
+  }
+}
+
+/* ================================================================
+ * Escala da VT323. Ela desenha bem menor que a Inter no mesmo
+ * font-size, entao tudo que e para ler sobe de tamanho.
+ * ================================================================ */
+
+body {
+  font-size: var(--text-base);
+  line-height: 1.45;
+  letter-spacing: 0.01em;
+}
+
+/* A frase do exercicio continua sendo a maior coisa do modal. */
+.sentence {
+  font-size: 1.6rem;
+  line-height: 1.55;
+}
+
+.option.list-group-item {
+  font-size: 1.25rem;
+  padding: var(--space-2) var(--space-3);
+}
+
+.typed.form-control {
+  font-size: 1.35rem;
+}
+
+.hint,
+.feedback,
+.feedback p {
+  font-size: 1.1rem;
+}
+
+.feedback__headline {
+  font-family: var(--font-arcade);
+  font-size: 0.8rem;
+  line-height: 1.6;
+}
+
+.choice__label {
+  font-family: var(--font-arcade);
+  font-size: 0.72rem;
+  line-height: 1.6;
+}
+
+.choice__detail {
+  font-size: 1.05rem;
+  line-height: 1.3;
+}
+
+.choices__legend,
+.form-label,
+.hud__label {
+  font-family: var(--font-arcade);
+  font-size: 0.55rem;
+  line-height: 1.8;
+  letter-spacing: 0;
+}
+
+.nick__field.form-control {
+  font-size: 1.3rem;
+}
+
+.btn {
+  font-family: var(--font-arcade);
+  font-size: 0.7rem;
+  line-height: 1.7;
+}
+
+.btn-sm {
+  font-size: 0.55rem;
+}
+
+.btn-lg {
+  font-size: 0.85rem;
+}
+
+.panel__lead,
+.panel__note,
+.hints,
+.rank-side__note {
+  font-size: 1.05rem;
+}
+
+.hints {
+  line-height: 1.4;
+}
+
+.shell__sub {
+  font-size: 1rem;
+  letter-spacing: 0.08em;
+}
+
+.summary,
+.focus-table__list li,
+.missed__item p {
+  font-size: 1.05rem;
+}
+
+.panel__subtitle {
+  font-family: var(--font-arcade);
+  font-size: 0.7rem;
+  line-height: 1.7;
+}
+
+.missed__sentence {
+  font-size: 1.15rem;
+}
+
+.ranking__nick,
+.ranking__accuracy {
+  font-size: 1.05rem;
+}
+
+.ranking__accuracy {
+  font-size: 0.95rem;
+}
+
+.rank-side__date {
+  font-size: 0.95rem;
+}
+
+.timer__text {
+  font-size: 1.05rem;
+}
+
+/* ---------- convite de tela cheia (primeira visita) ---------- */
+
+.fs-hint.alert {
+  --bs-alert-color: var(--text);
+  --bs-alert-bg: color-mix(in srgb, var(--accent) 12%, transparent);
+  --bs-alert-border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+  padding: var(--space-3);
+}
+
+.fs-hint__text {
+  font-size: 1.05rem;
+  line-height: 1.35;
 }

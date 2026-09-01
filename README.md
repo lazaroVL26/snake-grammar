@@ -1,7 +1,8 @@
 # Snake Grammar
 
 Jogo web educativo para aula de inglês: o clássico Snake, mas **cada fruta comida abre
-uma frase com lacuna sobre Simple Past × Past Perfect**.
+uma frase com lacuna sobre tempos verbais do inglês**. Na tela inicial o aluno escolhe o
+conteúdo da rodada.
 
 - Resposta certa → +10 pontos e a cobra **cresce** 1 segmento.
 - Resposta errada (ou tempo esgotado) → a cobra **encolhe 2 segmentos**.
@@ -9,6 +10,105 @@ uma frase com lacuna sobre Simple Past × Past Perfect**.
 
 No fim da partida o aluno recebe um relatório com precisão, desempenho por tempo verbal
 e a lista das frases erradas com explicação — o material de revisão da aula.
+
+## Hospedar para a turma (vários PCs ao mesmo tempo)
+
+Este é o modo de usar em sala: **um PC seu roda o servidor** e os alunos acessam pelo
+navegador, cada um no seu computador. Todos disputam o **mesmo ranking**, que atualiza
+sozinho a cada 5 segundos.
+
+No PC que vai servir:
+
+```bash
+npm run aula
+```
+
+Isso compila o jogo e sobe o servidor. Ele imprime os endereços, algo assim:
+
+```
+Snake Grammar servindo na porta 8080
+  neste PC:      http://localhost:8080
+  para a turma:  http://192.168.1.148:8080
+  ranking em:    /caminho/do/projeto/data/scores.json
+```
+
+Dite para a turma o endereço da linha **"para a turma"**. É só abrir no navegador — não
+precisa instalar nada nos PCs dos alunos.
+
+### Liberar a porta no firewall
+
+Se os alunos não conseguirem abrir, quase sempre é o firewall do PC servidor. No Linux com
+`ufw`:
+
+```bash
+sudo ufw allow 8080/tcp
+```
+
+Para usar outra porta, defina `PORT`:
+
+```bash
+PORT=3000 npm run aula
+```
+
+### O que o servidor faz
+
+- Serve o jogo (os arquivos de `dist/`) e a API do ranking na mesma porta — sem CORS, sem
+  configuração extra nos PCs dos alunos.
+- Guarda o ranking em `data/scores.json`, no PC servidor. **É o único lugar que precisa de
+  backup** se você quiser guardar o resultado de uma aula.
+- Zera o ranking a cada dia, pelo relógio **do servidor** — assim o PC de um aluno com a
+  data errada não bagunça a lista de todo mundo.
+- Cada aluno aparece **uma vez**, com a melhor partida do dia. Quem joga dez vezes não
+  ocupa a lista inteira.
+- Valida tudo que chega pela rede: apelido, pontuação e precisão são limitados, e corpo
+  acima de 4 KB é recusado. A porta fica aberta para a rede da escola, então nada confia no
+  que o navegador manda.
+
+### Se o servidor cair no meio da aula
+
+O jogo continua funcionando. A coluna do ranking passa a mostrar **só as partidas daquele
+PC** e avisa: "Sem conexão com o servidor". Quando o servidor volta, a lista da turma
+reaparece sozinha na atualização seguinte. Nenhuma partida é perdida — cada PC também
+guarda as próprias no navegador.
+
+## Apelido e ranking do dia
+
+Antes de começar, o aluno escreve um **apelido** — sem ele a partida não inicia, porque o
+ranking do dia não faria sentido. O apelido fica lembrado no navegador para as partidas
+seguintes.
+
+Toda partida terminada entra no **ranking de hoje**: apelido, pontuação, precisão e
+conteúdo jogado. Ele fica numa **coluna ao lado do tabuleiro**, visível o tempo todo —
+inclusive durante a partida — mostrando o **top 10** do dia, com a sua linha destacada.
+Em telas com menos de 960px a
+coluna desce para o fim da página, abaixo dos controles de toque. A tela de fim de jogo
+mostra a sua colocação ("2º lugar de 5 partidas hoje").
+
+**O ranking zera sozinho a cada dia.** Cada partida guarda a data local em que foi jogada;
+ao abrir o jogo, o que não é de hoje é descartado. Não há tarefa agendada nem nada para o
+professor apertar — virou o dia, o ranking está limpo.
+
+> **Dois modos, conforme você sobe o jogo.** Com `npm run aula` (veja acima) o ranking é
+> **da turma inteira**, guardado no PC servidor — é o modo pensado para a sala. Se você
+> apenas abrir os arquivos estáticos sem o servidor, cada navegador cai no seu próprio
+> ranking local, e cada máquina fica com a sua lista. Para a turma disputar junto, suba o
+> servidor com `npm run aula`.
+
+## Conteúdos disponíveis
+
+O menu da tela inicial tem cinco opções. O banco traz **101 frases**:
+
+| Conteúdo                   | O que cai                                                        | Frases |
+| -------------------------- | ---------------------------------------------------------------- | ------ |
+| Simple Past x Past Perfect | O conjunto original: o que aconteceu antes do que já era passado | 41     |
+| Presente                   | Present simple, continuous, perfect e perfect continuous         | 24     |
+| Passado                    | Past simple, continuous, perfect e perfect continuous            | 53     |
+| Futuro                     | Will, going to, future continuous e future perfect               | 24     |
+| Todos os tempos            | Passado, presente e futuro embaralhados                          | 101    |
+
+O conteúdo escolhido aparece no relatório final, e o desempenho continua separado por
+tempo verbal — dá para ver que o aluno acerta Present Perfect mas erra Present Perfect
+Continuous.
 
 Interface em português do Brasil, exercício em inglês (nível A2–B1).
 
@@ -51,13 +151,22 @@ navegador do aluno.
 
 ## Como jogar
 
-| Ação                    | Teclado                | Toque                       |
-| ----------------------- | ---------------------- | --------------------------- |
-| Mover                   | Setas ou WASD          | Swipe no tabuleiro ou D-pad |
-| Começar / jogar de novo | Enter                  | Botão na tela               |
-| Pausar / continuar      | Espaço ou Esc          | Botão na tela               |
-| Marcar alternativa      | Teclas 1 a 4, ou setas | Toque na alternativa        |
-| Confirmar resposta      | Enter                  | Botão "Responder"           |
+| Ação                    | Teclado                | Toque                           |
+| ----------------------- | ---------------------- | ------------------------------- |
+| Mover                   | Setas ou WASD          | Swipe no tabuleiro ou D-pad     |
+| Começar / jogar de novo | Enter                  | Botão na tela                   |
+| Pausar / continuar      | Espaço ou Esc          | Botão na tela                   |
+| Marcar alternativa      | Teclas 1 a 4, ou setas | Toque na alternativa            |
+| Confirmar resposta      | Enter                  | Botão "Responder"               |
+| Tela cheia              | F                      | Botão "Tela cheia" no cabeçalho |
+
+Na tela inicial, `Enter` dentro do campo de apelido já começa a partida.
+
+**Tela cheia** ajuda no projetor e nos PCs dos alunos: em telas de 960px para cima o
+tabuleiro cresce para ocupar a altura disponível — num monitor de 1920×1080 ele vai de
+640px para cerca de 900px. Em telas estreitas o botão apenas esconde a moldura do
+navegador, porque espremer tudo numa altura fixa deixaria o tabuleiro minúsculo. O botão
+some sozinho se o navegador não permitir tela cheia.
 
 O jogo é 100% jogável só com teclado. Ele pausa sozinho quando a janela perde o foco ou
 o aluno troca de aba.
@@ -92,13 +201,35 @@ acrescentar novos objetos no mesmo formato e rodar `npm run build`.
 | ------------- | ---------------------------------------------------------------------- |
 | `id`          | Único no arquivo inteiro. Sugestão: `sp-`, `pp-` ou `ct-` + número     |
 | `level`       | `1` (fácil), `2` (médio) ou `3` (difícil)                              |
-| `focus`       | `simple-past`, `past-perfect` ou `contrast`                            |
+| `focus`       | O tempo verbal da frase (lista completa abaixo)                        |
 | `sentence`    | Exatamente uma lacuna, escrita como `___` (três sublinhados)           |
 | `verbHint`    | Verbo no infinitivo, mostrado como pista                               |
 | `options`     | Exatamente 4 alternativas, sem repetição                               |
 | `answerIndex` | Índice (0 a 3) da alternativa correta em `options`                     |
 | `accepted`    | Formas aceitas no modo digitado; precisa conter a alternativa correta  |
 | `explanation` | 1 ou 2 frases **em português**, dizendo por que aquele tempo é o certo |
+
+Valores válidos de `focus`, e em que conteúdo do menu cada um cai:
+
+| `focus`                      | Conteúdo do menu                     |
+| ---------------------------- | ------------------------------------ |
+| `simple-past`                | Passado • Simple Past x Past Perfect |
+| `past-continuous`            | Passado                              |
+| `past-perfect`               | Passado • Simple Past x Past Perfect |
+| `past-perfect-continuous`    | Passado                              |
+| `contrast`                   | Passado • Simple Past x Past Perfect |
+| `present-simple`             | Presente                             |
+| `present-continuous`         | Presente                             |
+| `present-perfect`            | Presente                             |
+| `present-perfect-continuous` | Presente                             |
+| `future-will`                | Futuro                               |
+| `future-going-to`            | Futuro                               |
+| `future-continuous`          | Futuro                               |
+| `future-perfect`             | Futuro                               |
+
+Todos caem também em "Todos os tempos". Para criar um conteúdo novo no menu, acrescente
+uma entrada em [`src/quiz/topics.ts`](src/quiz/topics.ts) — o menu, o filtro das questões
+e o relatório se ajustam sozinhos.
 
 O jogo puxa `level: 1` nas 5 primeiras frutas, `level: 2` da 6ª à 12ª e `level: 3` daí em
 diante. Se um nível acabar, ele cai para o nível mais próximo disponível — então vale a
@@ -123,7 +254,9 @@ O arquivo é validado no carregamento. Se algo estiver errado, o jogo **não abr
 uma tela de erro listando os problemas e registra no console. Rode `npm run test` para
 checar antes da aula — o teste `tests/questions.test.ts` roda sobre o arquivo real e
 acusa id duplicado, número de opções diferente de 4, `answerIndex` inválido, frase sem
-`___` e `accepted` que não contém a resposta correta.
+`___` e `accepted` que não contém a resposta correta. Outro teste falha se algum conteúdo
+do menu ficar com menos de 12 frases ou menos de 4 por nível — se você criar um conteúdo
+novo, ele avisa enquanto ainda falta material.
 
 ---
 
@@ -146,8 +279,10 @@ novo. Toda entrada e saída acontece em `main.ts`, `ui/`, `input/`, `storage/` e
 Para mudar velocidade, tempo da pergunta, pontuação ou tamanho da grade, mexa só em
 [`src/config.ts`](src/config.ts).
 
-Zero dependências de runtime: TypeScript, Vite, Vitest, ESLint e Prettier só em
-`devDependencies`.
+Uma única dependência de runtime: o **Bootstrap 5** (só o CSS, empacotado no build — não
+há CDN, então o jogo continua funcionando offline). A paleta e a tipografia do projeto
+continuam mandando: `src/styles/bootstrap-theme.css` traduz os tokens para as variáveis do
+Bootstrap. TypeScript, Vite, Vitest, ESLint e Prettier ficam em `devDependencies`.
 
 As decisões tomadas onde a especificação deixou liberdade estão em
 [`DECISIONS.md`](DECISIONS.md).

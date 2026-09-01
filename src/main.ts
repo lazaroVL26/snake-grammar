@@ -1,4 +1,6 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/tokens.css';
+import './styles/bootstrap-theme.css';
 import './styles/app.css';
 
 import { CONFIG } from './config';
@@ -17,15 +19,33 @@ import {
 } from './game/state';
 import { bindKeyboard } from './input/keyboard';
 import { bindSwipe, createDpad } from './input/touch';
-import { QuestionBankError, loadQuestions } from './quiz/questions';
+import { QuestionBankError, loadQuestions, questionsForTopic } from './quiz/questions';
 import { QuestionSelector, presentQuestion } from './quiz/selector';
-import { loadStats, recordGame } from './storage/persistence';
+import { DEFAULT_TOPIC, findTopic } from './quiz/topics';
+import {
+  loadStats,
+  markFullscreenHintSeen,
+  recordGame,
+  saveNick,
+} from './storage/persistence';
+import { dayKey } from './storage/scoreboard';
+import { fetchRanking, submitScore, type RankingSnapshot } from './storage/ranking';
 import { buildShell, showBankError } from './ui/shell';
 import { Hud } from './ui/hud';
 import { Overlays } from './ui/overlays';
+import { RankingPanel, positionLabel } from './ui/scoreboard';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
-import { buildReport, reportToText } from './ui/report';
-import type { AnswerMode, AttemptLog, Direction, GameState, Question } from './types';
+import { fullscreenSupported, isFullscreen, toggleFullscreen } from './ui/fullscreen';
+import { buildReport } from './ui/report';
+import type {
+  ScoreEntry,
+  AnswerMode,
+  AttemptLog,
+  Direction,
+  GameState,
+  Question,
+  TopicId,
+} from './types';
 
 const root = document.getElementById('app');
 if (!root) throw new Error('Elemento #app nao encontrado no index.html.');
@@ -44,24 +64,82 @@ const shell = buildShell(root);
 const rng = createRng(Date.now() >>> 0);
 const renderer = new Renderer(shell.canvas);
 const hud = new Hud(shell.hud);
+const rankingPanel = new RankingPanel(shell.ranking);
+/** De quanto em quanto tempo a coluna do ranking se atualiza sozinha. */
+const RANKING_POLL_MS = 5_000;
 
+let topic: TopicId = DEFAULT_TOPIC;
+let pool: Question[] = questionsForTopic(findTopic(topic), bank);
 let state: GameState = createInitialState(rng, performance.now());
-let selector = new QuestionSelector(bank, rng);
+let selector = new QuestionSelector(pool, rng);
 let best = loadStats().bestScore;
 let mode: AnswerMode = 'choice';
 let currentQuestion: Question | null = null;
 let countdownEndsAt = 0;
+let nick = loadStats().nick;
+let snapshot: RankingSnapshot = { board: [], today: dayKey(), shared: true };
+let mine: ScoreEntry | undefined;
+/**
+ * Contadores separados de proposito: a atualizacao periodica nao pode cancelar
+ * o envio da partida, senao a colocacao ficaria presa em "Enviando...".
+ */
+let refreshToken = 0;
+let submitToken = 0;
 
 const byId = new Map(bank.map((question) => [question.id, question]));
 
+/** Tela inicial: recorde pessoal, apelido lembrado e o convite de tela cheia. */
+function showIdleScreen(): void {
+  overlays.showIdle({
+    bestScore: best,
+    nick,
+    questionCount: countFor,
+    showFullscreenHint: shouldOfferFullscreen(),
+  });
+}
+
+/**
+ * Convite so na primeira visita, e so quando faz sentido: navegador que
+ * permite e jogo ainda em janela.
+ */
+function shouldOfferFullscreen(): boolean {
+  return fullscreenSupported() && !isFullscreen() && !loadStats().seenFullscreenHint;
+}
+
+function paintRanking(): void {
+  rankingPanel.update(snapshot.board, snapshot.today, {
+    highlight: mine,
+    shared: snapshot.shared,
+  });
+}
+
+/** Busca o ranking da turma no servidor e redesenha a coluna. */
+async function refreshRanking(): Promise<void> {
+  const token = (refreshToken += 1);
+  const fresh = await fetchRanking(dayKey());
+  if (token !== refreshToken) return;
+  snapshot = fresh;
+  paintRanking();
+}
+
+/** Quantas frases cada conteudo do menu tem, para o aluno escolher com informacao. */
+function countFor(id: TopicId): number {
+  return questionsForTopic(findTopic(id), bank).length;
+}
+
 const overlays = new Overlays(shell.overlay, {
-  onStart: (chosen) => {
+  onStart: (chosen, chosenTopic, chosenNick) => {
     mode = chosen;
+    topic = chosenTopic;
+    nick = chosenNick;
+    saveNick(chosenNick);
+    pool = questionsForTopic(findTopic(topic), bank);
+    selector = new QuestionSelector(pool, rng);
     beginGame();
   },
   onResume: () => enterCountdown(),
   onRestart: () => resetGame(),
-  onCopyReport: () => copyReport(),
+  onFullscreenHintDone: () => markFullscreenHintSeen(),
 });
 
 const modal = new QuestionModal(shell.modalRoot, {
@@ -92,11 +170,11 @@ function beginGame(): void {
 
 function resetGame(): void {
   state = createInitialState(rng, performance.now());
-  selector = new QuestionSelector(bank, rng);
+  selector = new QuestionSelector(pool, rng);
   currentQuestion = null;
   best = loadStats().bestScore;
   hud.update(state, best);
-  overlays.showIdle(best);
+  showIdleScreen();
 }
 
 function askQuestion(): void {
@@ -135,17 +213,43 @@ function finishGame(): void {
   const stats = recordGame(state);
   best = stats.bestScore;
   hud.update(state, best);
-  overlays.showGameOver(buildReport(state, best, byId, performance.now()));
-}
 
-async function copyReport(): Promise<boolean> {
-  const text = reportToText(buildReport(state, best, byId, performance.now()));
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    return false;
-  }
+  const report = buildReport(
+    state,
+    best,
+    byId,
+    performance.now(),
+    findTopic(topic).label,
+    nick,
+  );
+  // A tela de fim de jogo aparece na hora; a colocacao entra quando o
+  // servidor responder, para o aluno nao ficar esperando a rede.
+  overlays.showGameOver(report);
+
+  const token = (submitToken += 1);
+  // Descarta consulta em voo: ela traria a lista sem esta partida.
+  refreshToken += 1;
+  void submitScore(
+    {
+      nick,
+      score: report.score,
+      accuracy: report.accuracy,
+      correct: report.correct,
+      wrong: report.wrong,
+      topicLabel: report.topicLabel,
+    },
+    dayKey(),
+  ).then((saved) => {
+    if (token !== submitToken) return;
+    snapshot = saved.snapshot;
+    mine = saved.entry;
+    paintRanking();
+    overlays.setRankingPosition(
+      saved.snapshot.shared
+        ? positionLabel(saved.position, saved.snapshot.board.length)
+        : `${positionLabel(saved.position, saved.snapshot.board.length)} (so deste PC: servidor fora do ar)`,
+    );
+  });
 }
 
 function togglePause(): void {
@@ -195,8 +299,9 @@ function updateCountdown(now: number): void {
 bindKeyboard({
   onDirection: turn,
   onTogglePause: togglePause,
+  onToggleFullscreen: () => void toggleFullscreen(),
   onConfirm: () => {
-    if (state.phase === 'idle') beginGame();
+    if (state.phase === 'idle') overlays.requestStart();
     else if (state.phase === 'gameover') {
       resetGame();
       beginGame();
@@ -209,10 +314,23 @@ bindSwipe(shell.canvas, turn);
 
 window.addEventListener('blur', pauseIfRunning);
 document.addEventListener('visibilitychange', () => {
-  if (document.hidden) pauseIfRunning();
+  if (document.hidden) {
+    pauseIfRunning();
+    return;
+  }
+  // Voltou para a aba: a turma jogou enquanto isso, entao atualiza na hora.
+  void refreshRanking();
 });
 window.addEventListener('resize', () => renderer.resize());
 
 hud.update(state, best);
-overlays.showIdle(best);
+showIdleScreen();
+paintRanking();
+void refreshRanking();
+
+// Varios alunos jogam ao mesmo tempo: a lista precisa acompanhar sozinha.
+window.setInterval(() => {
+  if (document.visibilityState === 'visible') void refreshRanking();
+}, RANKING_POLL_MS);
+
 engine.start();

@@ -10,10 +10,28 @@
   --err: #ee6c5d;
   --text: #eae7e1;
   --muted: #9aaec8;
+  /* Azul de fliperama: sequencia de acertos, atalhos e detalhes de jogo. */
+  --accent: #7cc6ff;
 
-  --font-display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
-  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+  /* Brilhos: sempre derivados da paleta, nunca cor nova solta. */
+  --glow-snake: 0 0 12px color-mix(in srgb, var(--snake) 55%, transparent);
+  --glow-accent: 0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
+
+  /*
+   * Tipografia inteira de fliperama, em duas faces:
+   * - Press Start 2P: titulo, placar, contagem, ranking, rotulo curto.
+   * - VT323: tudo que e para ler. E fonte de terminal CRT, retro do mesmo
+   *   jeito, mas com altura de x e espacamento que aguentam frase inteira.
+   *   Press Start 2P em texto corrido dobra a largura e cansa a leitura, o
+   *   que atrapalharia justamente a decisao gramatical que o jogo cobra.
+   */
+  --font-arcade: 'Press Start 2P', 'Courier New', monospace;
+  --font-display: 'Press Start 2P', 'Courier New', monospace;
+  --font-ui: 'VT323', 'Courier New', monospace;
+  --font-mono: 'VT323', ui-monospace, 'Courier New', monospace;
+
+  /* VT323 desenha pequeno: a base sobe para compensar. */
+  --text-base: 1.15rem;
 
   --radius-sm: 8px;
   --radius-md: 14px;
@@ -26,7 +44,11 @@
   --space-5: 24px;
   --space-6: 32px;
 
+  /* Piso do tabuleiro; daqui para cima ele cresce com a tela. */
   --shell-width: 640px;
+  /* Teto, para nao virar um tabuleiro absurdo num monitor gigante. */
+  --board-max: 1040px;
+  --rank-width: 264px;
   --motion-fast: 160ms;
   --motion-base: 200ms;
   --easing: cubic-bezier(0.2, 0.7, 0.3, 1);

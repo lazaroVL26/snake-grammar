@@ -66,7 +66,7 @@ export function createDpad(onDirection: (direction: Direction) => void): HTMLEle
       'button',
       {
         type: 'button',
-        class: `dpad__key dpad__key--${button.area}`,
+        class: `dpad__key dpad__key--${button.area} btn btn-outline-secondary`,
         'aria-label': button.label,
       },
       [GLYPH[button.direction]],
