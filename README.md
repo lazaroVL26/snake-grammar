@@ -159,8 +159,13 @@ navegador do aluno.
 | Marcar alternativa      | Teclas 1 a 4, ou setas | Toque na alternativa            |
 | Confirmar resposta      | Enter                  | Botão "Responder"               |
 | Tela cheia              | F                      | Botão "Tela cheia" no cabeçalho |
+| Ligar/desligar som      | —                      | Botão "Som" no cabeçalho        |
 
 Na tela inicial, `Enter` dentro do campo de apelido já começa a partida.
+
+**Som:** acertar e errar tocam um efeito curto de fliperama, ligado por padrão. Num
+laboratório com trinta máquinas isso vira barulho — o botão "Som" no cabeçalho desliga, e a
+escolha fica lembrada naquele computador.
 
 **Tela cheia** ajuda no projetor e nos PCs dos alunos: em telas de 960px para cima o
 tabuleiro cresce para ocupar a altura disponível — num monitor de 1920×1080 ele vai de

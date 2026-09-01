@@ -27,7 +27,9 @@ import {
   markFullscreenHintSeen,
   recordGame,
   saveNick,
+  saveSoundOn,
 } from './storage/persistence';
+import { Sfx, createSoundButton } from './audio/sfx';
 import { dayKey } from './storage/scoreboard';
 import { fetchRanking, submitScore, type RankingSnapshot } from './storage/ranking';
 import { buildShell, showBankError } from './ui/shell';
@@ -65,6 +67,8 @@ const rng = createRng(Date.now() >>> 0);
 const renderer = new Renderer(shell.canvas);
 const hud = new Hud(shell.hud);
 const rankingPanel = new RankingPanel(shell.ranking);
+const sfx = new Sfx(loadStats().soundOn);
+shell.head.append(createSoundButton(sfx, (on) => saveSoundOn(on)));
 /** De quanto em quanto tempo a coluna do ranking se atualiza sozinha. */
 const RANKING_POLL_MS = 5_000;
 
@@ -193,7 +197,11 @@ function onAnswered(result: AnswerResult): void {
     chosen: result.chosen,
     elapsedMs: result.elapsedMs,
   };
-  if (!result.correct) selector.requeue(question);
+  if (result.correct) sfx.correct();
+  else {
+    sfx.wrong();
+    selector.requeue(question);
+  }
   state = applyAnswer(state, log);
   hud.update(state, best);
 }

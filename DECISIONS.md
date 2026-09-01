@@ -591,3 +591,29 @@ tabuleiro — foi o que levou o 1366×768 de 528 para 592.
 Achado ao medir a altura do layout: o D-pad aparecia em tela com mouse. O elemento levava
 `d-flex` do Bootstrap, que traz `display: flex !important` e vencia o `display: none` que
 o esconde fora de telas de toque. Classe removida; quem centraliza é o nosso CSS.
+
+## 56. Som sintetizado, não arquivo de áudio
+
+Pedido: som ao acertar e errar. A §13 já permitia áudio como opcional; virou requisito na
+§5.9, e a §13 passou a proibir só trilha e narração.
+
+Nenhum `.mp3` ou `.wav`: os dois efeitos são gerados com Web Audio na hora de tocar. Isso
+mantém o jogo rodando offline, não acrescenta dependência nem bytes ao bundle, e o timbre
+de onda quadrada é exatamente o fliperama que a §9.1 pede — um arquivo de áudio genérico
+soaria fora do lugar.
+
+Acerto sobe (660 → 990 Hz, onda quadrada), erro desce e é mais grave (200 → 130 Hz, dente
+de serra). Menos de 0,3 s cada, para não atropelar os 2,2 s de feedback.
+
+Três cuidados de navegador: o `AudioContext` só nasce no primeiro som — nunca no
+carregamento, porque áudio criado sem gesto do usuário é bloqueado; um contexto suspenso é
+retomado antes de tocar; e navegador sem Web Audio segue em silêncio, sem exceção.
+
+## 57. Som ligado por padrão, mas com botão à mão
+
+A §13 antiga sugeria um toggle **desligado** por padrão. Ligado faz mais sentido para quem
+pediu o som — desligado, o professor adicionaria o recurso e não ouviria nada.
+
+Mas o cenário de uso pesa: trinta PCs tocando ao mesmo tempo vira barulho. Por isso o botão
+fica no cabeçalho, visível, e a escolha é lembrada por máquina. Religar toca o som de
+acerto uma vez, para o aluno conferir o volume sem precisar errar de propósito.

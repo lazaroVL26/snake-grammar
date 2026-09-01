@@ -3,6 +3,8 @@ import { el } from './dom';
 import { createFullscreenButton } from './fullscreen';
 
 export interface Shell {
+  /** Cabecalho, onde ficam os botoes de tela cheia e som. */
+  head: HTMLElement;
   canvas: HTMLCanvasElement;
   hud: HTMLElement;
   overlay: HTMLElement;
@@ -20,6 +22,9 @@ export function buildShell(root: HTMLElement): Shell {
   // que esconde o D-pad em telas com mouse.
   const controls = el('div', { class: 'controls' });
   const modalRoot = el('div', { class: 'modal-root' });
+  const head = el('header', {
+    class: 'shell__head d-flex align-items-baseline flex-wrap gap-3',
+  });
   const ranking = el('aside', {
     class: 'rank-side card p-3',
     'aria-label': 'Ranking de hoje',
@@ -34,24 +39,19 @@ export function buildShell(root: HTMLElement): Shell {
       'Tabuleiro 20 por 20. A cobra amarela come a fruta vermelha e abre uma pergunta de ingles.',
   });
 
+  head.append(
+    el('h1', { class: 'shell__title mb-0', text: 'Snake Grammar' }),
+    el('p', { class: 'shell__sub mb-0', text: 'Passado, presente e futuro' }),
+    createFullscreenButton(),
+  );
+
   root.replaceChildren(
     el('main', { class: 'shell container-lg px-0' }, [
       // A coluna do jogo e um elemento proprio: sem isso o ranking teria que
       // atravessar linhas do grid, e `grid-row: 1 / -1` nao vale sem linhas
       // explicitas — o ranking acabava esticando o cabecalho.
       el('div', { class: 'shell__main' }, [
-        el(
-          'header',
-          { class: 'shell__head d-flex align-items-baseline flex-wrap gap-3' },
-          [
-            el('h1', { class: 'shell__title mb-0', text: 'Snake Grammar' }),
-            el('p', {
-              class: 'shell__sub mb-0',
-              text: 'Passado, presente e futuro',
-            }),
-            createFullscreenButton(),
-          ],
-        ),
+        head,
         hud,
         el('div', { class: 'board' }, [canvas, overlay]),
         el('p', {
@@ -65,7 +65,7 @@ export function buildShell(root: HTMLElement): Shell {
     ]),
   );
 
-  return { canvas, hud, overlay, controls, modalRoot, ranking };
+  return { canvas, head, hud, overlay, controls, modalRoot, ranking };
 }
 
 /** Tela de erro legivel quando o banco de questoes esta inconsistente. */

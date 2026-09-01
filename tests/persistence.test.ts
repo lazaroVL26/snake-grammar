@@ -8,6 +8,7 @@ import {
   markFullscreenHintSeen,
   recordGame,
   saveNick,
+  saveSoundOn,
   saveStats,
 } from '../src/storage/persistence';
 import type { GameState } from '../src/types';
@@ -36,6 +37,7 @@ describe('persistence', () => {
     expect(loadStats()).toEqual({
       nick: '',
       seenFullscreenHint: false,
+      soundOn: true,
       bestScore: 0,
       bestStreak: 0,
       gamesPlayed: 0,
@@ -48,6 +50,7 @@ describe('persistence', () => {
     saveStats({
       nick: 'Ana',
       seenFullscreenHint: false,
+      soundOn: true,
       bestScore: 30,
       bestStreak: 2,
       gamesPlayed: 1,
@@ -93,6 +96,15 @@ describe('persistence', () => {
     expect(loadStats().seenFullscreenHint).toBe(true);
   });
 
+  it('o som comeca ligado e a escolha do aluno e lembrada', () => {
+    expect(loadStats().soundOn).toBe(true);
+    saveSoundOn(false);
+    expect(loadStats().soundOn).toBe(false);
+    // Sobrevive a uma partida terminada, que reescreve as estatisticas.
+    recordGame(finished(50, 4, 1));
+    expect(loadStats().soundOn).toBe(false);
+  });
+
   it('ignora dados corrompidos em vez de quebrar o jogo', () => {
     window.localStorage.setItem(CONFIG.STORAGE_KEY, '{isso nao e json');
     expect(loadStats().bestScore).toBe(0);
@@ -108,6 +120,7 @@ describe('persistence', () => {
       saveStats({
         nick: 'Ana',
         seenFullscreenHint: false,
+        soundOn: true,
         bestScore: 1,
         bestStreak: 1,
         gamesPlayed: 1,

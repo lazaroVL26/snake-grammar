@@ -7,6 +7,8 @@ export interface PersistedStats {
   nick: string;
   /** O convite de tela cheia so aparece na primeira visita. */
   seenFullscreenHint: boolean;
+  /** Som de acerto e erro. Ligado por padrao. */
+  soundOn: boolean;
   bestScore: number;
   bestStreak: number;
   gamesPlayed: number;
@@ -17,6 +19,7 @@ export interface PersistedStats {
 const EMPTY: PersistedStats = {
   nick: '',
   seenFullscreenHint: false,
+  soundOn: true,
   bestScore: 0,
   bestStreak: 0,
   gamesPlayed: 0,
@@ -39,6 +42,8 @@ export function loadStats(): PersistedStats {
     return {
       nick: typeof data.nick === 'string' ? cleanNick(data.nick) : '',
       seenFullscreenHint: data.seenFullscreenHint === true,
+      // Ausente vale como ligado: quem nunca mexeu ouve o som.
+      soundOn: data.soundOn !== false,
       bestScore: isFiniteNumber(data.bestScore) ? data.bestScore : 0,
       bestStreak: isFiniteNumber(data.bestStreak) ? data.bestStreak : 0,
       gamesPlayed: isFiniteNumber(data.gamesPlayed) ? data.gamesPlayed : 0,
@@ -64,6 +69,7 @@ export function recordGame(state: GameState): PersistedStats {
   const updated: PersistedStats = {
     nick: previous.nick,
     seenFullscreenHint: previous.seenFullscreenHint,
+    soundOn: previous.soundOn,
     bestScore: Math.max(previous.bestScore, state.stats.score),
     bestStreak: Math.max(previous.bestStreak, state.stats.bestStreak),
     gamesPlayed: previous.gamesPlayed + 1,
@@ -82,4 +88,9 @@ export function saveNick(nick: string): void {
 /** Marca o convite de tela cheia como visto: ele nao volta a aparecer. */
 export function markFullscreenHintSeen(): void {
   saveStats({ ...loadStats(), seenFullscreenHint: true });
+}
+
+/** Lembra se o aluno quer som, para nao ter que desligar toda partida. */
+export function saveSoundOn(on: boolean): void {
+  saveStats({ ...loadStats(), soundOn: on });
 }

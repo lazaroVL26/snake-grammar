@@ -118,6 +118,8 @@ snake-grammar/
    ├─ input/
    │  ├─ keyboard.ts
    │  └─ touch.ts              # swipe + D-pad na tela em telas pequenas
+   ├─ audio/
+   │  └─ sfx.ts               # som de acerto e erro, sintetizado (§5.9)
    ├─ storage/
    │  ├─ persistence.ts        # recorde, estatísticas e apelido em localStorage
    │  └─ scoreboard.ts         # ranking do dia, com reset diário
@@ -214,6 +216,18 @@ leitura descarta o que não é de hoje — sem tarefa agendada. Guarda no máxim
 **O ranking é da turma quando o servidor está no ar** (§5.8). Se ele não responde, o jogo
 cai para o ranking local daquele navegador e avisa na coluna. Quando o servidor volta, a
 lista da turma reaparece sozinha.
+
+### 5.9 Som de acerto e erro
+
+Dois efeitos curtos, **sintetizados na hora com Web Audio** — nenhum arquivo de áudio, para
+não quebrar o offline nem a regra de zero dependência. Onda quadrada subindo no acerto,
+dente de serra descendo e mais grave no erro; menos de 0,3 s cada, para não atropelar o
+feedback.
+
+Ligado por padrão, com botão no cabeçalho e a escolha lembrada em `localStorage`
+(`soundOn`). O `AudioContext` só nasce no primeiro som, nunca antes de um gesto do aluno —
+navegador bloqueia áudio criado sem interação. Navegador sem Web Audio: o jogo segue em
+silêncio, sem erro.
 
 ### 5.8 Servidor de ranking (`server/`)
 
@@ -612,8 +626,8 @@ Só considere a tarefa concluída quando **todos** os itens abaixo forem verdade
 - Multiplayer em tempo real (a cobra de um aluno não aparece na tela do outro), contas de
   usuário com senha, banco de dados, serviço de nuvem. O servidor de ranking em `server/`
   é a única coisa fora do navegador, e ele é deliberadamente mínimo.
-- Áudio e trilha sonora (pode existir um toggle desligado por padrão apenas se sobrar
-  tempo — não é requisito).
+- Trilha sonora, música de fundo, narração. **Existe som de acerto e erro** (§5.9), e
+  nada além disso.
 - Sprites, imagens externas, ícones baixados: a cobra e a fruta são formas desenhadas no
   canvas.
 - Geração de questões por IA em runtime. O banco é estático.

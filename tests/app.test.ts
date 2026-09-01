@@ -278,6 +278,39 @@ function hudCell(index: number): string {
   return document.querySelectorAll('.hud__cell')[index]?.textContent ?? '';
 }
 
+/** Registra as frequencias tocadas: o jsdom nao tem Web Audio. */
+function espionarAudio(destino: string[]): void {
+  class ContextoFalso {
+    currentTime = 0;
+    destination = {};
+    state = 'running';
+    resume(): Promise<void> {
+      return Promise.resolve();
+    }
+    createOscillator(): unknown {
+      const freq = { value: 0 };
+      return {
+        type: '',
+        frequency: freq,
+        connect: (d: unknown) => d,
+        start: () => destino.push(String(freq.value)),
+        stop: () => undefined,
+      };
+    }
+    createGain(): unknown {
+      return {
+        gain: {
+          setValueAtTime: () => undefined,
+          linearRampToValueAtTime: () => undefined,
+          exponentialRampToValueAtTime: () => undefined,
+        },
+        connect: (d: unknown) => d,
+      };
+    }
+  }
+  vi.stubGlobal('AudioContext', ContextoFalso);
+}
+
 /** Espera as promessas do ranking resolverem (envio e releitura). */
 async function flush(): Promise<void> {
   for (let i = 0; i < 8; i += 1) await Promise.resolve();
@@ -498,6 +531,47 @@ describe('app — convite de tela cheia na primeira visita', () => {
   it('nao atrapalha comecar a partida', () => {
     startGame('Ana');
     expect(document.querySelector('.overlay')?.textContent).not.toContain('tela cheia');
+  });
+});
+
+describe('app — som de acerto e erro', () => {
+  it('o botao de som aparece no cabecalho, ligado por padrao', () => {
+    const button = document.querySelector<HTMLButtonElement>('.sound-toggle');
+    expect(button).not.toBeNull();
+    expect(button?.closest('.shell__head')).not.toBeNull();
+    expect(button?.textContent).toBe('Som ligado');
+    expect(button?.getAttribute('aria-pressed')).toBe('true');
+  });
+
+  it('desligar o som fica gravado para a proxima partida', () => {
+    document.querySelector<HTMLButtonElement>('.sound-toggle')?.click();
+    expect(window.localStorage.getItem(CONFIG.STORAGE_KEY)).toContain('"soundOn":false');
+  });
+
+  it('errar toca o som de erro', () => {
+    const tocados: string[] = [];
+    espionarAudio(tocados);
+
+    startGame('Ana');
+    driveUntilQuestion();
+    answerQuestion(false);
+
+    // Erro: duas notas graves, a segunda mais baixa que a primeira.
+    expect(tocados.length).toBe(2);
+    expect(Number(tocados[1])).toBeLessThan(Number(tocados[0]));
+  });
+
+  it('acertar toca o som de acerto', () => {
+    const tocados: string[] = [];
+    espionarAudio(tocados);
+
+    startGame('Ana');
+    driveUntilQuestion();
+    answerQuestion(true);
+
+    // Acerto: duas notas subindo.
+    expect(tocados.length).toBe(2);
+    expect(Number(tocados[1])).toBeGreaterThan(Number(tocados[0]));
   });
 });
 
