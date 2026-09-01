@@ -510,14 +510,27 @@ describe('app — apelido e ranking do dia', () => {
     expect(field?.value).toBe('Duda');
   });
 
-  it('o ranking de hoje aparece na tela inicial da partida seguinte', () => {
+  it('a coluna do ranking fica visivel durante a partida, fora do painel', () => {
+    startGame('Duda');
+    const side = document.querySelector('.rank-side');
+    expect(side).not.toBeNull();
+    expect(side?.closest('.overlay')).toBeNull();
+    expect(side?.closest('.panel')).toBeNull();
+    expect(side?.textContent).toContain('Ranking de hoje');
+    // Jogando: o painel da tela inicial saiu, mas a coluna continua ali.
+    expect(document.querySelector<HTMLElement>('.overlay')?.hidden).toBe(true);
+  });
+
+  it('a coluna do ranking continua visivel depois de voltar para a tela inicial', () => {
     startGame('Duda');
     driveUntilQuestion();
     answerQuestion(false);
     document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
 
-    expect(text()).toContain(`Ranking de hoje (${dayKey()})`);
-    expect(document.querySelector('.ranking')?.textContent).toContain('Duda');
+    const side = document.querySelector('.rank-side');
+    expect(side?.textContent).toContain('Ranking de hoje');
+    expect(side?.querySelector('.rank-side__date')?.textContent).toBe(dayKey());
+    expect(side?.querySelector('.ranking')?.textContent).toContain('Duda');
   });
 
   it('partidas de ontem nao aparecem no ranking de hoje', () => {

@@ -2,15 +2,13 @@ import type { AnswerMode, ScoreEntry, TopicId } from '../types';
 import { DEFAULT_TOPIC, TOPICS } from '../quiz/topics';
 import { CONFIG } from '../config';
 import { el } from './dom';
-import { positionLabel, scoreboardList } from './scoreboard';
+import { positionLabel } from './scoreboard';
 import { FOCUS_LABEL, REASON_LABEL, formatDuration, type Report } from './report';
 
 /** Tudo que a tela inicial precisa mostrar. */
 export interface IdleView {
   bestScore: number;
   nick: string;
-  today: string;
-  board: readonly ScoreEntry[];
   questionCount: (topic: TopicId) => number;
 }
 
@@ -156,10 +154,6 @@ export class Overlays {
       topicGroup,
       modeGroup,
       start,
-      el('div', { class: 'ranking-block' }, [
-        el('p', { class: 'choices__legend', text: `Ranking de hoje (${view.today})` }),
-        scoreboardList(view.board.slice(0, CONFIG.SCOREBOARD_VISIBLE)),
-      ]),
       el('p', { class: 'panel__note', text: `Seu recorde: ${view.bestScore} pontos` }),
       el('p', {
         class: 'panel__note',
@@ -303,16 +297,13 @@ function missedList(report: Report): HTMLElement {
   ]);
 }
 
+/** A lista completa fica na coluna ao lado do tabuleiro; aqui so a colocacao. */
 function rankingBlock(ranking?: RankingView): HTMLElement {
   if (!ranking) return el('div', { hidden: true });
-  return el('div', { class: 'ranking-block' }, [
-    el('h3', { class: 'panel__subtitle', text: `Ranking de hoje (${ranking.today})` }),
-    el('p', {
-      class: 'ranking__position',
-      text: positionLabel(ranking.position, ranking.board.length),
-    }),
-    scoreboardList(ranking.board.slice(0, CONFIG.SCOREBOARD_VISIBLE), ranking.entry),
-  ]);
+  return el('p', {
+    class: 'ranking__position',
+    text: positionLabel(ranking.position, ranking.board.length),
+  });
 }
 
 interface RadioOption<T extends string> {

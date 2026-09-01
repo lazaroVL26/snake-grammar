@@ -7,6 +7,8 @@ export interface Shell {
   overlay: HTMLElement;
   controls: HTMLElement;
   modalRoot: HTMLElement;
+  /** Coluna do ranking, ao lado do tabuleiro. */
+  ranking: HTMLElement;
 }
 
 /** Monta o esqueleto do DOM e devolve os pontos de montagem. */
@@ -15,6 +17,10 @@ export function buildShell(root: HTMLElement): Shell {
   const overlay = el('div', { class: 'overlay', hidden: true });
   const controls = el('div', { class: 'controls' });
   const modalRoot = el('div', { class: 'modal-root' });
+  const ranking = el('aside', {
+    class: 'rank-side',
+    'aria-label': 'Ranking de hoje',
+  });
 
   const canvas = el('canvas', {
     class: 'board__canvas',
@@ -41,11 +47,12 @@ export function buildShell(root: HTMLElement): Shell {
         text: 'Setas ou WASD movem • Espaco ou Esc pausam • 1 a 4 marcam a alternativa • Enter confirma',
       }),
       controls,
+      ranking,
       modalRoot,
     ]),
   );
 
-  return { canvas, hud, overlay, controls, modalRoot };
+  return { canvas, hud, overlay, controls, modalRoot, ranking };
 }
 
 /** Tela de erro legivel quando o banco de questoes esta inconsistente. */

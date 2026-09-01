@@ -190,8 +190,9 @@ Antes de começar, o aluno escreve um apelido; sem ele a partida não inicia. O 
 lembrado entre partidas.
 
 Toda partida terminada entra no ranking do dia, com apelido, pontuação, precisão e
-conteúdo. O ranking aparece na tela inicial (top `SCOREBOARD_VISIBLE`) e no fim de jogo,
-com a partida recém-jogada destacada.
+conteúdo. O ranking fica numa **coluna própria ao lado do tabuleiro** (`aside.rank-side`),
+visível a partida inteira, com a partida recém-jogada destacada. A tela de fim de jogo não
+repete a lista: mostra só a colocação.
 
 **O ranking zera a cada dia.** Cada entrada guarda o dia local em que foi jogada, e a
 leitura descarta o que não é de hoje — sem tarefa agendada. Guarda no máximo
@@ -408,7 +409,9 @@ o feedback vira troca de estado instantânea.
 
 ### 9.2 Layout
 
-- Coluna única centralizada, largura máxima ~640px.
+- Coluna do jogo centralizada, largura máxima ~640px. A partir de 960px de viewport,
+  uma coluna lateral de 232px com o ranking do dia aparece à direita, grudada no topo
+  (`position: sticky`); abaixo disso ela desce para o fim da página, depois do D-pad.
 - HUD acima do canvas: pontos • comprimento • acertos/erros • recorde.
 - Abaixo do canvas: uma linha discreta com os controles.
 - Responsivo até 360px de largura: o canvas encolhe proporcionalmente e o D-pad de toque

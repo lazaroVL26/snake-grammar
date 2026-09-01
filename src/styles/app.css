@@ -35,6 +35,62 @@ body {
   gap: var(--space-4);
 }
 
+/* O modal e fixo na tela: nao deve ocupar celula do grid. */
+.modal-root {
+  display: contents;
+}
+
+/* ---------- coluna do ranking ---------- */
+
+.rank-side {
+  background: var(--surface);
+  border-radius: var(--radius-md);
+  padding: var(--space-3) var(--space-4);
+  display: grid;
+  gap: var(--space-2);
+  align-content: start;
+}
+
+.rank-side__title {
+  font-family: var(--font-display);
+  font-weight: 700;
+  letter-spacing: -0.02em;
+  font-size: 1rem;
+  margin: 0;
+}
+
+.rank-side__date {
+  margin: 0;
+  color: var(--muted);
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+}
+
+.rank-side__note {
+  margin: 0;
+  color: var(--muted);
+  font-size: 0.7rem;
+}
+
+@media (min-width: 960px) {
+  .shell {
+    width: min(100%, calc(var(--shell-width) + var(--rank-width) + var(--space-4)));
+    grid-template-columns: minmax(0, 1fr) var(--rank-width);
+  }
+
+  /* Tudo na coluna da esquerda; o ranking ocupa a direita inteira. */
+  .shell > * {
+    grid-column: 1;
+  }
+
+  .shell > .rank-side {
+    grid-column: 2;
+    grid-row: 1 / -1;
+    position: sticky;
+    top: var(--space-5);
+  }
+}
+
 .shell__head {
   display: flex;
   align-items: baseline;

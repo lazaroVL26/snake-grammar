@@ -65,8 +65,6 @@ function idleView(overrides: Partial<IdleView> = {}): IdleView {
   return {
     bestScore: 0,
     nick: 'Ana',
-    today: '2026-09-01',
-    board,
     questionCount: () => 41,
     ...overrides,
   };
@@ -163,33 +161,22 @@ describe('overlays — apelido e ranking', () => {
     ]);
   });
 
-  it('lista o ranking do dia com a data', () => {
+  it('a tela inicial nao repete o ranking: ele vive na coluna ao lado', () => {
     overlays.showIdle(idleView());
-    expect(root.textContent).toContain('Ranking de hoje (2026-09-01)');
-    const rows = Array.from(root.querySelectorAll('.ranking__row'));
-    expect(rows.length).toBe(2);
-    expect(rows[0]?.textContent).toContain('Bruno');
-    expect(rows[0]?.textContent).toContain('90');
+    expect(root.querySelector('.ranking')).toBeNull();
+    expect(root.textContent).not.toContain('Ranking de hoje');
   });
 
-  it('avisa quando ninguem jogou hoje', () => {
-    overlays.showIdle(idleView({ board: [] }));
-    expect(root.textContent).toContain('Ninguem jogou hoje ainda');
+  it('o fim de jogo mostra so a colocacao, sem repetir a lista', () => {
+    const entry = board[1] as ScoreEntry;
+    overlays.showGameOver(report, { board, entry, position: 2, today: '2026-09-01' });
+    expect(root.textContent).toContain('2o lugar de 2 partidas hoje');
     expect(root.querySelector('.ranking')).toBeNull();
   });
 
-  it('o fim de jogo mostra a colocacao e destaca a partida do aluno', () => {
-    const entry = board[1] as ScoreEntry;
-    overlays.showGameOver(report, {
-      board,
-      entry,
-      position: 2,
-      today: '2026-09-01',
-    });
-    expect(root.textContent).toContain('2o lugar de 2 partidas hoje');
-    const mine = root.querySelector('.ranking__row--mine');
-    expect(mine?.textContent).toContain('Ana');
-    expect(mine?.getAttribute('aria-current')).toBe('true');
+  it('sem ranking, o fim de jogo nao mostra colocacao', () => {
+    overlays.showGameOver(report);
+    expect(root.querySelector('.ranking__position')).toBeNull();
   });
 
   it('copiar ranking chama o callback', async () => {

@@ -18,8 +18,10 @@ ranking do dia não faria sentido. O apelido fica lembrado no navegador para as 
 seguintes.
 
 Toda partida terminada entra no **ranking de hoje**: apelido, pontuação, precisão e
-conteúdo jogado. O ranking aparece na tela inicial (top 5) e no fim de jogo, com a partida
-recém-jogada destacada e a colocação em evidência.
+conteúdo jogado. Ele fica numa **coluna ao lado do tabuleiro**, visível o tempo todo —
+inclusive durante a partida — com a sua linha destacada. Em telas com menos de 960px a
+coluna desce para o fim da página, abaixo dos controles de toque. A tela de fim de jogo
+mostra a sua colocação ("2º lugar de 5 partidas hoje").
 
 **O ranking zera sozinho a cada dia.** Cada partida guarda a data local em que foi jogada;
 ao abrir o jogo, o que não é de hoje é descartado. Não há tarefa agendada nem nada para o

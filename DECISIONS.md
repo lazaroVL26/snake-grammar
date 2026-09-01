@@ -223,3 +223,28 @@ Agora a direção é deduzida do que o renderer desenhou (cabeça menos o segmen
 a tecla é reenviada a cada quadro enquanto for preciso, já que o jogo descarta viradas
 duplicadas. Sem estado paralelo, sem divergência: 12 execuções seguidas da suíte completa
 sem falha. O defeito era do arnês de teste, nunca do jogo.
+
+## 29. O ranking virou uma coluna ao lado do tabuleiro
+
+Pedido do professor. Antes a lista aparecia dentro do painel da tela inicial e se repetia
+no fim de jogo — só era visível quando ninguém estava jogando, que é justamente quando ela
+menos importa. Agora é um `<aside class="rank-side">` irmão do tabuleiro, visível a
+partida inteira.
+
+A §9.2 dizia "coluna única centralizada, largura máxima ~640px". A coluna do jogo continua
+com 640px; a partir de 960px de viewport entra uma segunda coluna de 232px à direita, com
+`position: sticky`. Abaixo de 960px ela desce para o fim da página — **depois** do D-pad,
+para não empurrar os controles de toque para fora da tela em 360px. A §9.2 foi atualizada.
+
+Com a lista sempre à vista, o painel de fim de jogo deixou de repeti-la: sobrou só a
+colocação ("2º lugar de 5 partidas hoje"), que é a informação que ele acrescenta.
+
+## 30. O destaque do ranking compara conteúdo, não referência
+
+`scoreboardList` marcava a linha do aluno com `entry === highlight`. Funcionava no teste
+de unidade, onde os dois lados são o mesmo objeto, mas nunca funcionaria de verdade: a
+coluna lateral é redesenhada a partir de `loadScoreboard()`, que reserializa tudo do
+`localStorage` e devolve objetos novos.
+
+O teste de ponta a ponta pegou o defeito. A comparação passou a ser por conteúdo
+(`playedAt` + `nick` + `score`), que sobrevive à ida e volta pelo JSON.

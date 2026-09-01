@@ -30,6 +30,7 @@ import {
 import { buildShell, showBankError } from './ui/shell';
 import { Hud } from './ui/hud';
 import { Overlays } from './ui/overlays';
+import { RankingPanel } from './ui/scoreboard';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
 import { buildReport, reportToText } from './ui/report';
 import type { RankingView } from './ui/overlays';
@@ -59,6 +60,7 @@ const shell = buildShell(root);
 const rng = createRng(Date.now() >>> 0);
 const renderer = new Renderer(shell.canvas);
 const hud = new Hud(shell.hud);
+const rankingPanel = new RankingPanel(shell.ranking);
 
 let topic: TopicId = DEFAULT_TOPIC;
 let pool: Question[] = questionsForTopic(findTopic(topic), bank);
@@ -73,15 +75,14 @@ let ranking: RankingView | null = null;
 
 const byId = new Map(bank.map((question) => [question.id, question]));
 
-/** Tela inicial: recorde pessoal, apelido lembrado e o ranking de hoje. */
+/** Tela inicial: recorde pessoal e apelido lembrado. */
 function showIdleScreen(): void {
-  overlays.showIdle({
-    bestScore: best,
-    nick,
-    today: dayKey(),
-    board: loadScoreboard(),
-    questionCount: countFor,
-  });
+  overlays.showIdle({ bestScore: best, nick, questionCount: countFor });
+}
+
+/** Redesenha a coluna do ranking ao lado do tabuleiro. */
+function refreshRanking(): void {
+  rankingPanel.update(loadScoreboard(), dayKey(), ranking?.entry);
 }
 
 /** Quantas frases cada conteudo do menu tem, para o aluno escolher com informacao. */
@@ -195,6 +196,7 @@ function finishGame(): void {
     playedAt: Date.now(),
   });
   ranking = { ...saved, today: dayKey() };
+  refreshRanking();
   overlays.showGameOver(report, ranking);
 }
 
@@ -287,4 +289,5 @@ window.addEventListener('resize', () => renderer.resize());
 
 hud.update(state, best);
 showIdleScreen();
+refreshRanking();
 engine.start();

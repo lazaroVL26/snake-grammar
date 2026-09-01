@@ -27,6 +27,7 @@
   --space-6: 32px;
 
   --shell-width: 640px;
+  --rank-width: 232px;
   --motion-fast: 160ms;
   --motion-base: 200ms;
   --easing: cubic-bezier(0.2, 0.7, 0.3, 1);
