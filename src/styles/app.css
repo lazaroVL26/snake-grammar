@@ -263,6 +263,104 @@ body {
   color: var(--snake-head);
 }
 
+/* ---------- apelido e ranking ---------- */
+
+.nick {
+  display: grid;
+  gap: var(--space-1);
+}
+
+.nick__field {
+  font: inherit;
+  font-family: var(--font-mono);
+  background: var(--bg);
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-sm);
+  color: var(--text);
+  padding: var(--space-2) var(--space-3);
+  width: 100%;
+}
+
+.nick__field::placeholder {
+  color: var(--muted);
+}
+
+.nick__warning {
+  margin: 0;
+  color: var(--err);
+  font-size: 0.75rem;
+  min-height: 1em;
+}
+
+.nick__warning:empty {
+  min-height: 0;
+}
+
+.ranking-block {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.ranking {
+  list-style: none;
+  counter-reset: rank;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 2px;
+  font-size: 0.85rem;
+}
+
+.ranking__row {
+  counter-increment: rank;
+  display: grid;
+  grid-template-columns: 1.6rem 1fr auto auto;
+  gap: var(--space-2);
+  align-items: baseline;
+  padding: var(--space-1) var(--space-2);
+  border-radius: var(--radius-sm);
+}
+
+.ranking__row::before {
+  content: counter(rank) '.';
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking__row--mine {
+  background: color-mix(in srgb, var(--snake) 18%, transparent);
+}
+
+.ranking__row--mine .ranking__nick {
+  color: var(--snake-head);
+  font-weight: 600;
+}
+
+.ranking__nick {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ranking__score {
+  font-weight: 600;
+  font-variant-numeric: tabular-nums;
+}
+
+.ranking__accuracy {
+  color: var(--muted);
+  font-variant-numeric: tabular-nums;
+  min-width: 3.2rem;
+  text-align: right;
+}
+
+.ranking__position {
+  margin: 0;
+  color: var(--snake);
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
 /* ---------- relatorio ---------- */
 
 .summary {

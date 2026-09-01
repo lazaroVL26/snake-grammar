@@ -180,3 +180,46 @@ anterior) é a explicação em português. O mesmo cuidado vale nos itens de `fu
 onde `will finish` nunca aparece ao lado de `will have finished`, e nos de
 `present-perfect-continuous`, que não oferecem o present perfect simples quando as duas
 formas seriam aceitáveis.
+
+## 25. O ranking é JSON no `localStorage`, não um arquivo em disco
+
+O pedido foi "salvo no json". Sem servidor não existe escrita de arquivo a partir de uma
+página estática, e a §2 proíbe backend e exige funcionar offline. O ranking é, então, JSON
+gravado em `localStorage`, na chave `snake-grammar:scores:v1` — separada de
+`snake-grammar:v1` justamente para poder ser zerada sem levar junto o recorde pessoal.
+
+A consequência precisa ficar explícita, e está no README: **o ranking é por navegador**.
+Num laboratório, cada máquina tem a sua lista. O botão "Copiar ranking" existe para
+contornar isso sem servidor — o aluno cola o texto num documento da turma.
+
+## 26. O reset diário é lazy, não agendado
+
+Cada entrada guarda o dia local (`AAAA-MM-DD`) em que a partida aconteceu.
+`loadScoreboard` descarta o que não é de hoje e regrava a lista já podada. Não há
+`setInterval` nem tarefa à meia-noite: o ranking "zera" na primeira leitura do dia
+seguinte, que é o único momento em que alguém olharia para ele. Menos código e nenhum
+estado vivo para manter.
+
+O dia é o do relógio da máquina do aluno. Numa turma com fusos diferentes, cada navegador
+vira o dia no seu próprio horário — irrelevante para uso em sala.
+
+## 27. Apelido obrigatório para começar
+
+Sem apelido o ranking vira uma lista de anônimos e perde a função. O botão "Começar" e o
+`Enter` global passam por `Overlays.requestStart()`, que leva o foco ao campo e avisa em
+vez de iniciar. O jogo continua 100% jogável só com teclado: o campo recebe foco sozinho
+quando ainda não há apelido, e `Enter` dentro dele começa a partida.
+
+O apelido é aparado (espaços colapsados, caracteres invisíveis removidos, 16 caracteres no
+máximo) antes de ir para o ranking — nada de layout quebrado por nome gigante colado.
+
+## 28. O piloto automático dos testes lê a direção da cobra no canvas
+
+O teste de partida completa em jsdom dirige a cobra até a fruta. Ele rastreava a direção
+por conta própria, e esse palpite podia divergir do jogo quando uma tecla era recusada —
+o que produzia uma falha de 1 em 4 execuções, com a cobra batendo na parede.
+
+Agora a direção é deduzida do que o renderer desenhou (cabeça menos o segmento seguinte), e
+a tecla é reenviada a cada quadro enquanto for preciso, já que o jogo descarta viradas
+duplicadas. Sem estado paralelo, sem divergência: 12 execuções seguidas da suíte completa
+sem falha. O defeito era do arnês de teste, nunca do jogo.

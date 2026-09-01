@@ -11,6 +11,28 @@ conteúdo da rodada.
 No fim da partida o aluno recebe um relatório com precisão, desempenho por tempo verbal
 e a lista das frases erradas com explicação — o material de revisão da aula.
 
+## Apelido e ranking do dia
+
+Antes de começar, o aluno escreve um **apelido** — sem ele a partida não inicia, porque o
+ranking do dia não faria sentido. O apelido fica lembrado no navegador para as partidas
+seguintes.
+
+Toda partida terminada entra no **ranking de hoje**: apelido, pontuação, precisão e
+conteúdo jogado. O ranking aparece na tela inicial (top 5) e no fim de jogo, com a partida
+recém-jogada destacada e a colocação em evidência.
+
+**O ranking zera sozinho a cada dia.** Cada partida guarda a data local em que foi jogada;
+ao abrir o jogo, o que não é de hoje é descartado. Não há tarefa agendada nem nada para o
+professor apertar — virou o dia, o ranking está limpo.
+
+> **Importante — o ranking é por navegador.** O jogo não tem servidor (a especificação
+> proíbe backend e exige funcionar offline), então o ranking mora no `localStorage` da
+> máquina onde se joga. Num laboratório, **cada computador tem o seu próprio ranking**; os
+> alunos não disputam entre máquinas. Para uma classificação da turma inteira, use o botão
+> **"Copiar ranking"** na tela de fim de jogo: ele copia a lista do dia em texto, e os
+> alunos colam num documento compartilhado. Uma disputa ao vivo entre máquinas exigiria um
+> servidor, que está fora do escopo definido em `CLAUDE.md`.
+
 ## Conteúdos disponíveis
 
 O menu da tela inicial tem cinco opções. O banco traz **101 frases**:
@@ -75,6 +97,8 @@ navegador do aluno.
 | Pausar / continuar      | Espaço ou Esc          | Botão na tela               |
 | Marcar alternativa      | Teclas 1 a 4, ou setas | Toque na alternativa        |
 | Confirmar resposta      | Enter                  | Botão "Responder"           |
+
+Na tela inicial, `Enter` dentro do campo de apelido já começa a partida.
 
 O jogo é 100% jogável só com teclado. Ele pausa sozinho quando a janela perde o foco ou
 o aluno troca de aba.

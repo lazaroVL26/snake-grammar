@@ -1,19 +1,41 @@
-import type { AnswerMode, TopicId } from '../types';
+import type { AnswerMode, ScoreEntry, TopicId } from '../types';
 import { DEFAULT_TOPIC, TOPICS } from '../quiz/topics';
+import { CONFIG } from '../config';
 import { el } from './dom';
+import { positionLabel, scoreboardList } from './scoreboard';
 import { FOCUS_LABEL, REASON_LABEL, formatDuration, type Report } from './report';
 
+/** Tudo que a tela inicial precisa mostrar. */
+export interface IdleView {
+  bestScore: number;
+  nick: string;
+  today: string;
+  board: readonly ScoreEntry[];
+  questionCount: (topic: TopicId) => number;
+}
+
+/** Colocacao da partida que acabou, para destacar no fim de jogo. */
+export interface RankingView {
+  board: readonly ScoreEntry[];
+  entry: ScoreEntry;
+  position: number;
+  today: string;
+}
+
 export interface OverlayCallbacks {
-  onStart: (mode: AnswerMode, topic: TopicId) => void;
+  onStart: (mode: AnswerMode, topic: TopicId, nick: string) => void;
   onResume: () => void;
   onRestart: () => void;
   onCopyReport: () => Promise<boolean>;
+  onCopyRanking: () => Promise<boolean>;
 }
 
 /** Camada sobre o canvas: inicio, pausa, contagem e relatorio final. */
 export class Overlays {
   private mode: AnswerMode = 'choice';
   private topic: TopicId = DEFAULT_TOPIC;
+  private nick = '';
+  private nickField: HTMLInputElement | null = null;
 
   constructor(
     private readonly root: HTMLElement,
@@ -28,6 +50,26 @@ export class Overlays {
     return this.topic;
   }
 
+  get playerNick(): string {
+    return this.nick;
+  }
+
+  /**
+   * Comeca a partida se houver apelido. Sem apelido, leva o foco para o campo
+   * em vez de comecar — o ranking do dia so faz sentido com nome.
+   */
+  requestStart(): void {
+    const nick = (this.nickField?.value ?? this.nick).trim();
+    if (nick === '') {
+      this.nickField?.focus();
+      const warning = this.root.querySelector('.nick__warning');
+      if (warning) warning.textContent = 'Escreva seu apelido para entrar no ranking.';
+      return;
+    }
+    this.nick = nick;
+    this.callbacks.onStart(this.mode, this.topic, nick);
+  }
+
   hide(): void {
     this.root.hidden = true;
     this.root.replaceChildren();
@@ -40,13 +82,38 @@ export class Overlays {
     return panel;
   }
 
-  showIdle(bestScore: number, questionCount: (topic: TopicId) => number): void {
+  showIdle(view: IdleView): void {
+    this.nick = view.nick;
+
+    const field = el('input', {
+      type: 'text',
+      class: 'nick__field',
+      id: 'nick',
+      maxlength: CONFIG.NICK_MAX_LENGTH,
+      autocomplete: 'off',
+      placeholder: 'como voce aparece no ranking',
+      value: view.nick,
+    });
+    field.value = view.nick;
+    field.addEventListener('keydown', (event) => {
+      if (event.key !== 'Enter') return;
+      event.preventDefault();
+      this.requestStart();
+    });
+    this.nickField = field;
+
+    const nickBlock = el('div', { class: 'nick' }, [
+      el('label', { class: 'choices__legend', for: 'nick', text: 'Seu apelido' }),
+      field,
+      el('p', { class: 'nick__warning', role: 'status', 'aria-live': 'polite' }),
+    ]);
+
     const topicGroup = radioGroup(
       'O que voce quer estudar?',
       TOPICS.map((topic) => ({
         value: topic.id,
         label: topic.label,
-        detail: `${topic.summary} ${questionCount(topic.id)} frases.`,
+        detail: `${topic.summary} ${view.questionCount(topic.id)} frases.`,
       })),
       this.topic,
       (value) => (this.topic = value),
@@ -77,7 +144,7 @@ export class Overlays {
       class: 'button button--primary',
       text: 'Comecar',
     });
-    start.addEventListener('click', () => this.callbacks.onStart(this.mode, this.topic));
+    start.addEventListener('click', () => this.requestStart());
 
     this.show(
       el('h2', { class: 'panel__title', text: 'Snake Grammar' }),
@@ -85,16 +152,22 @@ export class Overlays {
         class: 'panel__lead',
         text: 'Coma a fruta, responda a frase em ingles. Acertou, a cobra cresce. Errou, ela encolhe.',
       }),
+      nickBlock,
       topicGroup,
       modeGroup,
       start,
-      el('p', { class: 'panel__note', text: `Recorde atual: ${bestScore} pontos` }),
+      el('div', { class: 'ranking-block' }, [
+        el('p', { class: 'choices__legend', text: `Ranking de hoje (${view.today})` }),
+        scoreboardList(view.board.slice(0, CONFIG.SCOREBOARD_VISIBLE)),
+      ]),
+      el('p', { class: 'panel__note', text: `Seu recorde: ${view.bestScore} pontos` }),
       el('p', {
         class: 'panel__note',
         text: 'Setas ou WASD movem. Espaco ou Esc pausam. Enter comeca.',
       }),
     );
-    start.focus();
+    if (view.nick === '') field.focus();
+    else start.focus();
   }
 
   showPaused(): void {
@@ -119,7 +192,7 @@ export class Overlays {
     );
   }
 
-  showGameOver(report: Report): void {
+  showGameOver(report: Report, ranking?: RankingView): void {
     const again = el('button', {
       type: 'button',
       class: 'button button--primary',
@@ -138,6 +211,17 @@ export class Overlays {
       });
     });
 
+    const copyRanking = el('button', {
+      type: 'button',
+      class: 'button',
+      text: 'Copiar ranking',
+    });
+    copyRanking.addEventListener('click', () => {
+      void this.callbacks.onCopyRanking().then((done) => {
+        copyRanking.textContent = done ? 'Ranking copiado' : 'Nao foi possivel copiar';
+      });
+    });
+
     this.show(
       el('h2', { class: 'panel__title', text: 'Fim de jogo' }),
       el('p', {
@@ -148,7 +232,8 @@ export class Overlays {
       summary(report),
       focusTable(report),
       missedList(report),
-      el('div', { class: 'panel__actions' }, [again, copy]),
+      rankingBlock(ranking),
+      el('div', { class: 'panel__actions' }, [again, copy, copyRanking]),
     );
     again.focus();
   }
@@ -215,6 +300,18 @@ function missedList(report: Report): HTMLElement {
         ]),
       ),
     ),
+  ]);
+}
+
+function rankingBlock(ranking?: RankingView): HTMLElement {
+  if (!ranking) return el('div', { hidden: true });
+  return el('div', { class: 'ranking-block' }, [
+    el('h3', { class: 'panel__subtitle', text: `Ranking de hoje (${ranking.today})` }),
+    el('p', {
+      class: 'ranking__position',
+      text: positionLabel(ranking.position, ranking.board.length),
+    }),
+    scoreboardList(ranking.board.slice(0, CONFIG.SCOREBOARD_VISIBLE), ranking.entry),
   ]);
 }
 

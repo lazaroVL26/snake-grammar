@@ -92,3 +92,19 @@ export interface GameState {
   startedAt: number;
   endedAt: number | null;
 }
+
+/** Uma partida terminada, guardada no ranking do dia. */
+export interface ScoreEntry {
+  nick: string;
+  score: number;
+  /** Precisao em porcentagem inteira. */
+  accuracy: number;
+  correct: number;
+  wrong: number;
+  /** Conteudo jogado, como aparece no menu. */
+  topicLabel: string;
+  /** Momento em que a partida acabou. */
+  playedAt: number;
+  /** Dia local no formato AAAA-MM-DD: e o que zera o ranking. */
+  date: string;
+}

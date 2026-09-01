@@ -39,6 +39,14 @@ export const CONFIG = {
   DIRECTION_BUFFER: 2,
   /** Chave unica no localStorage. */
   STORAGE_KEY: 'snake-grammar:v1',
+  /** Chave do ranking do dia, separada para poder ser zerada sozinha. */
+  SCORE_STORAGE_KEY: 'snake-grammar:scores:v1',
+  /** Quantas partidas do dia ficam guardadas. */
+  SCOREBOARD_SIZE: 20,
+  /** Quantas linhas do ranking aparecem na tela. */
+  SCOREBOARD_VISIBLE: 5,
+  /** Limite do apelido, para nao quebrar o layout do ranking. */
+  NICK_MAX_LENGTH: 16,
 } as const;
 
 /** Frutas 1..5 usam nivel 1, 6..12 usam nivel 2, dai em diante nivel 3. */

@@ -20,12 +20,19 @@ import { bindSwipe, createDpad } from './input/touch';
 import { QuestionBankError, loadQuestions, questionsForTopic } from './quiz/questions';
 import { QuestionSelector, presentQuestion } from './quiz/selector';
 import { DEFAULT_TOPIC, findTopic } from './quiz/topics';
-import { loadStats, recordGame } from './storage/persistence';
+import { loadStats, recordGame, saveNick } from './storage/persistence';
+import {
+  dayKey,
+  loadScoreboard,
+  saveScore,
+  scoreboardToText,
+} from './storage/scoreboard';
 import { buildShell, showBankError } from './ui/shell';
 import { Hud } from './ui/hud';
 import { Overlays } from './ui/overlays';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
 import { buildReport, reportToText } from './ui/report';
+import type { RankingView } from './ui/overlays';
 import type {
   AnswerMode,
   AttemptLog,
@@ -61,8 +68,21 @@ let best = loadStats().bestScore;
 let mode: AnswerMode = 'choice';
 let currentQuestion: Question | null = null;
 let countdownEndsAt = 0;
+let nick = loadStats().nick;
+let ranking: RankingView | null = null;
 
 const byId = new Map(bank.map((question) => [question.id, question]));
+
+/** Tela inicial: recorde pessoal, apelido lembrado e o ranking de hoje. */
+function showIdleScreen(): void {
+  overlays.showIdle({
+    bestScore: best,
+    nick,
+    today: dayKey(),
+    board: loadScoreboard(),
+    questionCount: countFor,
+  });
+}
 
 /** Quantas frases cada conteudo do menu tem, para o aluno escolher com informacao. */
 function countFor(id: TopicId): number {
@@ -70,9 +90,11 @@ function countFor(id: TopicId): number {
 }
 
 const overlays = new Overlays(shell.overlay, {
-  onStart: (chosen, chosenTopic) => {
+  onStart: (chosen, chosenTopic, chosenNick) => {
     mode = chosen;
     topic = chosenTopic;
+    nick = chosenNick;
+    saveNick(chosenNick);
     pool = questionsForTopic(findTopic(topic), bank);
     selector = new QuestionSelector(pool, rng);
     beginGame();
@@ -80,6 +102,7 @@ const overlays = new Overlays(shell.overlay, {
   onResume: () => enterCountdown(),
   onRestart: () => resetGame(),
   onCopyReport: () => copyReport(),
+  onCopyRanking: () => copyRanking(),
 });
 
 const modal = new QuestionModal(shell.modalRoot, {
@@ -114,7 +137,7 @@ function resetGame(): void {
   currentQuestion = null;
   best = loadStats().bestScore;
   hud.update(state, best);
-  overlays.showIdle(best, countFor);
+  showIdleScreen();
 }
 
 function askQuestion(): void {
@@ -153,15 +176,42 @@ function finishGame(): void {
   const stats = recordGame(state);
   best = stats.bestScore;
   hud.update(state, best);
-  overlays.showGameOver(
-    buildReport(state, best, byId, performance.now(), findTopic(topic).label),
+
+  const report = buildReport(
+    state,
+    best,
+    byId,
+    performance.now(),
+    findTopic(topic).label,
+    nick,
   );
+  const saved = saveScore({
+    nick,
+    score: report.score,
+    accuracy: report.accuracy,
+    correct: report.correct,
+    wrong: report.wrong,
+    topicLabel: report.topicLabel,
+    playedAt: Date.now(),
+  });
+  ranking = { ...saved, today: dayKey() };
+  overlays.showGameOver(report, ranking);
 }
 
 async function copyReport(): Promise<boolean> {
   const text = reportToText(
-    buildReport(state, best, byId, performance.now(), findTopic(topic).label),
+    buildReport(state, best, byId, performance.now(), findTopic(topic).label, nick),
   );
+  try {
+    await navigator.clipboard.writeText(text);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+async function copyRanking(): Promise<boolean> {
+  const text = scoreboardToText(ranking?.board ?? loadScoreboard(), dayKey());
   try {
     await navigator.clipboard.writeText(text);
     return true;
@@ -218,7 +268,7 @@ bindKeyboard({
   onDirection: turn,
   onTogglePause: togglePause,
   onConfirm: () => {
-    if (state.phase === 'idle') beginGame();
+    if (state.phase === 'idle') overlays.requestStart();
     else if (state.phase === 'gameover') {
       resetGame();
       beginGame();
@@ -236,5 +286,5 @@ document.addEventListener('visibilitychange', () => {
 window.addEventListener('resize', () => renderer.resize());
 
 hud.update(state, best);
-overlays.showIdle(best, countFor);
+showIdleScreen();
 engine.start();

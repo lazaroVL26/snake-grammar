@@ -1,9 +1,11 @@
 // @vitest-environment jsdom
 import { beforeEach, describe, expect, it, vi } from 'vitest';
-import { Overlays } from '../src/ui/overlays';
+import { Overlays, type IdleView } from '../src/ui/overlays';
+import type { ScoreEntry } from '../src/types';
 import type { Report } from '../src/ui/report';
 
 const report: Report = {
+  nick: 'Ana',
   topicLabel: 'Passado',
   score: 40,
   bestScore: 120,
@@ -36,13 +38,48 @@ const report: Report = {
   reason: 'too-short',
 };
 
+const board: ScoreEntry[] = [
+  {
+    nick: 'Bruno',
+    score: 90,
+    accuracy: 90,
+    correct: 9,
+    wrong: 1,
+    topicLabel: 'Futuro',
+    playedAt: 1_000,
+    date: '2026-09-01',
+  },
+  {
+    nick: 'Ana',
+    score: 40,
+    accuracy: 50,
+    correct: 2,
+    wrong: 2,
+    topicLabel: 'Presente',
+    playedAt: 2_000,
+    date: '2026-09-01',
+  },
+];
+
+function idleView(overrides: Partial<IdleView> = {}): IdleView {
+  return {
+    bestScore: 0,
+    nick: 'Ana',
+    today: '2026-09-01',
+    board,
+    questionCount: () => 41,
+    ...overrides,
+  };
+}
+
 let root: HTMLElement;
 let overlays: Overlays;
 const calls = {
-  start: [] as Array<{ mode: string; topic: string }>,
+  start: [] as Array<{ mode: string; topic: string; nick: string }>,
   resume: 0,
   restart: 0,
   copy: 0,
+  copyRanking: 0,
 };
 
 beforeEach(() => {
@@ -54,12 +91,17 @@ beforeEach(() => {
   calls.resume = 0;
   calls.restart = 0;
   calls.copy = 0;
+  calls.copyRanking = 0;
   overlays = new Overlays(root, {
-    onStart: (mode, topic) => calls.start.push({ mode, topic }),
+    onStart: (mode, topic, nick) => calls.start.push({ mode, topic, nick }),
     onResume: () => (calls.resume += 1),
     onRestart: () => (calls.restart += 1),
     onCopyReport: () => {
       calls.copy += 1;
+      return Promise.resolve(true);
+    },
+    onCopyRanking: () => {
+      calls.copyRanking += 1;
       return Promise.resolve(true);
     },
   });
@@ -67,14 +109,14 @@ beforeEach(() => {
 
 describe('overlays — tela inicial', () => {
   it('mostra o recorde e comeca em multipla escolha', () => {
-    overlays.showIdle(120, () => 41);
+    overlays.showIdle(idleView({ bestScore: 120 }));
     expect(root.hidden).toBe(false);
-    expect(root.textContent).toContain('Recorde atual: 120 pontos');
+    expect(root.textContent).toContain('Seu recorde: 120 pontos');
     expect(overlays.answerMode).toBe('choice');
   });
 
   it('permite trocar para o modo digitado antes de comecar', () => {
-    overlays.showIdle(0, () => 41);
+    overlays.showIdle(idleView());
     const typed = Array.from(root.querySelectorAll<HTMLButtonElement>('.choice')).find(
       (button) => button.textContent?.startsWith('Digitando'),
     );
@@ -83,12 +125,90 @@ describe('overlays — tela inicial', () => {
     expect(typed?.getAttribute('aria-checked')).toBe('true');
 
     root.querySelector<HTMLButtonElement>('.button--primary')?.click();
-    expect(calls.start).toEqual([{ mode: 'typed', topic: 'past-contrast' }]);
+    expect(calls.start).toEqual([{ mode: 'typed', topic: 'past-contrast', nick: 'Ana' }]);
+  });
+});
+
+describe('overlays — apelido e ranking', () => {
+  it('mostra o campo de apelido ja preenchido com o nome lembrado', () => {
+    overlays.showIdle(idleView({ nick: 'Ana' }));
+    const field = root.querySelector<HTMLInputElement>('.nick__field');
+    expect(field?.value).toBe('Ana');
+    expect(field?.maxLength).toBe(16);
+  });
+
+  it('foca o campo quando ainda nao ha apelido', () => {
+    overlays.showIdle(idleView({ nick: '' }));
+    expect(document.activeElement).toBe(root.querySelector('.nick__field'));
+  });
+
+  it('sem apelido, comecar avisa em vez de iniciar', () => {
+    overlays.showIdle(idleView({ nick: '' }));
+    root.querySelector<HTMLButtonElement>('.button--primary')?.click();
+    expect(calls.start).toEqual([]);
+    expect(root.querySelector('.nick__warning')?.textContent).toContain(
+      'Escreva seu apelido',
+    );
+    expect(document.activeElement).toBe(root.querySelector('.nick__field'));
+  });
+
+  it('Enter no campo de apelido comeca a partida', () => {
+    overlays.showIdle(idleView({ nick: '' }));
+    const field = root.querySelector<HTMLInputElement>('.nick__field');
+    if (!field) throw new Error('campo nao encontrado');
+    field.value = '  Duda  ';
+    field.dispatchEvent(new KeyboardEvent('keydown', { key: 'Enter', bubbles: true }));
+    expect(calls.start).toEqual([
+      { mode: 'choice', topic: 'past-contrast', nick: 'Duda' },
+    ]);
+  });
+
+  it('lista o ranking do dia com a data', () => {
+    overlays.showIdle(idleView());
+    expect(root.textContent).toContain('Ranking de hoje (2026-09-01)');
+    const rows = Array.from(root.querySelectorAll('.ranking__row'));
+    expect(rows.length).toBe(2);
+    expect(rows[0]?.textContent).toContain('Bruno');
+    expect(rows[0]?.textContent).toContain('90');
+  });
+
+  it('avisa quando ninguem jogou hoje', () => {
+    overlays.showIdle(idleView({ board: [] }));
+    expect(root.textContent).toContain('Ninguem jogou hoje ainda');
+    expect(root.querySelector('.ranking')).toBeNull();
+  });
+
+  it('o fim de jogo mostra a colocacao e destaca a partida do aluno', () => {
+    const entry = board[1] as ScoreEntry;
+    overlays.showGameOver(report, {
+      board,
+      entry,
+      position: 2,
+      today: '2026-09-01',
+    });
+    expect(root.textContent).toContain('2o lugar de 2 partidas hoje');
+    const mine = root.querySelector('.ranking__row--mine');
+    expect(mine?.textContent).toContain('Ana');
+    expect(mine?.getAttribute('aria-current')).toBe('true');
+  });
+
+  it('copiar ranking chama o callback', async () => {
+    overlays.showGameOver(report);
+    const button = Array.from(
+      root.querySelectorAll<HTMLButtonElement>('.panel__actions button'),
+    ).find((node) => node.textContent === 'Copiar ranking');
+    button?.click();
+    await vi.waitFor(() => expect(button?.textContent).toBe('Ranking copiado'));
+    expect(calls.copyRanking).toBe(1);
   });
 });
 
 describe('overlays — menu de conteudo', () => {
-  beforeEach(() => overlays.showIdle(0, (topic) => (topic === 'all' ? 101 : 41)));
+  beforeEach(() =>
+    overlays.showIdle(
+      idleView({ questionCount: (topic) => (topic === 'all' ? 101 : 41) }),
+    ),
+  );
 
   it('lista os cinco conteudos com resumo e quantidade de frases', () => {
     const group = root.querySelector('.choices--topics');
@@ -122,7 +242,7 @@ describe('overlays — menu de conteudo', () => {
     expect(buttons[0]?.getAttribute('aria-checked')).toBe('false');
 
     root.querySelector<HTMLButtonElement>('.button--primary')?.click();
-    expect(calls.start).toEqual([{ mode: 'choice', topic: 'future' }]);
+    expect(calls.start).toEqual([{ mode: 'choice', topic: 'future', nick: 'Ana' }]);
   });
 });
 
@@ -191,6 +311,7 @@ describe('overlays — relatorio final', () => {
     expect(buttons.map((b) => b.textContent)).toEqual([
       'Jogar de novo',
       'Copiar relatorio',
+      'Copiar ranking',
     ]);
     buttons[0]?.click();
     expect(calls.restart).toBe(1);

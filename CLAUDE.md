@@ -107,7 +107,8 @@ snake-grammar/
    │  ├─ keyboard.ts
    │  └─ touch.ts              # swipe + D-pad na tela em telas pequenas
    ├─ storage/
-   │  └─ persistence.ts        # recorde e estatísticas em localStorage
+   │  ├─ persistence.ts        # recorde, estatísticas e apelido em localStorage
+   │  └─ scoreboard.ts         # ranking do dia, com reset diário
    └─ styles/
       ├─ tokens.css
       └─ app.css
@@ -166,8 +167,9 @@ testável** — não podem importar nada de `src/ui/`, `src/input/` nem tocar em
 - **Game over por encolhimento:** se após a penalidade o comprimento ficar **< 3**, o
   jogo termina com a mensagem "A cobra ficou curta demais". Não deixe o comprimento
   chegar a 0 nem gerar índice negativo.
-- Recorde (`bestScore`) e estatísticas ficam em `localStorage` na chave
-  `snake-grammar:v1`.
+- Recorde (`bestScore`), estatísticas e apelido ficam em `localStorage` na chave
+  `snake-grammar:v1`. O ranking do dia fica na chave separada
+  `snake-grammar:scores:v1` (§5.7).
 
 ### 5.5 Fim de jogo — relatório
 
@@ -181,6 +183,22 @@ A tela de game over é parte do valor pedagógico. Deve mostrar:
   revisão que o professor vai usar depois da partida).
 - Botões: "Jogar de novo" e "Copiar relatório" (copia um resumo em texto para a área de
   transferência, para o aluno colar no caderno/Moodle).
+
+### 5.7 Apelido e ranking do dia
+
+Antes de começar, o aluno escreve um apelido; sem ele a partida não inicia. O apelido é
+lembrado entre partidas.
+
+Toda partida terminada entra no ranking do dia, com apelido, pontuação, precisão e
+conteúdo. O ranking aparece na tela inicial (top `SCOREBOARD_VISIBLE`) e no fim de jogo,
+com a partida recém-jogada destacada.
+
+**O ranking zera a cada dia.** Cada entrada guarda o dia local em que foi jogada, e a
+leitura descarta o que não é de hoje — sem tarefa agendada. Guarda no máximo
+`SCOREBOARD_SIZE` partidas, ordenadas por pontuação; empate favorece quem jogou antes.
+
+Como não há servidor (§2), o ranking é por navegador. O botão "Copiar ranking" existe para
+o professor juntar as máquinas num documento só.
 
 ### 5.6 Máquina de estados
 
@@ -230,6 +248,10 @@ export const CONFIG = {
   WRAP_WALLS: false,
   DIRECTION_BUFFER: 2,
   STORAGE_KEY: 'snake-grammar:v1',
+  SCORE_STORAGE_KEY: 'snake-grammar:scores:v1',
+  SCOREBOARD_SIZE: 20,
+  SCOREBOARD_VISIBLE: 5,
+  NICK_MAX_LENGTH: 16,
 } as const;
 ```
 

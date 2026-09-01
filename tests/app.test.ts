@@ -3,6 +3,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONFIG } from '../src/config';
 import { loadQuestions } from '../src/quiz/questions';
 import { findTopic, includesFocus } from '../src/quiz/topics';
+import { dayKey } from '../src/storage/scoreboard';
 import type { TopicId } from '../src/types';
 import type { Direction, Vec } from '../src/types';
 
@@ -42,6 +43,19 @@ interface Snapshot {
   head: Vec;
   /** Ordem do renderer: cauda primeiro, cabeca por ultimo. */
   segments: Vec[];
+}
+
+/** Direcao real da cobra, deduzida do desenho: cabeca menos o segmento seguinte. */
+function facingOf(snake: Snapshot, fallback: Direction): Direction {
+  const neck = snake.segments[snake.segments.length - 2];
+  if (!neck) return fallback;
+  const dx = snake.head.x - neck.x;
+  const dy = snake.head.y - neck.y;
+  if (dx > 0) return 'right';
+  if (dx < 0) return 'left';
+  if (dy > 0) return 'down';
+  if (dy < 0) return 'up';
+  return fallback;
 }
 
 /** Avanca um quadro e le a cobra inteira pelo que foi desenhado no canvas. */
@@ -106,9 +120,9 @@ function sweepWaypoints(): Vec[] {
 
 /** Dirige a cobra pela serpentina ate ela comer, lendo a cabeca a cada quadro. */
 function driveUntilQuestion(): void {
-  let facing: Direction = 'right';
   const path = sweepWaypoints();
   let index = 0;
+  let lastKnown: Direction = 'right';
 
   for (let frame = 0; frame < 12_000; frame += 1) {
     if (modalOpen()) return;
@@ -131,11 +145,13 @@ function driveUntilQuestion(): void {
       target = path[index] as Vec;
     }
 
+    // A direcao vem do desenho, nunca de um palpite acumulado: se uma tecla for
+    // recusada pelo jogo, o quadro seguinte corrige sozinho.
+    const facing = facingOf(snake, lastKnown);
+    lastKnown = facing;
     const desired = chooseDirection(snake, target, facing);
-    if (desired && desired !== facing) {
-      key(ARROW[desired]);
-      facing = desired;
-    }
+    // Repetir a mesma tecla e inofensivo: o jogo descarta viradas duplicadas.
+    if (desired && desired !== facing) key(ARROW[desired]);
   }
   throw new Error('a cobra nao chegou na fruta');
 }
@@ -233,7 +249,15 @@ function openQuestionFocus(): string {
   return question.focus;
 }
 
-function startGame(): void {
+/** Preenche o apelido: sem ele a partida nao comeca. */
+function typeNick(name: string): void {
+  const field = document.querySelector<HTMLInputElement>('.nick__field');
+  if (!field) throw new Error('campo de apelido nao encontrado');
+  field.value = name;
+}
+
+function startGame(nickName = 'Ana'): void {
+  typeNick(nickName);
   document.querySelector<HTMLButtonElement>('.button--primary')?.click();
   skipCountdown();
 }
@@ -293,7 +317,7 @@ describe('app — boot', () => {
     expect(document.querySelector('canvas')).not.toBeNull();
     expect(document.querySelector('.hud')?.textContent).toContain('Pontos');
     expect(text()).toContain('Comecar');
-    expect(text()).toContain('Recorde atual: 0 pontos');
+    expect(text()).toContain('Seu recorde: 0 pontos');
   });
 
   it('o canvas tem aria-label descritivo e o HUD e texto no DOM', () => {
@@ -304,6 +328,7 @@ describe('app — boot', () => {
   });
 
   it('Enter comeca a partida pela contagem regressiva', () => {
+    typeNick('Ana');
     key('Enter');
     frames(2);
     expect(document.querySelector('.countdown')?.textContent).toBe('3');
@@ -313,10 +338,7 @@ describe('app — boot', () => {
 });
 
 describe('app — partida completa', () => {
-  beforeEach(() => {
-    document.querySelector<HTMLButtonElement>('.button--primary')?.click();
-    skipCountdown();
-  });
+  beforeEach(() => startGame());
 
   it('come a fruta, congela o jogo e abre a pergunta', () => {
     driveUntilQuestion();
@@ -429,5 +451,101 @@ describe('app — menu de conteudo', () => {
     startGame();
     driveUntilQuestion();
     expect(['simple-past', 'past-perfect', 'contrast']).toContain(openQuestionFocus());
+  });
+});
+
+describe('app — apelido e ranking do dia', () => {
+  it('sem apelido a partida nao comeca', () => {
+    document.querySelector<HTMLButtonElement>('.button--primary')?.click();
+    frames(3);
+    expect(text()).toContain('Escreva seu apelido');
+    expect(document.querySelector('.countdown')).toBeNull();
+  });
+
+  it('a partida terminada entra no ranking com o apelido', () => {
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+
+    expect(gameOver()).toBe(true);
+    const mine = document.querySelector('.ranking__row--mine');
+    expect(mine?.textContent).toContain('Duda');
+    expect(text()).toContain('Primeira partida do dia.');
+
+    const raw = window.localStorage.getItem(CONFIG.SCORE_STORAGE_KEY) ?? '';
+    expect(raw).toContain('"nick":"Duda"');
+    expect(raw).toContain(`"date":"${dayKey()}"`);
+  });
+
+  it('a segunda partida entra no mesmo ranking e ordena por pontuacao', () => {
+    // Primeira partida: erra de cara, fica com 0 ponto.
+    startGame('Ana');
+    driveUntilQuestion();
+    answerQuestion(false);
+    document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
+
+    // Segunda: acerta uma antes de morrer, entao passa a primeira.
+    startGame('Bruno');
+    driveUntilQuestion();
+    answerQuestion(true);
+    skipCountdown();
+    driveUntilQuestion();
+    answerQuestion(false);
+
+    expect(gameOver()).toBe(true);
+    const nicks = Array.from(document.querySelectorAll('.ranking__nick')).map(
+      (node) => node.textContent,
+    );
+    expect(nicks).toEqual(['Bruno', 'Ana']);
+    expect(text()).toContain('1o lugar de 2 partidas hoje');
+  });
+
+  it('o apelido fica lembrado para a partida seguinte', () => {
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+    document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
+
+    const field = document.querySelector<HTMLInputElement>('.nick__field');
+    expect(field?.value).toBe('Duda');
+  });
+
+  it('o ranking de hoje aparece na tela inicial da partida seguinte', () => {
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+    document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
+
+    expect(text()).toContain(`Ranking de hoje (${dayKey()})`);
+    expect(document.querySelector('.ranking')?.textContent).toContain('Duda');
+  });
+
+  it('partidas de ontem nao aparecem no ranking de hoje', () => {
+    const ontem = new Date(Date.now() - 24 * 60 * 60 * 1000);
+    window.localStorage.setItem(
+      CONFIG.SCORE_STORAGE_KEY,
+      JSON.stringify([
+        {
+          nick: 'Ontem',
+          score: 999,
+          accuracy: 100,
+          correct: 9,
+          wrong: 0,
+          topicLabel: 'Futuro',
+          playedAt: ontem.getTime(),
+          date: dayKey(ontem),
+        },
+      ]),
+    );
+
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+
+    expect(gameOver()).toBe(true);
+    const nicks = Array.from(document.querySelectorAll('.ranking__nick')).map(
+      (node) => node.textContent,
+    );
+    expect(nicks).toEqual(['Duda']);
   });
 });

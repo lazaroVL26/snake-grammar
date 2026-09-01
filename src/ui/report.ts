@@ -55,6 +55,8 @@ export interface MissedItem {
 }
 
 export interface Report {
+  /** Apelido de quem jogou, para o professor saber de quem e o relatorio. */
+  nick: string;
   /** Conteudo escolhido no menu, como o aluno leu na tela inicial. */
   topicLabel: string;
   score: number;
@@ -75,6 +77,7 @@ export function buildReport(
   questionsById: Map<string, Question>,
   now: number,
   topicLabel = 'Todos os tempos',
+  nick = '',
 ): Report {
   const { correctCount, wrongCount, score } = state.stats;
   const total = correctCount + wrongCount;
@@ -101,6 +104,7 @@ export function buildReport(
     });
 
   return {
+    nick,
     topicLabel,
     score,
     bestScore,
@@ -130,6 +134,7 @@ export function formatDuration(ms: number): string {
 export function reportToText(report: Report): string {
   const lines: string[] = [
     'Snake Grammar',
+    ...(report.nick ? [`Aluno: ${report.nick}`] : []),
     `Conteudo: ${report.topicLabel}`,
     `Pontuacao: ${report.score} (recorde: ${report.bestScore})`,
     `Comprimento final: ${report.finalLength} | Tempo: ${formatDuration(report.durationMs)}`,
