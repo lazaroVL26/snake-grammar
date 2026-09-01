@@ -496,3 +496,27 @@ decisão sobre o piloto automático — dessa vez estava no produto.
 
 A pontuação nunca foi afetada: `confirm()` usa `presented.options[selected]` e
 `isChoiceCorrect` compara texto exato normalizado. Quem errou foi contado como erro.
+
+## 50. Fliperama de verdade, sem sacrificar a leitura
+
+Pedido do professor: fontes e cores mais gamificadas. A §9.1 já dizia "caderno de idiomas
+encontrando fliperama", então o caminho foi puxar o lado fliperama, não trocar a direção
+de arte.
+
+**Press Start 2P entrou como quarta família** (`--font-arcade`), mas só onde o texto é
+número ou rótulo curto: placar, contagem regressiva, título, posições e pontuações do
+ranking, atalhos 1–4. **Nunca em texto corrido** — ela é larga e cansativa em frase longa,
+e os alunos são A2–B1. A frase do exercício continua em IBM Plex Mono, que é a assinatura
+pedagógica, e a leitura de interface continua em Inter.
+
+**Um token de cor novo:** `--accent: #7cc6ff`, azul de fliperama, para a sequência de
+acertos e os atalhos das alternativas. Os brilhos são `--glow-snake` e `--glow-accent`,
+derivados da paleta com `color-mix` — nada de cor solta fora dos tokens, como a §9.1 exige.
+
+**O placar pulsa** quando o número muda, o que dá o retorno de "ganhei ponto" que faltava.
+A animação respeita `prefers-reduced-motion`.
+
+Medido antes de fechar: os sete pares de cor novos ficam entre 8,2:1 e 12,9:1, folgado
+acima de AA. Em 360px o título ocupa 179px dos 360 e nenhum valor do placar estoura a
+célula, nem com "12 / 34" ou "9999" — Press Start 2P é larga, então isso precisava ser
+conferido, não presumido.

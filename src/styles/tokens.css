@@ -10,10 +10,18 @@
   --err: #ee6c5d;
   --text: #eae7e1;
   --muted: #9aaec8;
+  /* Azul de fliperama: sequencia de acertos, atalhos e detalhes de jogo. */
+  --accent: #7cc6ff;
+
+  /* Brilhos: sempre derivados da paleta, nunca cor nova solta. */
+  --glow-snake: 0 0 12px color-mix(in srgb, var(--snake) 55%, transparent);
+  --glow-accent: 0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
 
   --font-display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
   --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
   --font-mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
+  /* Placar, contagem e ranking: o lado fliperama da direcao de arte. */
+  --font-arcade: 'Press Start 2P', 'Bricolage Grotesque', monospace;
 
   --radius-sm: 8px;
   --radius-md: 14px;

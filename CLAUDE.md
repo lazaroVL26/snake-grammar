@@ -423,15 +423,23 @@ Bootstrap:
 --err: #ee6c5d; /* erro */
 --text: #eae7e1;
 --muted: #9aaec8;
+--accent: #7cc6ff; /* azul de fliperama: sequência, atalhos 1–4 */
 ```
 
 Tipografia (3 papéis, carregadas do Google Fonts no `index.html` com `display=swap`):
 
-- Display / títulos: **Bricolage Grotesque**, peso 700, tracking apertado.
+- Display / títulos de painel: **Bricolage Grotesque**, peso 700, tracking apertado.
+- **Placar, contagem regressiva, ranking e título: Press Start 2P** (`--font-arcade`).
+  É o lado fliperama da direção de arte. Só em número e rótulo curto — nunca em texto
+  corrido, que ficaria ilegível.
 - Corpo / UI: **Inter**.
 - **Frase do exercício: IBM Plex Mono** — a frase em inglês aparece sempre em
   monoespaçada, com a lacuna renderizada como um sublinhado que pulsa como cursor de
   caderno. Essa é a assinatura visual do projeto.
+
+O placar pulsa quando o número muda, e a sequência de acertos acende em `--accent`.
+Brilhos saem sempre de `--glow-snake` / `--glow-accent`, derivados da paleta — nunca uma
+cor nova solta.
 
 Momento de assinatura: ao acertar, o verbo escolhido **se encaixa na lacuna** (transição
 curta de 200ms, escala + cor `--ok`) e só então o modal fecha e a cauda cresce. Ao errar,

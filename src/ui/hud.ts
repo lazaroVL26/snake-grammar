@@ -17,6 +17,16 @@ function cell(label: string): Cell {
   return { root, value };
 }
 
+/** Escreve o valor e pulsa quando ele muda: o "ganhei ponto" do fliperama. */
+function write(cell: Cell, value: string): void {
+  if (cell.value.textContent === value) return;
+  cell.value.textContent = value;
+  cell.value.classList.remove('hud__value--bump');
+  // Leitura de layout forca o reinicio da animacao quando ela ja estava rodando.
+  void cell.value.offsetWidth;
+  cell.value.classList.add('hud__value--bump');
+}
+
 /** HUD e texto real no DOM (nunca desenho no canvas) para leitores de tela. */
 export class Hud {
   private readonly score = cell('Pontos');
@@ -31,10 +41,10 @@ export class Hud {
   }
 
   update(state: GameState, bestScore: number): void {
-    this.score.value.textContent = String(state.stats.score);
-    this.length.value.textContent = String(state.snake.segments.length);
-    this.answers.value.textContent = `${state.stats.correctCount} / ${state.stats.wrongCount}`;
-    this.best.value.textContent = String(Math.max(bestScore, state.stats.score));
+    write(this.score, String(state.stats.score));
+    write(this.length, String(state.snake.segments.length));
+    write(this.answers, `${state.stats.correctCount} / ${state.stats.wrongCount}`);
+    write(this.best, String(Math.max(bestScore, state.stats.score)));
     this.root.dataset.streak = String(state.stats.streak);
   }
 }
