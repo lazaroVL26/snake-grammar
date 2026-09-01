@@ -307,3 +307,52 @@ A coluna do ranking consulta o servidor a cada 5 segundos, **só com a aba visí
 navegadores em segundo plano batendo no servidor não ajudariam ninguém. Ao voltar para a
 aba, a atualização é imediata, sem esperar o próximo ciclo. Respostas fora de ordem são
 descartadas por um contador de geração.
+
+## 37. Bootstrap entrou como base, mas só o CSS e só via npm
+
+Pedido do professor. Contraria a §2 original ("sem frameworks de UI", "zero dependências
+de runtime"), que foi atualizada. Três limites que impus para não estragar o que já
+funcionava:
+
+**Só o CSS.** O JavaScript do Bootstrap não entra. O modal da pergunta tem foco preso,
+cronômetro de 20s e Esc bloqueado — comportamento próprio, testado, que o JS do Bootstrap
+atrapalharia. Uso as classes e escrevo o comportamento.
+
+**Via npm, nunca CDN.** O CSS é empacotado no build. Um `<link>` para CDN quebraria o
+requisito de rodar offline, que é o cenário da sala de aula.
+
+**As classes antigas continuam.** Cada elemento tem a classe semântica do projeto _e_ a do
+Bootstrap: `class="option list-group-item ..."`. Assim os 231 testes seguem valendo e o
+CSS próprio continua tendo onde se apoiar.
+
+Custo: o CSS do bundle foi de 11 KB para 244 KB (34 KB comprimido). Para uma rede local de
+escola é irrelevante; se um dia incomodar, dá para trocar pelo Bootstrap compilado só com
+os componentes usados.
+
+## 38. `.modal` era colisão direta: virou `.question-modal`
+
+`.modal` é classe do Bootstrap, com `display: none; position: fixed`. A nossa era o cartão
+do diálogo — importar o Bootstrap teria escondido a pergunta inteira. Rodei uma checagem
+das 119 classes do projeto contra o CSS do Bootstrap; essa foi a única colisão real, e o
+diálogo passou a se chamar `question-modal`.
+
+## 39. A paleta continua sendo a nossa, via variáveis do Bootstrap
+
+`styles/bootstrap-theme.css` mapeia os tokens de `tokens.css` para as variáveis do
+Bootstrap (`--bs-body-bg`, `--bs-btn-bg`, `--bs-card-bg`, `--bs-list-group-*`). O `<html>`
+leva `data-bs-theme="dark"` para os padrões escuros. Nenhum componente usa cor crua do
+Bootstrap, então a §9.1 continua valendo: fundo azul-noite, cobra em amarelo marca-texto,
+frase em IBM Plex Mono e a lacuna piscando como cursor.
+
+## 40. A atualização periódica não pode cancelar o envio da partida
+
+Achado por um teste que quebrou durante esta mudança, mas o defeito era do jogo, não do
+teste. `refreshRanking` e o envio do fim de partida compartilhavam um contador de geração
+para descartar respostas fora de ordem. Se o ciclo de 5 segundos disparasse enquanto o
+envio estava em voo, ele invalidava o envio — e a colocação ficava presa em "Enviando para
+o ranking da turma..." para sempre.
+
+Agora são dois contadores: `refreshToken` para as consultas e `submitToken` para os
+envios. O envio ainda invalida consultas em voo (elas trariam a lista sem a partida que
+acabou), mas nunca o contrário. Há teste avançando 30 segundos de relógio com a resposta
+pendente.

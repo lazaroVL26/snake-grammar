@@ -67,7 +67,7 @@ afterEach(() => {
 describe('questionModal — estrutura e acessibilidade', () => {
   it('abre como dialogo modal com a frase e a lacuna', () => {
     modal.open(presented, 'choice');
-    const dialog = document.querySelector('.modal');
+    const dialog = document.querySelector('.question-modal');
     expect(dialog?.getAttribute('role')).toBe('dialog');
     expect(dialog?.getAttribute('aria-modal')).toBe('true');
     expect(document.querySelector('.sentence')?.textContent).toBe(question.sentence);

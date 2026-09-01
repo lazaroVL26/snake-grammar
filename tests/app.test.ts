@@ -389,7 +389,9 @@ describe('app — partida completa', () => {
   it('come a fruta, congela o jogo e abre a pergunta', () => {
     driveUntilQuestion();
     expect(modalOpen()).toBe(true);
-    expect(document.querySelector('.modal')?.getAttribute('aria-modal')).toBe('true');
+    expect(document.querySelector('.question-modal')?.getAttribute('aria-modal')).toBe(
+      'true',
+    );
     expect(document.querySelector('.sentence')?.textContent).toContain('___');
     expect(document.querySelectorAll('.option').length).toBe(4);
   });
@@ -684,6 +686,20 @@ describe('app — ranking da turma pelo servidor', () => {
     document.dispatchEvent(new Event('visibilitychange'));
     await flush();
     expect(server.calls).toBeGreaterThan(antes);
+  });
+
+  it('a atualizacao periodica nao cancela o envio da partida', async () => {
+    fakeServer();
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+    // Varios ciclos de atualizacao passam enquanto a resposta nao chegou.
+    vi.advanceTimersByTime(30_000);
+    await flush();
+
+    const posicao = document.querySelector('.ranking__position')?.textContent ?? '';
+    expect(posicao).not.toContain('Enviando');
+    expect(posicao).toContain('Primeira partida do dia.');
   });
 
   it('sem servidor, avisa que a lista e so deste PC', async () => {

@@ -19,17 +19,17 @@ export function scoreboardList(
 ): HTMLElement {
   if (board.length === 0) {
     return el('p', {
-      class: 'panel__note',
+      class: 'panel__note text-secondary mb-0',
       text: 'Ninguem jogou hoje ainda. Voce pode ser o primeiro.',
     });
   }
 
   return el(
     'ol',
-    { class: 'ranking' },
+    { class: 'ranking list-group list-group-flush' },
     board.map((entry) => {
       const isMine = highlight !== undefined && isSameEntry(entry, highlight);
-      const row = el('li', { class: 'ranking__row' }, [
+      const row = el('li', { class: 'ranking__row list-group-item' }, [
         el('span', { class: 'ranking__nick', text: entry.nick }),
         el('span', { class: 'ranking__score', text: String(entry.score) }),
         el('span', { class: 'ranking__accuracy', text: `${entry.accuracy}%` }),
@@ -63,13 +63,17 @@ export class RankingPanel {
   ): void {
     const shared = options.shared !== false;
     this.root.replaceChildren(
-      el('h2', { class: 'rank-side__title', text: 'Ranking de hoje' }),
-      el('p', { class: 'rank-side__date', text: today }),
+      el('h2', { class: 'rank-side__title mb-0', text: 'Ranking de hoje' }),
+      el('p', { class: 'rank-side__date mb-0', text: today }),
       scoreboardList(board, options.highlight),
       shared
-        ? el('p', { class: 'rank-side__note', text: 'Toda a turma. Zera todo dia.' })
+        ? el('p', {
+            class: 'rank-side__note mb-0',
+            text: 'Toda a turma. Zera todo dia.',
+          })
         : el('p', {
-            class: 'rank-side__note rank-side__note--offline',
+            class:
+              'rank-side__note rank-side__note--offline alert alert-warning py-2 mb-0',
             role: 'status',
             text: 'Sem conexao com o servidor. Mostrando so as partidas deste PC.',
           }),

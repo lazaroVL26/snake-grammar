@@ -57,12 +57,12 @@ export class QuestionModal {
     private readonly callbacks: QuestionModalCallbacks,
   ) {
     this.focusLabel = el('span', { class: 'modal__focus' });
-    this.timerBar = el('div', { class: 'timer__bar' });
+    this.timerBar = el('div', { class: 'timer__bar progress-bar' });
     this.timerText = el('span', { class: 'timer__text' });
     this.gap = el('span', { class: 'gap', text: '___' });
     this.sentence = el('p', { class: 'sentence', lang: 'en' });
-    this.hint = el('p', { class: 'hint' });
-    this.answers = el('div', { class: 'answers' });
+    this.hint = el('p', { class: 'hint mb-0' });
+    this.answers = el('div', { class: 'answers list-group' });
     this.feedback = el('div', {
       class: 'feedback',
       'aria-live': 'assertive',
@@ -70,7 +70,7 @@ export class QuestionModal {
     });
     this.submit = el('button', {
       type: 'button',
-      class: 'button button--primary',
+      class: 'button button--primary btn btn-primary',
       text: 'Responder',
     });
     this.submit.addEventListener('click', () => this.confirm());
@@ -78,7 +78,7 @@ export class QuestionModal {
     this.dialog = el(
       'div',
       {
-        class: 'modal',
+        class: 'question-modal card p-4',
         role: 'dialog',
         'aria-modal': 'true',
         'aria-labelledby': 'modal-title',
@@ -87,17 +87,20 @@ export class QuestionModal {
         el('div', { class: 'modal__head' }, [
           el('h2', {
             id: 'modal-title',
-            class: 'modal__title',
+            class: 'modal__title mb-0',
             text: 'Complete a frase',
           }),
           this.focusLabel,
         ]),
-        el('div', { class: 'timer' }, [this.timerBar, this.timerText]),
+        el('div', { class: 'timer d-flex align-items-center gap-2' }, [
+          el('div', { class: 'timer__track progress flex-grow-1' }, [this.timerBar]),
+          this.timerText,
+        ]),
         this.sentence,
         this.hint,
         this.answers,
         this.feedback,
-        el('div', { class: 'modal__foot' }, [this.submit]),
+        el('div', { class: 'modal__foot d-flex justify-content-end' }, [this.submit]),
       ],
     );
 
@@ -152,7 +155,7 @@ export class QuestionModal {
     if (this.mode === 'typed') {
       const input = el('input', {
         type: 'text',
-        class: 'typed',
+        class: 'typed form-control form-control-lg',
         autocomplete: 'off',
         autocapitalize: 'off',
         spellcheck: 'false',
@@ -173,7 +176,12 @@ export class QuestionModal {
     const list = presented.options.map((option, index) => {
       const button = el(
         'button',
-        { type: 'button', class: 'option', 'aria-pressed': 'false' },
+        {
+          type: 'button',
+          class:
+            'option list-group-item list-group-item-action d-flex align-items-center gap-3',
+          'aria-pressed': 'false',
+        },
         [el('span', { class: 'option__key', text: String(index + 1) }), option],
       );
       button.addEventListener('click', () => this.select(index));

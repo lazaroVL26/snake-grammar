@@ -7,10 +7,12 @@ interface Cell {
 }
 
 function cell(label: string): Cell {
-  const value = el('strong', { class: 'hud__value', text: '0' });
+  const value = el('strong', { class: 'hud__value d-block', text: '0' });
   const root = el('div', { class: 'hud__cell' }, [
-    el('span', { class: 'hud__label', text: label }),
-    value,
+    el('div', { class: 'card h-100 px-3 py-2' }, [
+      el('span', { class: 'hud__label d-block', text: label }),
+      value,
+    ]),
   ]);
   return { root, value };
 }

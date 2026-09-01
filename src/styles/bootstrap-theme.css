@@ -1,0 +1,130 @@
+/*
+ * Ponte entre o Bootstrap e a identidade do projeto (CLAUDE.md 9.1).
+ * O Bootstrap entra so como base de componentes; a paleta, a tipografia e a
+ * assinatura visual continuam sendo as nossas. Nada de cor nova aqui: tudo
+ * aponta para os tokens de tokens.css.
+ */
+
+[data-bs-theme='dark'] {
+  --bs-body-bg: var(--bg);
+  --bs-body-color: var(--text);
+  --bs-body-font-family: var(--font-ui);
+  --bs-emphasis-color: var(--text);
+  --bs-secondary-color: var(--muted);
+  --bs-tertiary-color: var(--muted);
+  --bs-border-color: var(--grid);
+  --bs-border-radius: var(--radius-sm);
+  --bs-border-radius-lg: var(--radius-md);
+  --bs-border-radius-xl: var(--radius-lg);
+
+  --bs-primary: var(--snake);
+  --bs-success: var(--ok);
+  --bs-danger: var(--err);
+
+  --bs-link-color: var(--snake);
+  --bs-link-hover-color: var(--snake-head);
+
+  --bs-heading-color: var(--text);
+  --bs-code-color: var(--snake);
+}
+
+body {
+  /* O Bootstrap zera isso; o jogo respira melhor com folga em volta. */
+  padding: var(--space-5) var(--space-4) var(--space-6);
+}
+
+/* ---------- botoes ---------- */
+
+.btn {
+  --bs-btn-font-weight: 600;
+  --bs-btn-focus-box-shadow: none;
+}
+
+.btn-primary {
+  --bs-btn-bg: var(--snake);
+  --bs-btn-border-color: var(--snake);
+  --bs-btn-color: var(--bg);
+  --bs-btn-hover-bg: var(--snake-head);
+  --bs-btn-hover-border-color: var(--snake-head);
+  --bs-btn-hover-color: var(--bg);
+  --bs-btn-active-bg: var(--snake-head);
+  --bs-btn-active-border-color: var(--snake-head);
+  --bs-btn-active-color: var(--bg);
+  --bs-btn-disabled-bg: var(--grid);
+  --bs-btn-disabled-border-color: var(--grid);
+  --bs-btn-disabled-color: var(--muted);
+}
+
+.btn-outline-secondary {
+  --bs-btn-color: var(--text);
+  --bs-btn-border-color: var(--grid);
+  --bs-btn-hover-bg: var(--grid);
+  --bs-btn-hover-border-color: var(--muted);
+  --bs-btn-hover-color: var(--text);
+  --bs-btn-active-bg: var(--grid);
+  --bs-btn-active-border-color: var(--muted);
+  --bs-btn-active-color: var(--text);
+}
+
+/* ---------- cartoes e listas ---------- */
+
+.card {
+  --bs-card-bg: var(--surface);
+  --bs-card-border-color: transparent;
+  --bs-card-border-radius: var(--radius-md);
+  --bs-card-cap-bg: transparent;
+}
+
+.list-group {
+  --bs-list-group-bg: transparent;
+  --bs-list-group-color: var(--text);
+  --bs-list-group-border-color: var(--grid);
+  --bs-list-group-action-hover-bg: var(--grid);
+  --bs-list-group-action-hover-color: var(--text);
+  --bs-list-group-active-bg: color-mix(in srgb, var(--snake) 16%, var(--bg));
+  --bs-list-group-active-border-color: var(--snake);
+  --bs-list-group-active-color: var(--text);
+}
+
+/* ---------- formulario ---------- */
+
+.form-control {
+  --bs-body-bg: var(--bg);
+  background-color: var(--bg);
+  border-color: var(--grid);
+  color: var(--text);
+  font-family: var(--font-mono);
+}
+
+.form-control:focus {
+  background-color: var(--bg);
+  color: var(--text);
+  border-color: var(--snake);
+  box-shadow: none;
+}
+
+.form-control::placeholder {
+  color: var(--muted);
+}
+
+.form-label {
+  color: var(--muted);
+  font-size: 0.72rem;
+  text-transform: uppercase;
+  letter-spacing: 0.07em;
+  margin-bottom: var(--space-1);
+}
+
+/* ---------- foco visivel (CLAUDE.md 9.4) ---------- */
+
+:focus-visible {
+  outline: 2px solid var(--snake-head);
+  outline-offset: 2px;
+}
+
+.btn:focus-visible,
+.form-control:focus-visible {
+  outline: 2px solid var(--snake-head);
+  outline-offset: 2px;
+  box-shadow: none;
+}

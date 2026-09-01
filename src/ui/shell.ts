@@ -15,10 +15,10 @@ export interface Shell {
 export function buildShell(root: HTMLElement): Shell {
   const hud = el('div', { class: 'hud' });
   const overlay = el('div', { class: 'overlay', hidden: true });
-  const controls = el('div', { class: 'controls' });
+  const controls = el('div', { class: 'controls d-flex justify-content-center' });
   const modalRoot = el('div', { class: 'modal-root' });
   const ranking = el('aside', {
-    class: 'rank-side',
+    class: 'rank-side card p-3',
     'aria-label': 'Ranking de hoje',
   });
 
@@ -32,18 +32,18 @@ export function buildShell(root: HTMLElement): Shell {
   });
 
   root.replaceChildren(
-    el('main', { class: 'shell' }, [
-      el('header', { class: 'shell__head' }, [
-        el('h1', { class: 'shell__title', text: 'Snake Grammar' }),
+    el('main', { class: 'shell container-lg px-0' }, [
+      el('header', { class: 'shell__head d-flex align-items-baseline flex-wrap gap-3' }, [
+        el('h1', { class: 'shell__title mb-0', text: 'Snake Grammar' }),
         el('p', {
-          class: 'shell__sub',
+          class: 'shell__sub mb-0',
           text: 'Passado, presente e futuro',
         }),
       ]),
       hud,
       el('div', { class: 'board' }, [canvas, overlay]),
       el('p', {
-        class: 'hints',
+        class: 'hints text-center mb-0',
         text: 'Setas ou WASD movem • Espaco ou Esc pausam • 1 a 4 marcam a alternativa • Enter confirma',
       }),
       controls,
@@ -58,10 +58,10 @@ export function buildShell(root: HTMLElement): Shell {
 /** Tela de erro legivel quando o banco de questoes esta inconsistente. */
 export function showBankError(root: HTMLElement, problems: string[]): void {
   root.replaceChildren(
-    el('main', { class: 'shell shell--error' }, [
+    el('main', { class: 'shell shell--error container-lg px-0' }, [
       el('h1', { class: 'shell__title', text: 'O banco de questoes esta invalido' }),
       el('p', {
-        class: 'panel__lead',
+        class: 'panel__lead alert alert-danger',
         text: 'Corrija content/questions.seed.json e recarregue a pagina. Problemas encontrados:',
       }),
       el(

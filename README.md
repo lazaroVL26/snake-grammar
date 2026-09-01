@@ -271,8 +271,10 @@ novo. Toda entrada e saída acontece em `main.ts`, `ui/`, `input/`, `storage/` e
 Para mudar velocidade, tempo da pergunta, pontuação ou tamanho da grade, mexa só em
 [`src/config.ts`](src/config.ts).
 
-Zero dependências de runtime: TypeScript, Vite, Vitest, ESLint e Prettier só em
-`devDependencies`.
+Uma única dependência de runtime: o **Bootstrap 5** (só o CSS, empacotado no build — não
+há CDN, então o jogo continua funcionando offline). A paleta e a tipografia do projeto
+continuam mandando: `src/styles/bootstrap-theme.css` traduz os tokens para as variáveis do
+Bootstrap. TypeScript, Vite, Vitest, ESLint e Prettier ficam em `devDependencies`.
 
 As decisões tomadas onde a especificação deixou liberdade estão em
 [`DECISIONS.md`](DECISIONS.md).

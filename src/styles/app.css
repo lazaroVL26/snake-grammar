@@ -1,33 +1,3 @@
-*,
-*::before,
-*::after {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  margin: 0;
-  padding: 0;
-}
-
-body {
-  background: var(--bg);
-  color: var(--text);
-  font-family: var(--font-ui);
-  font-size: 16px;
-  line-height: 1.5;
-  min-height: 100dvh;
-  padding: var(--space-5) var(--space-4) var(--space-6);
-}
-
-:focus-visible {
-  outline: 2px solid var(--snake-head);
-  outline-offset: 2px;
-  border-radius: 4px;
-}
-
-/* ---------- estrutura ---------- */
-
 .shell {
   width: min(100%, var(--shell-width));
   margin: 0 auto;
@@ -235,110 +205,11 @@ body {
 
 /* ---------- botoes ---------- */
 
-.button {
-  font: inherit;
-  font-weight: 600;
-  border: 1px solid var(--grid);
-  background: var(--bg);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-4);
-  cursor: pointer;
-  transition: background var(--motion-fast) var(--easing);
-}
-
-.button:hover {
-  background: var(--grid);
-}
-
-.button--primary {
-  background: var(--snake);
-  border-color: var(--snake);
-  color: var(--bg);
-}
-
-.button--primary:hover {
-  background: var(--snake-head);
-}
-
-.choices {
-  display: grid;
-  gap: var(--space-2);
-}
-
-.choices__legend {
-  margin: 0;
-  color: var(--muted);
-  font-size: 0.72rem;
-  text-transform: uppercase;
-  letter-spacing: 0.07em;
-}
-
-.choices--modes {
-  grid-template-columns: 1fr 1fr;
-}
-
-.choices--modes .choices__legend {
-  grid-column: 1 / -1;
-}
-
-.choice {
-  font: inherit;
-  text-align: left;
-  display: grid;
-  gap: 1px;
-  border: 1px solid var(--grid);
-  background: var(--bg);
-  color: var(--text);
-  border-radius: var(--radius-sm);
-  padding: var(--space-2) var(--space-3);
-  cursor: pointer;
-  transition: border-color var(--motion-fast) var(--easing);
-}
-
-.choice:hover {
-  border-color: var(--muted);
-}
-
-.choice__label {
-  font-weight: 600;
-  font-size: 0.92rem;
-}
-
-.choice__detail {
-  color: var(--muted);
-  font-size: 0.75rem;
-}
-
-.choice--on {
-  border-color: var(--snake);
-  background: color-mix(in srgb, var(--snake) 14%, var(--bg));
-}
-
-.choice--on .choice__label {
-  color: var(--snake-head);
-}
-
 /* ---------- apelido e ranking ---------- */
 
 .nick {
   display: grid;
   gap: var(--space-1);
-}
-
-.nick__field {
-  font: inherit;
-  font-family: var(--font-mono);
-  background: var(--bg);
-  border: 1px solid var(--grid);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  padding: var(--space-2) var(--space-3);
-  width: 100%;
-}
-
-.nick__field::placeholder {
-  color: var(--muted);
 }
 
 .nick__warning {
@@ -511,7 +382,7 @@ body {
   display: none;
 }
 
-.modal {
+.question-modal {
   background: var(--surface);
   border-radius: var(--radius-lg);
   padding: var(--space-5);
@@ -677,21 +548,6 @@ body {
   opacity: 1;
 }
 
-.typed {
-  font: inherit;
-  font-family: var(--font-mono);
-  background: var(--bg);
-  border: 1px solid var(--grid);
-  border-radius: var(--radius-sm);
-  color: var(--text);
-  padding: var(--space-3);
-  width: 100%;
-}
-
-.typed::placeholder {
-  color: var(--muted);
-}
-
 .feedback {
   display: grid;
   gap: var(--space-1);
@@ -780,7 +636,7 @@ body {
     grid-template-columns: repeat(2, 1fr);
   }
 
-  .modal {
+  .question-modal {
     padding: var(--space-4);
   }
 
@@ -805,4 +661,83 @@ body {
   .gap--filled {
     transform: none;
   }
+}
+
+/* ---------- convivencia com o Bootstrap ---------- */
+
+/* O .container-lg do Bootstrap seria largo demais: quem manda e a nossa medida. */
+.shell {
+  max-width: min(100%, var(--shell-width));
+}
+
+@media (min-width: 960px) {
+  .shell {
+    max-width: min(100%, calc(var(--shell-width) + var(--rank-width) + var(--space-4)));
+  }
+}
+
+/* O cartao do HUD nao pode herdar a borda do .card generico. */
+.hud .card {
+  border: 0;
+}
+
+/* A cor da barra do cronometro e nossa, nao a primaria do Bootstrap. */
+.timer__track {
+  --bs-progress-bg: var(--grid);
+  --bs-progress-height: 6px;
+  --bs-progress-border-radius: 999px;
+}
+
+.timer__bar {
+  --bs-progress-bar-bg: var(--snake);
+  transition: none;
+}
+
+.timer__bar[data-low='true'] {
+  --bs-progress-bar-bg: var(--err);
+}
+
+/* Alternativas e ranking usam list-group, mas com o nosso espacamento. */
+.answers.list-group,
+.ranking.list-group {
+  --bs-list-group-border-width: 0;
+}
+
+.option.list-group-item {
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.option.list-group-item + .option.list-group-item {
+  margin-top: var(--space-2);
+}
+
+.choice.list-group-item {
+  border: 1px solid var(--grid);
+  border-radius: var(--radius-sm);
+  background: var(--bg);
+}
+
+.choice.list-group-item + .choice.list-group-item {
+  margin-top: var(--space-2);
+}
+
+.ranking__row.list-group-item {
+  background: transparent;
+  border: 0;
+}
+
+/* O aviso de sem conexao usa o alerta do Bootstrap com a nossa cor. */
+.rank-side__note--offline {
+  --bs-alert-color: var(--err);
+  --bs-alert-bg: color-mix(in srgb, var(--err) 12%, transparent);
+  --bs-alert-border-color: color-mix(in srgb, var(--err) 35%, transparent);
+  font-size: 0.72rem;
+}
+
+.ranking__position.alert {
+  --bs-alert-color: var(--snake);
+  --bs-alert-bg: color-mix(in srgb, var(--snake) 12%, transparent);
+  --bs-alert-border-color: color-mix(in srgb, var(--snake) 30%, transparent);
 }

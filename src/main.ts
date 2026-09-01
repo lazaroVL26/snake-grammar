@@ -1,4 +1,6 @@
+import 'bootstrap/dist/css/bootstrap.min.css';
 import './styles/tokens.css';
+import './styles/bootstrap-theme.css';
 import './styles/app.css';
 
 import { CONFIG } from './config';
@@ -71,8 +73,12 @@ let countdownEndsAt = 0;
 let nick = loadStats().nick;
 let snapshot: RankingSnapshot = { board: [], today: dayKey(), shared: true };
 let mine: ScoreEntry | undefined;
-/** Descarta resposta antiga que chegue depois de uma mais nova. */
-let rankingGeneration = 0;
+/**
+ * Contadores separados de proposito: a atualizacao periodica nao pode cancelar
+ * o envio da partida, senao a colocacao ficaria presa em "Enviando...".
+ */
+let refreshToken = 0;
+let submitToken = 0;
 
 const byId = new Map(bank.map((question) => [question.id, question]));
 
@@ -90,9 +96,9 @@ function paintRanking(): void {
 
 /** Busca o ranking da turma no servidor e redesenha a coluna. */
 async function refreshRanking(): Promise<void> {
-  const generation = (rankingGeneration += 1);
+  const token = (refreshToken += 1);
   const fresh = await fetchRanking(dayKey());
-  if (generation !== rankingGeneration) return;
+  if (token !== refreshToken) return;
   snapshot = fresh;
   paintRanking();
 }
@@ -202,7 +208,9 @@ function finishGame(): void {
   // servidor responder, para o aluno nao ficar esperando a rede.
   overlays.showGameOver(report);
 
-  const generation = (rankingGeneration += 1);
+  const token = (submitToken += 1);
+  // Descarta consulta em voo: ela traria a lista sem esta partida.
+  refreshToken += 1;
   void submitScore(
     {
       nick,
@@ -214,7 +222,7 @@ function finishGame(): void {
     },
     dayKey(),
   ).then((saved) => {
-    if (generation !== rankingGeneration) return;
+    if (token !== submitToken) return;
     snapshot = saved.snapshot;
     mine = saved.entry;
     paintRanking();

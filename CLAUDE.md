@@ -36,12 +36,15 @@ em inglês.** Nunca traduza as frases do exercício.
 - **Vanilla TS + Canvas 2D** para o jogo. **Não use React, Vue, Svelte, Phaser ou
   qualquer game engine.** O tabuleiro é desenhado no `<canvas>`; HUD, modais e overlays
   são DOM comum.
-- **CSS puro** com custom properties (`:root`). Sem Tailwind, sem CSS-in-JS, sem
-  frameworks de UI.
+- **Bootstrap 5 como base de componentes**, instalado via npm (nunca CDN, para não
+  quebrar o offline) e **só o CSS** — o JavaScript do Bootstrap não entra, porque o modal
+  da pergunta tem comportamento próprio (foco preso, Esc bloqueado, cronômetro).
+  A paleta e a tipografia continuam sendo as nossas: `styles/bootstrap-theme.css` traduz
+  os tokens de `tokens.css` para as variáveis do Bootstrap. Sem Tailwind, sem CSS-in-JS.
 - **Vitest** para testes unitários da lógica pura.
 - **ESLint + Prettier**.
-- **Zero dependências de runtime.** Tudo que vai para o bundle final deve ser código
-  próprio. Dependências apenas em `devDependencies`.
+- **Uma única dependência de runtime: o `bootstrap`** (CSS). Qualquer outra precisa ser
+  justificada em `DECISIONS.md` antes de entrar. O resto do bundle é código próprio.
 - **Servidor próprio permitido, e só ele** (`server/`): Node com módulos internos apenas,
   zero dependências, sem banco de dados e sem API externa. Ele serve `dist/` e o ranking da
   turma. Nada mais pode fazer chamada de rede.
@@ -119,8 +122,9 @@ snake-grammar/
    │  ├─ persistence.ts        # recorde, estatísticas e apelido em localStorage
    │  └─ scoreboard.ts         # ranking do dia, com reset diário
    └─ styles/
-      ├─ tokens.css
-      └─ app.css
+      ├─ tokens.css            # paleta e tipografia (fonte da verdade)
+      ├─ bootstrap-theme.css   # traduz os tokens para as variáveis do Bootstrap
+      └─ app.css               # o que é só nosso: tabuleiro, lacuna, ranking, D-pad
 ```
 
 **Regra de ouro da arquitetura:** `src/game/` e `src/quiz/` são **lógica pura e
@@ -404,7 +408,9 @@ Nada de "neon verde em fundo preto" — o visual é **caderno de idiomas encontr
 fliperama**: fundo azul-noite, grade como papel pautado, e a cobra em amarelo de
 marca-texto.
 
-Tokens (defina em `styles/tokens.css`, use **só** estes):
+Tokens (defina em `styles/tokens.css`, use **só** estes). O Bootstrap entra depois deles e
+é reconfigurado por `styles/bootstrap-theme.css` — nenhum componente pode usar cor crua do
+Bootstrap:
 
 ```css
 --bg: #0e1a2b; /* fundo da página */
@@ -448,6 +454,8 @@ o feedback vira troca de estado instantânea.
 ### 9.3 Modal da pergunta
 
 - `role="dialog"`, `aria-modal="true"`, foco preso dentro do modal (focus trap).
+  A classe é `question-modal`, **não** `modal`: `.modal` é do Bootstrap e traz
+  `display: none`, que esconderia o diálogo.
 - **Esc não fecha** o modal — a pergunta é obrigatória. Esc dentro do modal não faz nada.
 - Alternativas navegáveis por `Tab`/setas, selecionáveis pelas teclas **1–4**, confirmação
   com `Enter`.

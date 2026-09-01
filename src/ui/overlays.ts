@@ -65,7 +65,7 @@ export class Overlays {
   }
 
   private show(...children: Array<Node | string>): HTMLElement {
-    const panel = el('div', { class: 'panel' }, children);
+    const panel = el('div', { class: 'panel card p-4' }, children);
     this.root.hidden = false;
     this.root.replaceChildren(panel);
     return panel;
@@ -76,7 +76,7 @@ export class Overlays {
 
     const field = el('input', {
       type: 'text',
-      class: 'nick__field',
+      class: 'nick__field form-control',
       id: 'nick',
       maxlength: CONFIG.NICK_MAX_LENGTH,
       autocomplete: 'off',
@@ -92,9 +92,17 @@ export class Overlays {
     this.nickField = field;
 
     const nickBlock = el('div', { class: 'nick' }, [
-      el('label', { class: 'choices__legend', for: 'nick', text: 'Seu apelido' }),
+      el('label', {
+        class: 'choices__legend form-label',
+        for: 'nick',
+        text: 'Seu apelido',
+      }),
       field,
-      el('p', { class: 'nick__warning', role: 'status', 'aria-live': 'polite' }),
+      el('p', {
+        class: 'nick__warning small mb-0',
+        role: 'status',
+        'aria-live': 'polite',
+      }),
     ]);
 
     const topicGroup = radioGroup(
@@ -130,7 +138,7 @@ export class Overlays {
 
     const start = el('button', {
       type: 'button',
-      class: 'button button--primary',
+      class: 'button button--primary btn btn-primary btn-lg w-100',
       text: 'Comecar',
     });
     start.addEventListener('click', () => this.requestStart());
@@ -158,7 +166,7 @@ export class Overlays {
   showPaused(): void {
     const resume = el('button', {
       type: 'button',
-      class: 'button button--primary',
+      class: 'button button--primary btn btn-primary',
       text: 'Continuar',
     });
     resume.addEventListener('click', () => this.callbacks.onResume());
@@ -186,14 +194,14 @@ export class Overlays {
   showGameOver(report: Report): void {
     const again = el('button', {
       type: 'button',
-      class: 'button button--primary',
+      class: 'button button--primary btn btn-primary',
       text: 'Jogar de novo',
     });
     again.addEventListener('click', () => this.callbacks.onRestart());
 
     const copy = el('button', {
       type: 'button',
-      class: 'button',
+      class: 'button btn btn-outline-secondary',
       text: 'Copiar relatorio',
     });
     copy.addEventListener('click', () => {
@@ -204,7 +212,7 @@ export class Overlays {
 
     const copyRanking = el('button', {
       type: 'button',
-      class: 'button',
+      class: 'button btn btn-outline-secondary',
       text: 'Copiar ranking',
     });
     copyRanking.addEventListener('click', () => {
@@ -224,7 +232,11 @@ export class Overlays {
       focusTable(report),
       missedList(report),
       rankingBlock(),
-      el('div', { class: 'panel__actions' }, [again, copy, copyRanking]),
+      el('div', { class: 'panel__actions d-flex flex-wrap gap-2' }, [
+        again,
+        copy,
+        copyRanking,
+      ]),
     );
     again.focus();
   }
@@ -241,7 +253,7 @@ function summary(report: Report): HTMLElement {
   ];
   return el(
     'dl',
-    { class: 'summary' },
+    { class: 'summary mb-0' },
     rows.flatMap(([label, value]) => [
       el('dt', { text: label }),
       el('dd', { text: value }),
@@ -254,9 +266,9 @@ function focusTable(report: Report): HTMLElement {
     el('h3', { class: 'panel__subtitle', text: 'Por tempo verbal' }),
     el(
       'ul',
-      { class: 'focus-table__list' },
+      { class: 'focus-table__list list-group list-group-flush' },
       report.byFocus.map((row) =>
-        el('li', {}, [
+        el('li', { class: 'list-group-item px-0 py-1 border-0' }, [
           el('span', { class: 'focus-table__name', text: FOCUS_LABEL[row.focus] }),
           el('span', {
             class: 'focus-table__score',
@@ -278,7 +290,7 @@ function missedList(report: Report): HTMLElement {
       'ol',
       { class: 'missed__list' },
       report.missed.map((item) =>
-        el('li', { class: 'missed__item' }, [
+        el('li', { class: 'missed__item mb-3' }, [
           el('p', { class: 'missed__sentence', lang: 'en', text: item.sentence }),
           el('p', { class: 'missed__answer', text: `Resposta certa: ${item.answer}` }),
           el('p', {
@@ -297,7 +309,7 @@ function missedList(report: Report): HTMLElement {
 /** A lista completa fica na coluna ao lado; aqui so a colocacao, que chega depois. */
 function rankingBlock(): HTMLElement {
   return el('p', {
-    class: 'ranking__position',
+    class: 'ranking__position alert alert-secondary py-2 mb-0',
     role: 'status',
     'aria-live': 'polite',
     text: 'Enviando para o ranking da turma...',
@@ -319,7 +331,7 @@ function radioGroup<T extends string>(
   variant: string,
 ): HTMLElement {
   const list = el('div', {
-    class: `choices choices--${variant}`,
+    class: `choices choices--${variant} list-group`,
     role: 'radiogroup',
     'aria-label': legend,
   });
@@ -329,7 +341,7 @@ function radioGroup<T extends string>(
       'button',
       {
         type: 'button',
-        class: 'choice',
+        class: 'choice list-group-item list-group-item-action',
         role: 'radio',
         'aria-checked': String(option.value === selected),
       },
@@ -350,6 +362,6 @@ function radioGroup<T extends string>(
     return button;
   });
 
-  list.append(el('p', { class: 'choices__legend', text: legend }), ...buttons);
+  list.append(el('p', { class: 'choices__legend form-label', text: legend }), ...buttons);
   return list;
 }
