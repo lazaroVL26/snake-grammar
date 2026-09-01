@@ -22,7 +22,12 @@ import { bindSwipe, createDpad } from './input/touch';
 import { QuestionBankError, loadQuestions, questionsForTopic } from './quiz/questions';
 import { QuestionSelector, presentQuestion } from './quiz/selector';
 import { DEFAULT_TOPIC, findTopic } from './quiz/topics';
-import { loadStats, recordGame, saveNick } from './storage/persistence';
+import {
+  loadStats,
+  markFullscreenHintSeen,
+  recordGame,
+  saveNick,
+} from './storage/persistence';
 import { dayKey } from './storage/scoreboard';
 import { fetchRanking, submitScore, type RankingSnapshot } from './storage/ranking';
 import { buildShell, showBankError } from './ui/shell';
@@ -30,7 +35,7 @@ import { Hud } from './ui/hud';
 import { Overlays } from './ui/overlays';
 import { RankingPanel, positionLabel } from './ui/scoreboard';
 import { QuestionModal, type AnswerResult } from './ui/questionModal';
-import { toggleFullscreen } from './ui/fullscreen';
+import { fullscreenSupported, isFullscreen, toggleFullscreen } from './ui/fullscreen';
 import { buildReport } from './ui/report';
 import type {
   ScoreEntry,
@@ -83,9 +88,22 @@ let submitToken = 0;
 
 const byId = new Map(bank.map((question) => [question.id, question]));
 
-/** Tela inicial: recorde pessoal e apelido lembrado. */
+/** Tela inicial: recorde pessoal, apelido lembrado e o convite de tela cheia. */
 function showIdleScreen(): void {
-  overlays.showIdle({ bestScore: best, nick, questionCount: countFor });
+  overlays.showIdle({
+    bestScore: best,
+    nick,
+    questionCount: countFor,
+    showFullscreenHint: shouldOfferFullscreen(),
+  });
+}
+
+/**
+ * Convite so na primeira visita, e so quando faz sentido: navegador que
+ * permite e jogo ainda em janela.
+ */
+function shouldOfferFullscreen(): boolean {
+  return fullscreenSupported() && !isFullscreen() && !loadStats().seenFullscreenHint;
 }
 
 function paintRanking(): void {
@@ -121,6 +139,7 @@ const overlays = new Overlays(shell.overlay, {
   },
   onResume: () => enterCountdown(),
   onRestart: () => resetGame(),
+  onFullscreenHintDone: () => markFullscreenHintSeen(),
 });
 
 const modal = new QuestionModal(shell.modalRoot, {

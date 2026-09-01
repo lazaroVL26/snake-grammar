@@ -1,5 +1,5 @@
 // @vitest-environment jsdom
-import { beforeEach, describe, expect, it } from 'vitest';
+import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { Overlays, type IdleView } from '../src/ui/overlays';
 import type { Report } from '../src/ui/report';
 
@@ -42,6 +42,7 @@ function idleView(overrides: Partial<IdleView> = {}): IdleView {
     bestScore: 0,
     nick: 'Ana',
     questionCount: () => 41,
+    showFullscreenHint: false,
     ...overrides,
   };
 }
@@ -52,6 +53,7 @@ const calls = {
   start: [] as Array<{ mode: string; topic: string; nick: string }>,
   resume: 0,
   restart: 0,
+  hintDone: 0,
 };
 
 beforeEach(() => {
@@ -62,10 +64,12 @@ beforeEach(() => {
   calls.start = [];
   calls.resume = 0;
   calls.restart = 0;
+  calls.hintDone = 0;
   overlays = new Overlays(root, {
     onStart: (mode, topic, nick) => calls.start.push({ mode, topic, nick }),
     onResume: () => (calls.resume += 1),
     onRestart: () => (calls.restart += 1),
+    onFullscreenHintDone: () => (calls.hintDone += 1),
   });
 });
 
@@ -88,6 +92,65 @@ describe('overlays — tela inicial', () => {
 
     root.querySelector<HTMLButtonElement>('.button--primary')?.click();
     expect(calls.start).toEqual([{ mode: 'typed', topic: 'past-contrast', nick: 'Ana' }]);
+  });
+});
+
+describe('overlays — convite de tela cheia', () => {
+  it('aparece na primeira visita, antes do apelido', () => {
+    overlays.showIdle(idleView({ showFullscreenHint: true }));
+    const hint = root.querySelector('.fs-hint');
+    expect(hint).not.toBeNull();
+    expect(hint?.getAttribute('role')).toBe('note');
+    expect(hint?.textContent).toContain('tela cheia');
+    // Vem antes do campo de apelido, onde o aluno olha primeiro.
+    const campo = root.querySelector('.nick');
+    expect(hint?.compareDocumentPosition(campo as Node)).toBe(
+      Node.DOCUMENT_POSITION_FOLLOWING,
+    );
+  });
+
+  it('nao aparece quando ja foi visto', () => {
+    overlays.showIdle(idleView({ showFullscreenHint: false }));
+    expect(root.querySelector('.fs-hint')).toBeNull();
+  });
+
+  it('ensina como sair, para o aluno nao se sentir preso', () => {
+    overlays.showIdle(idleView({ showFullscreenHint: true }));
+    const texto = root.querySelector('.fs-hint__text')?.textContent ?? '';
+    expect(texto).toContain('Esc');
+    expect(texto).toContain('F');
+  });
+
+  it('"Agora nao" fecha o convite e avisa que foi respondido', () => {
+    overlays.showIdle(idleView({ showFullscreenHint: true }));
+    root.querySelector<HTMLButtonElement>('.fs-hint__dismiss')?.click();
+    expect(root.querySelector('.fs-hint')).toBeNull();
+    expect(calls.hintDone).toBe(1);
+  });
+
+  it('"Jogar em tela cheia" pede tela cheia e fecha o convite', async () => {
+    const pedido = vi.fn(() => Promise.resolve());
+    Object.defineProperty(document, 'fullscreenEnabled', {
+      value: true,
+      configurable: true,
+    });
+    Object.defineProperty(document, 'fullscreenElement', {
+      value: null,
+      configurable: true,
+    });
+    document.documentElement.requestFullscreen = pedido;
+
+    overlays.showIdle(idleView({ showFullscreenHint: true }));
+    root.querySelector<HTMLButtonElement>('.fs-hint__accept')?.click();
+
+    await vi.waitFor(() => expect(calls.hintDone).toBe(1));
+    expect(pedido).toHaveBeenCalled();
+    expect(root.querySelector('.fs-hint')).toBeNull();
+  });
+
+  it('nao rouba o foco: o campo de apelido continua recebendo', () => {
+    overlays.showIdle(idleView({ showFullscreenHint: true, nick: '' }));
+    expect(document.activeElement).toBe(root.querySelector('.nick__field'));
   });
 });
 

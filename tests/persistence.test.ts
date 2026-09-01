@@ -3,7 +3,13 @@ import { beforeEach, describe, expect, it, vi } from 'vitest';
 import { CONFIG } from '../src/config';
 import { createRng } from '../src/game/board';
 import { createInitialState } from '../src/game/state';
-import { loadStats, recordGame, saveNick, saveStats } from '../src/storage/persistence';
+import {
+  loadStats,
+  markFullscreenHintSeen,
+  recordGame,
+  saveNick,
+  saveStats,
+} from '../src/storage/persistence';
 import type { GameState } from '../src/types';
 
 function finished(score: number, correct: number, wrong: number): GameState {
@@ -29,6 +35,7 @@ describe('persistence', () => {
   it('comeca zerado quando nao ha nada salvo', () => {
     expect(loadStats()).toEqual({
       nick: '',
+      seenFullscreenHint: false,
       bestScore: 0,
       bestStreak: 0,
       gamesPlayed: 0,
@@ -40,6 +47,7 @@ describe('persistence', () => {
   it('grava na chave unica do projeto', () => {
     saveStats({
       nick: 'Ana',
+      seenFullscreenHint: false,
       bestScore: 30,
       bestStreak: 2,
       gamesPlayed: 1,
@@ -76,6 +84,15 @@ describe('persistence', () => {
     expect(loadStats().nick.length).toBe(CONFIG.NICK_MAX_LENGTH);
   });
 
+  it('o convite de tela cheia comeca por ver e nao volta depois de visto', () => {
+    expect(loadStats().seenFullscreenHint).toBe(false);
+    markFullscreenHintSeen();
+    expect(loadStats().seenFullscreenHint).toBe(true);
+    // Sobrevive a uma partida terminada, que reescreve as estatisticas.
+    recordGame(finished(50, 4, 1));
+    expect(loadStats().seenFullscreenHint).toBe(true);
+  });
+
   it('ignora dados corrompidos em vez de quebrar o jogo', () => {
     window.localStorage.setItem(CONFIG.STORAGE_KEY, '{isso nao e json');
     expect(loadStats().bestScore).toBe(0);
@@ -90,6 +107,7 @@ describe('persistence', () => {
     expect(() =>
       saveStats({
         nick: 'Ana',
+        seenFullscreenHint: false,
         bestScore: 1,
         bestStreak: 1,
         gamesPlayed: 1,

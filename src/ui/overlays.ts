@@ -2,6 +2,7 @@ import type { AnswerMode, TopicId } from '../types';
 import { DEFAULT_TOPIC, TOPICS } from '../quiz/topics';
 import { CONFIG } from '../config';
 import { el } from './dom';
+import { createFullscreenHint } from './fullscreen';
 import { FOCUS_LABEL, REASON_LABEL, formatDuration, type Report } from './report';
 
 /** Tudo que a tela inicial precisa mostrar. */
@@ -9,10 +10,14 @@ export interface IdleView {
   bestScore: number;
   nick: string;
   questionCount: (topic: TopicId) => number;
+  /** Convite de tela cheia: so na primeira visita, e so se o navegador deixa. */
+  showFullscreenHint: boolean;
 }
 
 export interface OverlayCallbacks {
   onStart: (mode: AnswerMode, topic: TopicId, nick: string) => void;
+  /** O aluno respondeu ao convite de tela cheia, aceitando ou nao. */
+  onFullscreenHintDone: () => void;
   onResume: () => void;
   onRestart: () => void;
 }
@@ -141,12 +146,17 @@ export class Overlays {
     });
     start.addEventListener('click', () => this.requestStart());
 
+    const hint = view.showFullscreenHint
+      ? createFullscreenHint(() => this.callbacks.onFullscreenHintDone())
+      : el('div', { hidden: true });
+
     this.show(
       el('h2', { class: 'panel__title', text: 'Snake Grammar' }),
       el('p', {
         class: 'panel__lead',
         text: 'Coma a fruta, responda a frase em ingles. Acertou, a cobra cresce. Errou, ela encolhe.',
       }),
+      hint,
       nickBlock,
       topicGroup,
       modeGroup,

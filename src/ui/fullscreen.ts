@@ -64,3 +64,45 @@ export function createFullscreenButton(): HTMLButtonElement {
 
   return button;
 }
+
+/**
+ * Convite de primeira visita. Tela cheia so pode ser pedida a partir de um
+ * gesto do usuario, entao o convite e um botao — nao da para maximizar
+ * sozinho quando a pagina abre.
+ */
+export function createFullscreenHint(onDone: () => void): HTMLElement {
+  const box = el('div', {
+    class: 'fs-hint alert alert-secondary d-grid gap-2 mb-0',
+    role: 'note',
+  });
+
+  const aceitar = el('button', {
+    type: 'button',
+    class: 'fs-hint__accept btn btn-primary btn-sm',
+    text: 'Jogar em tela cheia',
+  });
+  const dispensar = el('button', {
+    type: 'button',
+    class: 'fs-hint__dismiss btn btn-outline-secondary btn-sm',
+    text: 'Agora nao',
+  });
+
+  const fechar = (): void => {
+    box.remove();
+    onDone();
+  };
+
+  aceitar.addEventListener('click', () => {
+    void toggleFullscreen().then(fechar);
+  });
+  dispensar.addEventListener('click', fechar);
+
+  box.append(
+    el('p', {
+      class: 'fs-hint__text mb-0',
+      text: 'O tabuleiro fica bem maior em tela cheia. Da para sair a qualquer momento com Esc, ou apertando F.',
+    }),
+    el('div', { class: 'fs-hint__actions d-flex flex-wrap gap-2' }, [aceitar, dispensar]),
+  );
+  return box;
+}

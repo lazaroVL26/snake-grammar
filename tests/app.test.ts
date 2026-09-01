@@ -462,6 +462,45 @@ describe('app — partida completa', () => {
   });
 });
 
+describe('app — convite de tela cheia na primeira visita', () => {
+  it('aparece ao abrir o jogo pela primeira vez', () => {
+    const hint = document.querySelector('.fs-hint');
+    expect(hint).not.toBeNull();
+    expect(hint?.textContent).toContain('tela cheia');
+  });
+
+  it('dispensar guarda a decisao e o convite nao volta na proxima partida', () => {
+    document.querySelector<HTMLButtonElement>('.fs-hint__dismiss')?.click();
+    expect(document.querySelector('.fs-hint')).toBeNull();
+    expect(window.localStorage.getItem(CONFIG.STORAGE_KEY)).toContain(
+      '"seenFullscreenHint":true',
+    );
+
+    // Uma partida inteira, e de volta a tela inicial: nada de convite de novo.
+    startGame('Duda');
+    driveUntilQuestion();
+    answerQuestion(false);
+    document.querySelector<HTMLButtonElement>('.panel__actions button')?.click();
+    expect(document.querySelector('.fs-hint')).toBeNull();
+  });
+
+  it('aceitar tambem guarda a decisao', async () => {
+    const pedido = vi.fn(() => Promise.resolve());
+    document.documentElement.requestFullscreen = pedido;
+    document.querySelector<HTMLButtonElement>('.fs-hint__accept')?.click();
+    await flush();
+    expect(pedido).toHaveBeenCalled();
+    expect(window.localStorage.getItem(CONFIG.STORAGE_KEY)).toContain(
+      '"seenFullscreenHint":true',
+    );
+  });
+
+  it('nao atrapalha comecar a partida', () => {
+    startGame('Ana');
+    expect(document.querySelector('.overlay')?.textContent).not.toContain('tela cheia');
+  });
+});
+
 describe('app — botao de tela cheia', () => {
   it('o botao aparece no cabecalho quando o navegador suporta', () => {
     const button = document.querySelector<HTMLButtonElement>('.fullscreen-toggle');

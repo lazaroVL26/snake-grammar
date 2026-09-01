@@ -520,3 +520,39 @@ Medido antes de fechar: os sete pares de cor novos ficam entre 8,2:1 e 12,9:1, f
 acima de AA. Em 360px o título ocupa 179px dos 360 e nenhum valor do placar estoura a
 célula, nem com "12 / 34" ou "9999" — Press Start 2P é larga, então isso precisava ser
 conferido, não presumido.
+
+## 51. Tipografia inteira de fliperama, em duas faces
+
+Pedido: todas as fontes no estilo fliperama. Feito — não sobrou nenhuma fonte moderna. Mas
+não com uma face só.
+
+Press Start 2P em texto corrido é ilegível: ela é cerca de duas vezes mais larga que uma
+sans normal e não tem variação de peso. A frase em inglês é justamente o que o aluno A2–B1
+precisa ler com atenção para decidir o tempo verbal — pôr a frase e as explicações nela
+atrapalharia o objetivo pedagógico do jogo, que é a decisão gramatical.
+
+A solução foi **VT323** para tudo que é leitura: fonte de terminal CRT, retrô do mesmo
+jeito, monoespaçada (então a assinatura da frase em monoespaçada sobrevive) e com forma de
+letra que aguenta frase inteira. Press Start 2P segue em título, placar, contagem, ranking
+e botões. Inter e IBM Plex Mono saíram.
+
+VT323 desenha pequeno no mesmo `font-size`, então a escala inteira subiu: base 1.15rem e
+frase do exercício 1.6rem. Medido em 360px: a frase mais longa ocupa 2 linhas e nada
+transborda.
+
+Se o professor preferir Press Start 2P literalmente em tudo, é trocar `--font-ui` e
+`--font-mono` em `tokens.css` — mas a leitura da frase vai sofrer.
+
+## 52. O convite de tela cheia é um botão, porque não existe alternativa
+
+Pedido: sugerir tela cheia na primeira vez que o aluno abre a página. A Fullscreen API só
+aceita `requestFullscreen` a partir de um gesto do usuário — **não dá para maximizar
+sozinho ao carregar**, e tentar seria erro de permissão no console. Então o convite é um
+cartão com "Jogar em tela cheia" e "Agora não".
+
+Qualquer uma das duas respostas grava `seenFullscreenHint` e o convite nunca mais aparece:
+sugestão que insiste vira estorvo. Ele também só aparece se o navegador permite tela cheia
+e se o jogo ainda não está maximizado.
+
+Dois cuidados: o texto diz como sair (Esc ou F), para ninguém se sentir preso; e o convite
+não rouba o foco — o campo de apelido continua recebendo, para quem joga só de teclado.

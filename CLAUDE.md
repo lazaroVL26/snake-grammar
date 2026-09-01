@@ -428,14 +428,21 @@ Bootstrap:
 
 Tipografia (3 papéis, carregadas do Google Fonts no `index.html` com `display=swap`):
 
-- Display / títulos de painel: **Bricolage Grotesque**, peso 700, tracking apertado.
-- **Placar, contagem regressiva, ranking e título: Press Start 2P** (`--font-arcade`).
-  É o lado fliperama da direção de arte. Só em número e rótulo curto — nunca em texto
-  corrido, que ficaria ilegível.
+A tipografia é **inteira de fliperama**, em duas faces:
+
+- **Press Start 2P** (`--font-arcade`, também `--font-display`): título, placar, contagem
+  regressiva, ranking, botões e rótulo curto. Só em número e rótulo — **nunca em texto
+  corrido**, onde ela dobra a largura e cansa a leitura.
+- **VT323** (`--font-ui` e `--font-mono`): tudo que é para ler — frase do exercício,
+  explicação, alternativas, menus. É fonte de terminal CRT, retrô do mesmo jeito, mas com
+  altura de x e espaçamento que aguentam frase inteira.
+
+VT323 desenha pequeno: a base do corpo é `--text-base` (1.15rem) e a frase do exercício
+vai a 1.6rem, senão o aluno lê apertado.
+
 - Corpo / UI: **Inter**.
-- **Frase do exercício: IBM Plex Mono** — a frase em inglês aparece sempre em
-  monoespaçada, com a lacuna renderizada como um sublinhado que pulsa como cursor de
-  caderno. Essa é a assinatura visual do projeto.
+- **Frase do exercício: sempre monoespaçada** (hoje VT323), com a lacuna renderizada como
+  um sublinhado que pulsa como cursor de caderno. Essa é a assinatura visual do projeto.
 
 O placar pulsa quando o número muda, e a sequência de acertos acende em `--accent`.
 Brilhos saem sempre de `--glow-snake` / `--glow-accent`, derivados da paleta — nunca uma
@@ -462,6 +469,17 @@ o feedback vira troca de estado instantânea.
   do navegador.
 - Responsivo até 360px de largura: o canvas encolhe proporcionalmente e o D-pad de toque
   aparece abaixo dele.
+
+### 9.2b Convite de tela cheia
+
+Na **primeira visita** a tela inicial mostra um convite para jogar em tela cheia, com dois
+botões: "Jogar em tela cheia" e "Agora não". Qualquer um dos dois marca
+`seenFullscreenHint` em `localStorage` e o convite não volta.
+
+Tela cheia só pode ser pedida a partir de um gesto do usuário, então **não existe
+maximizar sozinho** quando a página abre — o convite tem que ser clicável. O texto diz
+como sair (Esc ou F), para o aluno não se sentir preso, e o convite não rouba o foco do
+campo de apelido.
 
 ### 9.3 Modal da pergunta
 

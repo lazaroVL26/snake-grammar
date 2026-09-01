@@ -17,11 +17,21 @@
   --glow-snake: 0 0 12px color-mix(in srgb, var(--snake) 55%, transparent);
   --glow-accent: 0 0 12px color-mix(in srgb, var(--accent) 55%, transparent);
 
-  --font-display: 'Bricolage Grotesque', 'Inter', system-ui, sans-serif;
-  --font-ui: 'Inter', system-ui, -apple-system, sans-serif;
-  --font-mono: 'IBM Plex Mono', ui-monospace, 'Courier New', monospace;
-  /* Placar, contagem e ranking: o lado fliperama da direcao de arte. */
-  --font-arcade: 'Press Start 2P', 'Bricolage Grotesque', monospace;
+  /*
+   * Tipografia inteira de fliperama, em duas faces:
+   * - Press Start 2P: titulo, placar, contagem, ranking, rotulo curto.
+   * - VT323: tudo que e para ler. E fonte de terminal CRT, retro do mesmo
+   *   jeito, mas com altura de x e espacamento que aguentam frase inteira.
+   *   Press Start 2P em texto corrido dobra a largura e cansa a leitura, o
+   *   que atrapalharia justamente a decisao gramatical que o jogo cobra.
+   */
+  --font-arcade: 'Press Start 2P', 'Courier New', monospace;
+  --font-display: 'Press Start 2P', 'Courier New', monospace;
+  --font-ui: 'VT323', 'Courier New', monospace;
+  --font-mono: 'VT323', ui-monospace, 'Courier New', monospace;
+
+  /* VT323 desenha pequeno: a base sobe para compensar. */
+  --text-base: 1.15rem;
 
   --radius-sm: 8px;
   --radius-md: 14px;
