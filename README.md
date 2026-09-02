@@ -35,6 +35,36 @@ Snake Grammar servindo na porta 8080
 Dite para a turma o endereço da linha **"para a turma"**. É só abrir no navegador — não
 precisa instalar nada nos PCs dos alunos.
 
+### Subir num servidor público (internet)
+
+O jogo é um site estático **mais** um servidor Node minúsculo. O que você escolhe muda o
+ranking:
+
+| Tipo de hospedagem                                       | Ranking                                        |
+| -------------------------------------------------------- | ---------------------------------------------- |
+| Serviço que roda **Node** (Render, Railway, Fly.io, VPS) | Compartilhado, a turma inteira na mesma lista  |
+| Hospedagem **estática** (Vercel, Netlify, GitHub Pages)  | Cada navegador com o seu — o servidor não roda |
+
+Para manter o ranking da turma, use uma hospedagem que rode Node. O projeto já vem pronto:
+
+- **Comando de build:** `npm install && npm run build`
+- **Comando de start:** `npm start`
+- **Porta:** o servidor lê a variável `PORT`, que esses serviços definem sozinhos
+- **Node:** 20 ou mais novo (declarado em `engines`)
+
+Não há variável de ambiente para configurar, nem banco de dados.
+
+> **Antes de expor na internet, leia isto.** A API do ranking foi feita para a rede da
+> escola e **não tem autenticação**: qualquer pessoa com o endereço pode mandar pontuação
+> pelo `POST /api/scores`. Numa sala isso é aceitável; aberto ao público, alguém pode
+> poluir a lista. Também não há limite de requisições por IP. Se o endereço for ficar
+> público de verdade, vale pedir para eu acrescentar uma chave da turma ou limite de envio.
+
+> **Sobre o arquivo do ranking.** Ele fica em `data/scores.json`, no disco do servidor.
+> Vários serviços têm disco efêmero: um redeploy ou reinício zera o arquivo. Como o ranking
+> já zera todo dia, isso costuma ser tolerável — mas um reinício no meio da aula levaria a
+> lista junto. Para evitar, use um serviço com volume persistente.
+
 ### Liberar a porta no firewall
 
 Se os alunos não conseguirem abrir, quase sempre é o firewall do PC servidor. No Linux com

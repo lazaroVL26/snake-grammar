@@ -13,7 +13,12 @@
     "lint": "eslint . --ext .ts,.cjs,.mjs --max-warnings=0",
     "format": "prettier --write .",
     "serve": "node server/index.mjs",
-    "aula": "npm run build && node server/index.mjs"
+    "aula": "npm run build && node server/index.mjs",
+    "start": "node server/index.mjs",
+    "build:deploy": "vite build"
+  },
+  "engines": {
+    "node": ">=20"
   },
   "devDependencies": {
     "@types/node": "^26.4.0",
